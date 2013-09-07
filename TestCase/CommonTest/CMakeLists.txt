@@ -1,0 +1,16 @@
+SET(APPNAME CommonTest)
+
+AUX_SOURCE_DIRECTORY(. CommonTest_src)
+
+ADD_EXECUTABLE(${APPNAME} ${CommonTest_src})
+
+LINK_PROJECT(${APPNAME}
+
+  utility
+  )
+
+TARGET_LINK_LIBRARIES( ${APPNAME} 
+
+  ${CPPUNIT_LIBRARIES}
+  ${Boost_LIBRARIES}
+  )
