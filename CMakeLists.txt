@@ -60,6 +60,11 @@ IF(SUITESPARSE_FOUND)
   INCLUDE_DIRECTORIES(${SUITESPARSE_INCLUDE_DIRS})
 ENDIF(SUITESPARSE_FOUND)
 
+FIND_PACKAGE(CASADI)
+IF(CASADI_FOUND)
+  INCLUDE_DIRECTORIES(${CASADI_INCLUDE_DIR})
+ENDIF(CASADI_FOUND)
+
 #####################################QT#####################################
 FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED )
 FIND_PACKAGE(QGLViewer)
@@ -69,12 +74,11 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 #####################################QT#####################################
 
 INCLUDE_FOR_PROJECT(${PROJECT_NAME}
-  SRC/QGLViewerExt/Animation
-  SRC/QGLViewerExt/Manipulation
-  SRC/QGLViewerExt/Render
-  SRC/CppunitExt
-  SRC/Eigen3Ext
+  SRC/UI/Animation
+  SRC/UI/Manipulation
+  SRC/UI/Render
   SRC/Common
+  SRC/Math
   )
 
 FIND_INTERNAL_PACKAGE(${PROJECT_SOURCE_DIR}/Lib/${CMAKE_BUILD_TYPE_DIR}

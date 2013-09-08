@@ -1,5 +1,5 @@
-#ifndef _EIGENMATRIXTOOLS_H_
-#define _EIGENMATRIXTOOLS_H_
+#ifndef _MATRIXTOOLS_H_
+#define _MATRIXTOOLS_H_
 
 #include <vector>
 #include <set>
@@ -125,4 +125,4 @@ namespace EIGEN3EXT{
   
 }
 
-#endif /* _EIGENMATRIXTOOLS_H_ */
+#endif /* _MATRIXTOOLS_H_ */

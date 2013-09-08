@@ -1,8 +1,8 @@
-SET(LIBRARY_NAME cppunitext)
-AUX_SOURCE_DIRECTORY(. basetestor_src)
+SET(LIBRARY_NAME math)
+AUX_SOURCE_DIRECTORY(. math_src)
 
 ADD_LIBRARY(${LIBRARY_NAME} 
-  ${basetestor_src}
+  ${math_src}
 )
 
 # install 

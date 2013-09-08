@@ -1,12 +1,12 @@
-#ifndef _EIGENSPAREMASTRIXTOOLS_H_
-#define _EIGENSPAREMASTRIXTOOLS_H_
+#ifndef _SPARSEMATRIXTOOLS_H_
+#define _SPARSEMATRIXTOOLS_H_
 
 #include <vector>
 #include <set>
 #include <eigen3/Eigen/Dense>
-#include <EigenSparseHeads.h>
-#include <assertext.h>
+#include <eigen3/Eigen/Sparse>
 #include <boost/foreach.hpp>
+#include <assertext.h>
 
 namespace EIGEN3EXT{
 
@@ -249,7 +249,6 @@ namespace EIGEN3EXT{
 	return inverse(P,inv_P);
   }
 
-  
-
 }
-#endif /* _EIGENSPAREMASTRIXTOOLS_H_ */
+
+#endif /* _SPARSEMATRIXTOOLS_H_ */

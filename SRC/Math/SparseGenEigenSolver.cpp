@@ -1,5 +1,4 @@
-#include "EigenSym.h"
-
+#include "SparseGenEigenSolver.h"
 #include <memory.h>
 #include <stdlib.h>
 #include <arpack++/arlsmat.h>
