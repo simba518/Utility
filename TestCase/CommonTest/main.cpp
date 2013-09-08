@@ -18,25 +18,47 @@ using namespace Eigen;
 
 int main(int argc, char *argv[]){
 
-  TRACE_FUN();
-  ERROR_LOG("asd;asjd;fj");
-  ERROR_LOG_COND("asd;asjd;fj",false);
-  WARN_LOG("asd;asjd;fj");
-  DEBUG_LOG("asd;asjd;fj");
-  INFO_LOG("asd;asjd;fj");
-  DEBUG_LOG("asd;asjd;fj");
-
-  MatrixXd a(3,2);
-  a << 12,3,4,5,6,7;
-  cout<< endl << a << endl;
-  assert(EIGEN3EXT::write("a.b",a));
-
-  Timer timer;
-  timer.start();
-  MatrixXd b;
-  assert(EIGEN3EXT::load("a.b",b));
-  cout<< endl << b << endl;
-  timer.stop();
+  JsonFilePaser file;
+  int a;
+  std::vector<std::string> av;
+  file.read("hh",av);
 
   return 0;
 }
+
+
+// #include <stdio.h>
+
+// #include <iostream>
+// #include <fstream>
+// #include <sstream>
+// #include <string>
+// #include <locale>
+
+// #include "boost/property_tree/ptree.hpp"
+// #include "boost/foreach.hpp"
+// #include "boost/property_tree/json_parser.hpp"
+// #include "boost/property_tree/xml_parser.hpp"
+
+// int main(int argc, char **argv){
+//   try {
+
+// 	std::ifstream jsonFile;
+// 	jsonFile.open("/home/simba/Workspace/Utility/TestCase/TestData/json.in");
+
+// 	boost::property_tree::ptree ptParse;
+// 	boost::property_tree::json_parser::read_json(jsonFile, ptParse);
+// 	const int num = ptParse.get<int>("intnumber");
+// 	std::string strVal = ptParse.get<std::string>("filename");
+// 	std::cout << "Num=" << std::dec << num << " Str=" << strVal << std::endl << std::endl;
+
+// 	BOOST_FOREACH(const boost::property_tree::ptree::value_type& child,ptParse.get_child("strArray")){
+// 	  std::cout << child.second.get<int>("") << std::endl;
+//     }
+
+//   }catch (std::exception& ex){
+// 	std::cout << "ERR:" << ex.what() << std::endl;
+//   }
+
+//   return 0;
+// }

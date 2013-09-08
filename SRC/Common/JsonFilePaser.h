@@ -5,9 +5,13 @@
 #include <vector>
 #include <set>
 #include <fstream>
+#include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/filesystem.hpp>
-#include <eigen3/Eigen/Dense>
 #include <Log.h>
+using namespace boost::property_tree;
 
 namespace UTILITY{
   
@@ -23,18 +27,27 @@ namespace UTILITY{
 	}
 
 	~JsonFilePaser(){
-	  JsonFilePaser::close();
+	  close();
 	}
 
-	virtual bool open(const std::string filename){
+	bool open(const std::string filename){
+
+	  bool succ = false;
+	  close();
 	  _initFilename = filename;
-	  JsonFilePaser::close();
 	  _file.open(filename.c_str());
-	  const bool succ = _file.is_open();
-	  ERROR_LOG_COND("failed to open init file: "<<filename,succ);
+	  ERROR_LOG_COND("failed to open init file: "<<filename,!_file.is_open());
+	  if(_file.is_open()){
+		try{
+		  json_parser::read_json(_file,_jsonData);
+		  succ = true;
+		}catch(std::exception& ex){
+		  ERROR_LOG("file: "<< filename << ex.what());
+		}
+	  }
 	  return succ;
 	}
-	virtual void close(){ if(_file.is_open()) _file.close();}
+	void close(){ if(_file.is_open()) _file.close();}
 
 	std::string getFileDir()const{
 	  return _initFileDir;
@@ -46,111 +59,89 @@ namespace UTILITY{
 	template<class T>
 	bool read(const std::string eleName, T &value, const bool checkValidation = true){
 	  if( !_file.is_open() ){
+		ERROR_LOG("json file is not open");
 		return false;
 	  }
-	  bool succ = nodeIsFound(eleName);
-	  if(succ){
-		succ = this->actualRead(eleName,value);
-	  }else{
-		nodeNotFound(eleName);
+	  bool succ = true;
+	  try{
+		actualRead(eleName,value);
+	  }catch(std::exception& ex){
+		succ = false;
+		ERROR_LOG(ex.what());
 	  }
 	  return succ;
 	}
 	bool readFilePath(const std::string eleName, std::string &filePath,const bool checkFileExist = true){
-	  if( !_file.is_open() ){
-		return false;
-	  }
-	  bool succ = read(eleName,filePath);
-	  if(succ){
+	  bool succ = false;
+	  if( read(eleName,filePath) ){
 		filePath = _initFileDir+filePath;
-		if(checkFileExist)
-		  succ = fileIsExist(eleName,filePath);
+		succ = fileIsExist(eleName,filePath,checkFileExist);
 	  }
 	  return succ;
 	}
 	bool readFilePathes(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist = true){
-	  if( !_file.is_open() ){
-		return false;
-	  }
-	  bool succ = read(eleName,filePathes);
-	  if(succ){
+	  bool succ = false;
+	  if(read(eleName,filePathes)){
 		for (size_t i = 0; i < filePathes.size(); ++i){
 		  filePathes[i] = _initFileDir+filePathes[i];
-		  if(checkFileExist)
-			succ &= fileIsExist(eleName,filePathes[i]);
+		  succ &= fileIsExist(eleName,filePathes[i],checkFileExist);
 		}
 	  }
 	  return succ;
 	}
-	/// replace the first "~" as the home directory
 	std::string replaceHomeDir(const std::string &path,const bool checkPathExist = true){
+	  /// replace the first "~" as the home directory
 	  std::string newPath = path;
 	  if(path.size() > 0 && path[0] == '~')
 		newPath = getenv("HOME") + newPath.erase(0,1);
-	  if(checkPathExist)
-		dirIsExist("",newPath);
+	  dirIsExist("",newPath,checkPathExist);
 	  return newPath;
 	}
 	
   protected:
-	// print the name and value
-	template<class T>
-	void print(const std::string eleName, const T &value)const{
-	  INFO_LOG_COND(eleName << "\t" << value,_printData);
-	}
-	void nodeNotFound(const std::string eleName)const{
-	  WARN_LOG("the node '"<< eleName <<"' is not found!");
-	}
-
-	// checking
-	bool fileIsExist(const std::string eleName,const std::string filePath)const{
-	  const bool exist = (boost::filesystem::exists(filePath) && 
-						  !(boost::filesystem::is_directory(filePath)));
-	  WARN_LOG_COND("file '"<< filePath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
-	  return exist;
-	}
-	bool dirIsExist(const std::string eleName,const std::string dirPath)const{
-	  const bool exist = boost::filesystem::is_directory(dirPath);
-	  WARN_LOG_COND("dir '"<< dirPath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
-	  return exist;
-	}
-	virtual bool nodeIsFound(const std::string eleName) = 0;
-
-	// perform the actual reading process
-	template<class T>
-	bool actualRead(const std::string eleName, std::set<T> &value){
-	  value.clear();
-	  std::vector<T> vec;
-	  if ( this->actualRead(eleName, vec) ){
-		for (size_t i = 0; i < vec.size(); ++i){
-		  value.insert(vec[i]);
-		}
-		return true;
+	bool fileIsExist(const std::string eleName,const std::string filePath,bool check=true)const{
+	  bool exist = true;
+	  if(check){
+		exist = (boost::filesystem::exists(filePath) && 
+				 !(boost::filesystem::is_directory(filePath)));
+		WARN_LOG_COND("file '"<< filePath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
 	  }
-	  return false;
+	  return exist;
+	}
+	bool dirIsExist(const std::string eleName,const std::string dirPath,bool check)const{
+	  bool exist = true;
+	  if(check){
+		exist = boost::filesystem::is_directory(dirPath);
+		WARN_LOG_COND("dir '"<< dirPath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
+	  }
+	  return exist;
 	}
 
-	virtual bool actualRead(const std::string eleName, bool &value) = 0;
-	virtual bool actualRead(const std::string eleName, int &value) = 0;
-	virtual bool actualRead(const std::string eleName, float &value) = 0;
-	virtual bool actualRead(const std::string eleName, double &value) = 0;
-	virtual bool actualRead(const std::string eleName, std::string &value) = 0;
+	template<class T>
+	void actualRead(const std::string eleName, T &value){
+	  value = _jsonData.get<T>(eleName);
+	}
 
-	virtual bool actualRead(const std::string eleName, std::vector<int> &value) = 0;
-	virtual bool actualRead(const std::string eleName, std::vector<float> &value) = 0;
-	virtual bool actualRead(const std::string eleName, std::vector<double> &value) = 0;
-	virtual bool actualRead(const std::string eleName, std::vector<std::string> &value) = 0;
+	template<class T>
+	void actualRead(const std::string eleName, std::vector<T> &value){
+	  BOOST_FOREACH(const boost::property_tree::ptree::value_type& child,_jsonData.get_child(eleName)){
+		value.push_back(child.second.get<T>(""));
+	  }
+	}
 
-	// read in the eigen3 data types
-	virtual bool actualRead(const std::string eleName, Eigen::VectorXd &value) = 0;
-	virtual bool actualRead(const std::string eleName, Eigen::MatrixXd &value) = 0;
-	virtual bool actualRead(const std::string eleName, std::vector<Eigen::VectorXd> &value) = 0;
+	template<class T>
+	void actualRead(const std::string eleName, std::set<T> &value){
+	  BOOST_FOREACH(const boost::property_tree::ptree::value_type& child,_jsonData.get_child(eleName)){
+		value.insert(child.second.get<T>(""));
+	  }
+	}
 
-  protected:
+  private:
 	std::ifstream _file;
-	std::string _initFilename; //< filename of this initfile.
-	std::string _initFileDir; //< directory of the initfile.
-	bool _printData; // if true, function print() will work. false in default.
+	std::string _initFilename; 
+	std::string _initFileDir;
+	bool _printData;
+	ptree _jsonData;
   };
 
 }//end of namespace
