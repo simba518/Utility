@@ -73,6 +73,7 @@ INCLUDE_FOR_PROJECT(${PROJECT_NAME}
   SRC/QGLViewerExt/Manipulation
   SRC/QGLViewerExt/Render
   SRC/CppunitExt
+  SRC/Eigen3Ext
   SRC/Common
   )
 

@@ -2,7 +2,6 @@
 #define _CASADIEXT_H_
 
 #include <iostream>
-using namespace std;
 #include <vector>
 #include <string>
 #include <boost/lexical_cast.hpp>
@@ -12,9 +11,6 @@ using namespace std;
 #include <symbolic/fx/sx_function.hpp>
 #include <symbolic/matrix/matrix_tools.hpp>
 #include <assertext.h>
-
-using CasADi::SX;
-using CasADi::SXMatrix;
 
 /**
  * extension for the CasADi library.

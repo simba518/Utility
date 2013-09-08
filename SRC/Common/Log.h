@@ -7,7 +7,7 @@
 namespace UTILITY{
 
   template<class T>
-  void PRINT_MSG(const std::string &title,const T&event,bool cond=true,const std::string file="",const int line=0){
+  inline void PRINT_MSG(const std::string &title,const T&event,bool cond=true,const std::string file="",const int line=0){
 	if(!cond){
 	  return ;
 	}
@@ -41,10 +41,11 @@ namespace UTILITY{
 
   /************************WARN******************************/
 #ifdef LOG_WARN
-  template<class T> 
-  inline void WARN_LOG(const T&event,bool cond=true){ PRINT_MSG("WARN",event,cond);}
+#define WARN_LOG_COND(event,cond) {PRINT_MSG_MICRO_EXT("WARN",event,cond,__FILE__,__LINE__);}
+#define WARN_LOG(event) {PRINT_MSG_MICRO_EXT("WARN",event,true,__FILE__,__LINE__);}
 #else
-#define WARN_LOG(event,...)
+#define WARN_LOG_COND(event,cond)
+#define WARN_LOG(event)
 #endif
 
   /************************TRACE******************************/

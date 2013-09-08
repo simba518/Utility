@@ -1,6 +1,11 @@
 #ifndef _TIMER_H_
 #define _TIMER_H_
 
+#include <string>
+#include <iomanip>
+#include <Log.h>
+#include <assertext.h>
+
 namespace UTILITY{
 
 #if (defined __unix__) || (defined __APPLE__)
@@ -108,25 +113,23 @@ namespace UTILITY{
 
 #endif
 
-#include <Log.h>
-#include <string>
-
   class Timer{
 	
   public:
 	void start(){
 	  _PerformanceCounter.StartCounter();
 	}
-	double stop(const std::string &msg="time = ",const bool printOut=true){
+	double stop(const std::string msg="time = ",const bool printOut=true,const int outPrecision=10){
 
+	  assert_gt(outPrecision,0);
 	  _PerformanceCounter.StopCounter();
 	  const double elapsed_time = _PerformanceCounter.GetElapsedTime();
-	  INFO_LOG_COND(msg<<elapsed_time,printOut);
+	  INFO_LOG_COND(msg<<std::setprecision(outPrecision)<<elapsed_time,printOut);
 	  return elapsed_time;
 	}
 	
   private:
-	PerformanceCounter _PerformanceCounter;
+  	PerformanceCounter _PerformanceCounter;
 
   };
   
