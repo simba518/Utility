@@ -1,14 +1,19 @@
-#ifndef _ASSERTMACROSEXT_H_
-#define _ASSERTMACROSEXT_H_
+#ifndef _UNITTESTASSERT_H_
+#define _UNITTESTASSERT_H_
 
 /**
- * This is some extentions for the assertion macros of the CPPUNIT_TEST
- * framework, which is more powerfull and more easy to use.
+ * This is some extentions for the assertion macros of the boost unit test
+ * framework, which is more powerful and more easy to use.
  */
 
 #include <sstream>
 #include <iomanip>
-#include <cppunit/TestAssert.h>
+#include <boost/test/test_tools.hpp>
+
+#define UNIT_TEST_ASSERT_MESSAGE(msg,predicate)						\
+  std::ostringstream stringStreamPre;								\
+  stringStreamPre << "\n " <<__STRING(predicate) << "\n ";			\
+  BOOST_CHECK_MESSAGE(predicate,stringStreamPre.str()+msg);
 
 // assert "value_a == value_b", if not, print the values and abort.
 #define ASSERT_EQ(value_a, value_b)										\
@@ -16,10 +21,10 @@
 	{																	\
 	  std::ostringstream stringStream;									\
 	  stringStream << __STRING(value_a) <<" = " << value_a<< std::endl; \
-	  stringStream << "- ";												\
+	  stringStream << " ";												\
 	  stringStream <<__STRING(value_b) <<" = " << value_b<< std::endl;	\
-	  CPPUNIT_ASSERT_MESSAGE(stringStream.str(),value_a == value_b);	\
-	}														
+	  UNIT_TEST_ASSERT_MESSAGE(stringStream.str(),value_a == value_b);	\
+	}
 
 // assert "||value_a - value_b||<=tol", if not, print the values and abort.
 #define ASSERT_EQ_TOL(value_a, value_b,tol)								\
@@ -29,7 +34,7 @@
 	  stringStream << __STRING(value_a) <<" = " << value_a<< std::endl; \
 	  stringStream << "- ";												\
 	  stringStream <<__STRING(value_b) <<" = " << value_b<< std::endl;	\
-	  CPPUNIT_ASSERT_MESSAGE(stringStream.str(),fabs(value_a-value_b)<=tol); \
+	  UNIT_TEST_ASSERT_MESSAGE(stringStream.str(),fabs(value_a-value_b)<=tol); \
 	}														
 
 // assert "value_a != value_b", if not, print the values and abort.
@@ -38,9 +43,9 @@
 	{																	\
 	  std::ostringstream stringStream;									\
 	  stringStream << __STRING(value_a) <<" = " << value_a<< std::endl; \
-	  stringStream << "- ";												\
+	  stringStream << " ";												\
 	  stringStream <<__STRING(value_b) <<" = " << value_b<< std::endl;	\
-	  CPPUNIT_ASSERT_MESSAGE(stringStream.str(),value_a != value_b);	\
+	  UNIT_TEST_ASSERT_MESSAGE(stringStream.str(),value_a != value_b);	\
 	}														
 
 // assert "value_a >= value_b", if not, print the values and abort.
@@ -49,9 +54,9 @@
 	{																	\
 	  std::ostringstream stringStream;									\
 	  stringStream << __STRING(value_a) <<" = " << value_a<< std::endl; \
-	  stringStream << "- ";												\
+	  stringStream << " ";												\
 	  stringStream <<__STRING(value_b) <<" = " << value_b<< std::endl;	\
-	  CPPUNIT_ASSERT_MESSAGE(stringStream.str(),value_a >= value_b);	\
+	  UNIT_TEST_ASSERT_MESSAGE(stringStream.str(),value_a >= value_b);	\
 	}														
 
 // assert "value_a > value_b", if not, print the values and abort.
@@ -60,9 +65,9 @@
 	{																	\
 	  std::ostringstream stringStream;									\
 	  stringStream << __STRING(value_a) <<" = " << value_a<< std::endl; \
-	  stringStream << "- ";												\
+	  stringStream << " ";												\
 	  stringStream <<__STRING(value_b) <<" = " << value_b<< std::endl;	\
-	  CPPUNIT_ASSERT_MESSAGE(stringStream.str(),value_a > value_b);		\
+	  UNIT_TEST_ASSERT_MESSAGE(stringStream.str(),value_a > value_b);		\
 	}														
 
 // assert "value_a <= value_b", if not, print the values and abort.
@@ -71,9 +76,9 @@
 	{																	\
 	  std::ostringstream stringStream;									\
 	  stringStream << __STRING(value_a) <<" = " << value_a<< std::endl; \
-	  stringStream << "- ";												\
+	  stringStream << " ";												\
 	  stringStream <<__STRING(value_b) <<" = " << value_b<< std::endl;	\
-	  CPPUNIT_ASSERT_MESSAGE(stringStream.str(),value_a <= value_b);	\
+	  UNIT_TEST_ASSERT_MESSAGE(stringStream.str(),value_a <= value_b);	\
 	}														
 
 // assert "value_a < value_b", if not, print the values and abort.
@@ -82,9 +87,9 @@
 	{																	\
 	  std::ostringstream stringStream;									\
 	  stringStream << __STRING(value_a) <<" = " << value_a<< std::endl; \
-	  stringStream << "- ";												\
+	  stringStream << " ";												\
 	  stringStream <<__STRING(value_b) <<" = " << value_b<< std::endl;	\
-	  CPPUNIT_ASSERT_MESSAGE(stringStream.str(),value_a < value_b);		\
+	  UNIT_TEST_ASSERT_MESSAGE(stringStream.str(),value_a < value_b);		\
 	}														
 
 // @brief assert "vector_a == vector_b", if not, abort. 
@@ -101,17 +106,17 @@
 		{																\
 		  std::ostringstream v_a;										\
 		  std::ostringstream v_b;										\
-		  v_a << "- " << __STRING(vector_a) << " = ( ";					\
-		  v_b << "- " << __STRING(vector_b) << " = ( ";					\
+		  v_a << " " << __STRING(vector_a) << " = ( ";					\
+		  v_b << " " << __STRING(vector_b) << " = ( ";					\
 		  for (int j = 0; j < len; ++j)									\
 			{															\
 			  v_a << std::setprecision(5) << vector_a[j]<<" ";			\
 			  v_b << std::setprecision(5) << vector_b[j]<<" ";			\
 			}															\
-		  v_a << " ) " << endl;											\
-		  v_b << " ) " << endl;											\
+		  v_a << " ) " << std::endl;											\
+		  v_b << " ) " << std::endl;											\
 		  v_a << v_b.str();												\
-		  CPPUNIT_ASSERT_MESSAGE(v_a.str(),vector_a == vector_b);		\
+		  UNIT_TEST_ASSERT_MESSAGE(v_a.str(),vector_a == vector_b);		\
 		  break;														\
 		}																\
 	}																	\
@@ -124,17 +129,17 @@
 		{																\
 		  std::ostringstream v_a;										\
 		  std::ostringstream v_b;										\
-		  v_a << "- " << __STRING(vector_a) << " = ( ";					\
-		  v_b << "- " << __STRING(vector_b) << " = ( ";					\
+		  v_a << " " << __STRING(vector_a) << " = ( ";					\
+		  v_b << " " << __STRING(vector_b) << " = ( ";					\
 		  for (int j = 0; j < len; ++j)									\
 			{															\
 			  v_a << std::setprecision(5) << vector_a[j]<<" ";			\
 			  v_b << std::setprecision(5) << vector_b[j]<<" ";			\
 			}															\
-		  v_a << " ) " << endl;											\
-		  v_b << " ) " << endl;											\
+		  v_a << " ) " << std::endl;											\
+		  v_b << " ) " << std::endl;											\
 		  v_a << v_b.str();												\
-		  CPPUNIT_ASSERT_MESSAGE(v_a.str(),vector_a == vector_b);		\
+		  UNIT_TEST_ASSERT_MESSAGE(v_a.str(),vector_a == vector_b);		\
 		  break;														\
 		}																\
 	}																	\
@@ -151,7 +156,7 @@
 	msg<<__STRING(mat_b) << ".dimension()\n-";							\
 	msg<<__STRING(mat_a)<<":("<<mat_a.rows()<<","<<mat_a.cols()<<")\n-"; \
 	msg<<__STRING(mat_b)<<":("<<mat_b.rows()<<","<<mat_b.cols()<<")\n";	\
-	CPPUNIT_ASSERT_MESSAGE(msg.str(),false);							\
+	UNIT_TEST_ASSERT_MESSAGE(msg.str(),false);							\
 																		\
   }else{																\
   																		\
@@ -161,9 +166,9 @@
 		  if (mat_a(i,j) != mat_b(i,j))									\
 			{															\
 			  std::ostringstream msg;									\
-			  msg << __STRING(mat_a)<<":\n" << mat_a << endl << endl;	\
-			  msg << __STRING(mat_b)<<":\n" << mat_b << endl << endl;	\
-			  CPPUNIT_ASSERT_MESSAGE(msg.str(),mat_a == mat_b);			\
+			  msg << __STRING(mat_a)<<":\n" << mat_a << std::endl << std::endl;	\
+			  msg << __STRING(mat_b)<<":\n" << mat_b << std::endl << std::endl;	\
+			  UNIT_TEST_ASSERT_MESSAGE(msg.str(),mat_a == mat_b);			\
 			  break;													\
 			}															\
 		}																\
@@ -177,7 +182,7 @@
 	msg<<__STRING(mat_b) << ".dimension()\n-";							\
 	msg<<__STRING(mat_a)<<":("<<mat_a.rows()<<","<<mat_a.cols()<<")\n-"; \
 	msg<<__STRING(mat_b)<<":("<<mat_b.rows()<<","<<mat_b.cols()<<")\n";	\
-	CPPUNIT_ASSERT_MESSAGE(msg.str(),false);							\
+	UNIT_TEST_ASSERT_MESSAGE(msg.str(),false);							\
 																		\
   }else{																\
   																		\
@@ -187,12 +192,12 @@
 		  if (fabs(mat_a(i,j)-mat_b(i,j)) > tol)						\
 			{															\
 			  std::ostringstream msg;									\
-			  msg << __STRING(mat_a)<<":\n" << mat_a << endl << endl;	\
-			  msg << __STRING(mat_b)<<":\n" << mat_b << endl << endl;	\
-			  CPPUNIT_ASSERT_MESSAGE(msg.str(),mat_a == mat_b);			\
+			  msg << __STRING(mat_a)<<":\n" << mat_a << std::endl << std::endl;	\
+			  msg << __STRING(mat_b)<<":\n" << mat_b << std::endl << std::endl;	\
+			  UNIT_TEST_ASSERT_MESSAGE(msg.str(),mat_a == mat_b);			\
 			  break;													\
 			}															\
 		}																\
    }
 
-#endif /* _ASSERTMACROSEXT_H_ */
+#endif /* _UNITTESTASSERT_H_ */
