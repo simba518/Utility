@@ -1,4 +1,4 @@
-SET(LIBRARY_NAME qglviewerext)
+SET(LIBRARY_NAME utility_ui)
 
 SET(NONE_QT_CPP
 
@@ -41,5 +41,5 @@ ADD_LIBRARY(${LIBRARY_NAME}
 
 # install
 FILE(GLOB header ${header} ./Animation/*.h ./Manipulation/*.h ./Render/*.h CACHE INTERNAL)
-INSTALL(FILES ${header} DESTINATION /usr/local/include/utility)
-INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION /usr/local/lib/)
+INSTALL(FILES ${header} DESTINATION ${HEADFILE_DEST})
+INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DEST})

@@ -96,7 +96,7 @@ namespace UTILITY{
 	  in.open(fname.c_str());
 	}
 	const bool succ = in.is_open();
-	ERROR_LOG_COND("failed to open file: "<<fname,!succ);
+	ERROR_LOG_COND("failed to open file: "<<fname,succ);
 	return succ;
   }
 
@@ -108,7 +108,7 @@ namespace UTILITY{
 	  out.open(fname.c_str());
 	}
 	const bool succ = out.is_open();
-	ERROR_LOG_COND("failed to open file: "<<fname,!succ);
+	ERROR_LOG_COND("failed to open file: "<<fname,succ);
 	return succ;
   }
 
@@ -138,7 +138,6 @@ namespace UTILITY{
 	  const int len = (int)data.size();
 	  if(write(out,&len,1,io_type,fname,space)){
 		assert_gt(len,0);
-		data.resize(len);
 		succ = write(out,&data[0],len,io_type,space,fname);
 	  }
 	}

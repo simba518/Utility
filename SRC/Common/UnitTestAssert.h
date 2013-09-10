@@ -10,10 +10,17 @@
 #include <iomanip>
 #include <boost/test/test_tools.hpp>
 
-#define UNIT_TEST_ASSERT_MESSAGE(msg,predicate)						\
+#define UNIT_TEST_ASSERT_MESSAGE(msg,predicate){					\
   std::ostringstream stringStreamPre;								\
   stringStreamPre << "\n " <<__STRING(predicate) << "\n ";			\
-  BOOST_CHECK_MESSAGE(predicate,stringStreamPre.str()+msg);
+  BOOST_CHECK_MESSAGE(predicate,stringStreamPre.str()+msg);			\
+  }
+
+#define ASSERT_MSG(msg,predicate)			\
+  UNIT_TEST_ASSERT_MESSAGE(msg,predicate);
+
+#define ASSERT(predicate)						\
+  UNIT_TEST_ASSERT_MESSAGE("",predicate);
 
 // assert "value_a == value_b", if not, print the values and abort.
 #define ASSERT_EQ(value_a, value_b)										\

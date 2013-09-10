@@ -8,7 +8,7 @@ namespace UTILITY{
 
   template<class T>
   inline void PRINT_MSG(const std::string &title,const T&event,bool cond=true,const std::string file="",const int line=0){
-	if(!cond){
+	if(cond){
 	  return ;
 	}
 	std::cout<<"*"<<title<<"\t: "<<event;
@@ -20,12 +20,12 @@ namespace UTILITY{
   }
 
 #define PRINT_MSG_MICRO(title,event,cond)					\
-  if(cond){													\
+  if(!cond){													\
 	std::cout<<"*"<<title<<"\t: "<<event<<std::endl;		\
   }
 
 #define PRINT_MSG_MICRO_EXT(title,event,cond,file,line)		\
-  if(cond){													\
+  if(!cond){													\
 	std::cout<<"*"<<title<<"\t: "<<event;					\
 	std::cout<<"\t at\t: "<<file<<":"<<line<<std::endl;		\
   }
@@ -71,7 +71,7 @@ namespace UTILITY{
 #define INFO_LOG(event) {PRINT_MSG("INFO",event);}
 #define INFO_LOG_COND(event,cond) {PRINT_MSG_MICRO("INFO",event,cond);}
 #else
-#define INFO_LOG(event,)
+#define INFO_LOG(event)
 #define INFO_LOG_COND(event,cond)
 #endif
 

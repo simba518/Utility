@@ -36,11 +36,12 @@ namespace UTILITY{
 	  close();
 	  _initFilename = filename;
 	  _file.open(filename.c_str());
-	  ERROR_LOG_COND("failed to open init file: "<<filename,!_file.is_open());
+	  ERROR_LOG_COND("failed to open init file: "<<filename,_file.is_open());
 	  if(_file.is_open()){
 		try{
 		  json_parser::read_json(_file,_jsonData);
-		  succ = true;
+		  succ = read("init_file_dir",_initFileDir);
+		  _initFileDir = replaceHomeDir(_initFileDir);
 		}catch(std::exception& ex){
 		  ERROR_LOG("file: "<< filename << ex.what());
 		}
@@ -74,16 +75,16 @@ namespace UTILITY{
 	bool readFilePath(const std::string eleName, std::string &filePath,const bool checkFileExist = true){
 	  bool succ = false;
 	  if( read(eleName,filePath) ){
-		filePath = _initFileDir+filePath;
+		filePath = getFileDir()+filePath;
 		succ = fileIsExist(eleName,filePath,checkFileExist);
 	  }
 	  return succ;
 	}
-	bool readFilePathes(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist = true){
+	bool readFilePath(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist = true){
 	  bool succ = false;
 	  if(read(eleName,filePathes)){
 		for (size_t i = 0; i < filePathes.size(); ++i){
-		  filePathes[i] = _initFileDir+filePathes[i];
+		  filePathes[i] = getFileDir()+filePathes[i];
 		  succ &= fileIsExist(eleName,filePathes[i],checkFileExist);
 		}
 	  }

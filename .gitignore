@@ -13,3 +13,8 @@
 *.a
 Build
 Bin
+
+temp*
+*/temp*
+*/*/temp*
+*/*/temp*

@@ -1,4 +1,4 @@
-SET(LIBRARY_NAME cudaext)
+SET(LIBRARY_NAME utility_cuda)
 AUX_SOURCE_DIRECTORY(. CUDA_MATH_src)
 
 ###################CUDA###################
@@ -14,5 +14,5 @@ CUDA_ADD_LIBRARY(${LIBRARY_NAME}
 
 # install
 FILE(GLOB header ${header} *.h)
-INSTALL(FILES ${header} DESTINATION /usr/local/include/utility)
-INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION /usr/local/lib/)
+INSTALL(FILES ${header} DESTINATION ${HEADFILE_DEST})
+INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DEST})
