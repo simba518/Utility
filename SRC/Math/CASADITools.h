@@ -92,7 +92,6 @@ namespace CASADI{
 	rlst.resize(out.size1()*out.size2());
 	assert_gt (rlst.size(),0);
 	out.get (&rlst[0], CasADi::DENSE);//@bug when T==float?
-	return rlst;
   }
 
   template<class T> 
@@ -106,7 +105,6 @@ namespace CASADI{
 		rlst(i,j) = out(i,j).toScalar();
 	  }
 	}
-	return rlst;
   }
 
   template<class T> 
@@ -187,6 +185,27 @@ namespace CASADI{
   }
 
   template<class T> 
+  inline void convert(const CasADi::SXMatrix &SV, Eigen::Matrix<T,-1,1> &V){
+
+	V.resize(SV.size());
+	for (int i = 0; i < SV.size(); ++i){
+	  V[i] = SV.elem(i).getValue();
+	}
+  }
+
+  template<class T> 
+  inline void convert(const CasADi::SXMatrix &SM, Eigen::Matrix<T,-1,-1> &M){
+
+	M.resize(SM.size1(),SM.size2());
+	for (int i = 0; i < SM.size1(); ++i){
+	  for (int j = 0; j < SM.size2(); ++j){
+		M(i,j) = SM.elem(i,j).getValue();
+	  }
+	}
+	return M;
+  }
+
+  template<class T> 
   inline CasADi::SXMatrix convert(const Eigen::Matrix<T,-1,1> &V){
 	CasADi::SXMatrix SV;
 	SV.makeDense(V.size(),1,0.0f);
@@ -205,22 +224,15 @@ namespace CASADI{
 
   template<class T> 
   inline Eigen::Matrix<T,-1,1> convert2Vec(const CasADi::SXMatrix &SV){
-
-	Eigen::Matrix<T,-1,1> V(SV.size());
-	for (int i = 0; i < SV.size(); ++i){
-	  V[i] = SV.elem(i).getValue();
-	}
+	Eigen::Matrix<T,-1,1> V;
+	convert(SV,V);
 	return V;
   }
 
   template<class T> 
   inline Eigen::Matrix<T,-1,-1> convert(const CasADi::SXMatrix &SM){
 	Eigen::Matrix<T,-1,-1> M(SM.size1(),SM.size2());
-	for (int i = 0; i < SM.size1(); ++i){
-	  for (int j = 0; j < SM.size2(); ++j){
-		M(i,j) = SM.elem(i,j).getValue();
-	  }
-	}
+	convert(SM,M);
 	return M;
   }
 }

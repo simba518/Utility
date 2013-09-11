@@ -1,5 +1,5 @@
-#ifndef _IO_H_
-#define _IO_H_
+#ifndef _IOTOOLS_H_
+#define _IOTOOLS_H_
 
 #include <fstream>
 #include <vector>
@@ -88,7 +88,7 @@ namespace UTILITY{
 	}
   }
 
-  bool openInputFile(std::ifstream &in,const std::string fname,IO_TYPE io_type){
+  inline bool openInputFile(std::ifstream &in,const std::string fname,IO_TYPE io_type){
 
 	if(BINARY == io_type){
 	  in.open(fname.c_str(),std::ios_base::in|std::ios_base::binary);
@@ -100,7 +100,7 @@ namespace UTILITY{
 	return succ;
   }
 
-  bool openOutputFile(std::ofstream &out,const std::string fname,IO_TYPE io_type){
+  inline bool openOutputFile(std::ofstream &out,const std::string fname,IO_TYPE io_type){
 
 	if(BINARY == io_type){
 	  out.open(fname.c_str(),std::ios_base::out|std::ios_base::binary);
@@ -180,4 +180,4 @@ namespace UTILITY{
   }
 }
 
-#endif /* _IO_H_ */
+#endif /* _IOTOOLS_H_ */

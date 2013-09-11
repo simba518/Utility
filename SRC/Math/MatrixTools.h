@@ -10,15 +10,9 @@
 
 namespace EIGEN3EXT{
 
-  template <class T>
-  struct MatType{
-    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mat;
-    typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector;
-  };
-
   /************************************ create ********************************/
   template <class T>
-  const Eigen::Matrix<T,3,3> &createFromRowMajor (Eigen::Matrix<T,3,3> &M, const T *A){
+  inline const Eigen::Matrix<T,3,3> &createFromRowMajor (Eigen::Matrix<T,3,3> &M, const T *A){
 
 	const int r = 3;
 	const int c = 3;
@@ -32,8 +26,8 @@ namespace EIGEN3EXT{
 
 
   template <class T>
-  const typename MatType<T>::mat &createFromRowMajor(typename MatType<T>::mat &M,
-													 const T *A, const int r, const int c){
+  inline const Eigen::Matrix<T,-1,-1> &createFromRowMajor(Eigen::Matrix<T,-1,-1> &M,
+														  const T *A, const int r, const int c){
 
 	assert_ge (r,0);
 	assert_ge (c,0);
@@ -47,7 +41,7 @@ namespace EIGEN3EXT{
   }
 
   template <class T>
-  void createRowMajor(const typename MatType<T>::mat &M,T *A){
+  inline void createRowMajor(const Eigen::Matrix<T,-1,-1> &M,T *A){
 
 	const int r = M.rows();
 	const int c = M.cols();
@@ -59,8 +53,8 @@ namespace EIGEN3EXT{
   }
 
   template <class T>
-  const typename MatType<T>::mat &createFromColMajor(typename MatType<T>::mat &M, 
-  													 const T *A, const int r, const int c){
+  inline const Eigen::Matrix<T,-1,-1> &createFromColMajor(Eigen::Matrix<T,-1,-1> &M, 
+														  const T *A, const int r, const int c){
   	assert_ge (r,0);
   	assert_ge (c,0);
   	M.resize(r,c);
@@ -72,6 +66,32 @@ namespace EIGEN3EXT{
   	return M;
   }
 
+  template <class T> 
+  inline void convert(const Eigen::Matrix<T,-1,-1> &M, std::vector<Eigen::Matrix<T,-1,1> > &vv){
+	vv.clear();
+	vv.reserve(M.cols());
+	for (int c = 0; c < M.cols(); ++c){
+	  vv.push_back(M.col(c));
+	}
+  }
+
+  template <class T> 
+  inline void convert(const std::vector<Eigen::Matrix<T,-1,1> > &vv,Eigen::Matrix<T,-1,-1> &M){
+
+	M.resize(0,0);
+	if(vv.size() > 0){
+	  const int cols = (int)vv.size();
+	  const int rows = vv[0].size();
+	  if(cols > 0){
+		M.resize(rows,cols);
+		for (int c = 0; c < M.cols(); ++c){
+		  assert_eq(vv[c].size(),rows);
+		  M.col(c) = vv[c];
+		}
+	  }
+	}
+  }
+
   /************************************ decomposition *************************/
   
   /*
@@ -80,10 +100,10 @@ namespace EIGEN3EXT{
    * @see study record: Polar Decomposition.
    */
   template <class T>
-  void ModifiedSVD3x3(const Eigen::Matrix<T,3,3> &F,
-					  Eigen::Matrix<T,3,3> &U,
-					  Eigen::Matrix<T,3,3> &Vt,
-					  Eigen::Matrix<T,3,3> &D){
+  inline void ModifiedSVD3x3(const Eigen::Matrix<T,3,3> &F,
+							 Eigen::Matrix<T,3,3> &U,
+							 Eigen::Matrix<T,3,3> &Vt,
+							 Eigen::Matrix<T,3,3> &D){
 
 	Eigen::JacobiSVD<Eigen::Matrix<T,3,3> > svd(F, Eigen::ComputeFullU | Eigen::ComputeFullV);
 	U = svd.matrixU();
@@ -111,9 +131,9 @@ namespace EIGEN3EXT{
    * @see study record: Polar Decomposition.
    */
   template <class T>
-  void ModifiedPD3x3(const Eigen::Matrix<T,3,3> &F,
-  					 Eigen::Matrix<T,3,3> &R,
-  					 Eigen::Matrix<T,3,3> &S){
+  inline void ModifiedPD3x3(const Eigen::Matrix<T,3,3> &F,
+							Eigen::Matrix<T,3,3> &R,
+							Eigen::Matrix<T,3,3> &S){
 
   	Eigen::Matrix<T,3,3> &U = R;
 	Eigen::Matrix<T,3,3> &Vt = S;

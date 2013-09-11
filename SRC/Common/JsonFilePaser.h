@@ -11,6 +11,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/filesystem.hpp>
 #include <Log.h>
+#include <IOTools.h>
 using namespace boost::property_tree;
 
 namespace UTILITY{
@@ -69,6 +70,24 @@ namespace UTILITY{
 	  }catch(std::exception& ex){
 		succ = false;
 		ERROR_LOG(ex.what());
+	  }
+	  return succ;
+	}
+	template<class VECTOR>
+	bool readVecFile(const std::string eleName, VECTOR &value){
+	  std::string vectorFile;
+	  bool succ = readFilePath(eleName,vectorFile,true);
+	  if(succ){
+		succ = loadVec(vectorFile,value);
+	  }
+	  return succ;
+	}
+	template<class MATRIX>
+	bool readMatFile(const std::string eleName, MATRIX &value){
+	  std::string matFile;
+	  bool succ = readFilePath(eleName,matFile,true);
+	  if(succ){
+		succ = loadMat(matFile,value);
 	  }
 	  return succ;
 	}

@@ -2,7 +2,7 @@
 #define _MATRIXIO_H_
 
 #include <eigen3/Eigen/Dense>
-#include <IO.h>
+#include <IOTools.h>
 
 namespace EIGEN3EXT{
 
