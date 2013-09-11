@@ -40,8 +40,8 @@ namespace EIGEN3EXT{
 	return M;
   }
 
-  template <class T>
-  inline void createRowMajor(const Eigen::Matrix<T,-1,-1> &M,T *A){
+  template <class T, class MATRIX>
+  inline void createRowMajor(const MATRIX &M,T *A){
 
 	const int r = M.rows();
 	const int c = M.cols();
@@ -66,8 +66,8 @@ namespace EIGEN3EXT{
   	return M;
   }
 
-  template <class T> 
-  inline void convert(const Eigen::Matrix<T,-1,-1> &M, std::vector<Eigen::Matrix<T,-1,1> > &vv){
+  template <class T, class MATRIX> 
+  inline void convert(const MATRIX &M, std::vector<Eigen::Matrix<T,-1,1> > &vv){
 	vv.clear();
 	vv.reserve(M.cols());
 	for (int c = 0; c < M.cols(); ++c){
