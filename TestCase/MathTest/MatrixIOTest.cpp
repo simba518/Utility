@@ -6,8 +6,7 @@ using namespace EIGEN3EXT;
 
 BOOST_AUTO_TEST_SUITE(MatrixIO)
 
-BOOST_AUTO_TEST_CASE(vectorIO)
-{
+BOOST_AUTO_TEST_CASE(vectorIO){
   Eigen::VectorXd v1(3),v2;
   v1 << 1,2,3;
   const std::string fname = "./TestCase/TestData/temptV.b";
@@ -16,8 +15,7 @@ BOOST_AUTO_TEST_CASE(vectorIO)
   ASSERT_EQ_SMALL_VEC(v1,v2,v1.size());
 }
 
-BOOST_AUTO_TEST_CASE(matrixIO)
-{
+BOOST_AUTO_TEST_CASE(matrixIO){
   Eigen::MatrixXd m1(3,2);
   Eigen::MatrixXd m2 = Eigen::MatrixXd::Random(3,2);
   ASSERT_NE(m1,m2);

@@ -13,15 +13,13 @@ struct JsonFilePaserTestInit{
 
 BOOST_AUTO_TEST_SUITE(JsonFilePaser)
 
-BOOST_FIXTURE_TEST_CASE(readFloat, JsonFilePaserTestInit)
-{
+BOOST_FIXTURE_TEST_CASE(readFloat, JsonFilePaserTestInit){
   float f;
   ASSERT(jsonFile.read("floatnumber",f));
   ASSERT_EQ(f,100.0);
 }
 
-BOOST_FIXTURE_TEST_CASE(readVector, JsonFilePaserTestInit)
-{
+BOOST_FIXTURE_TEST_CASE(readVector, JsonFilePaserTestInit){
   std::vector<int> v, cv;
   cv.push_back(1);
   cv.push_back(2);
@@ -31,8 +29,7 @@ BOOST_FIXTURE_TEST_CASE(readVector, JsonFilePaserTestInit)
   ASSERT_EQ_SMALL_VEC(v,cv,v.size());
 }
 
-BOOST_FIXTURE_TEST_CASE(readFilePath, JsonFilePaserTestInit)
-{
+BOOST_FIXTURE_TEST_CASE(readFilePath, JsonFilePaserTestInit){
   std::string filename;
   ASSERT(jsonFile.readFilePath("filename",filename,false));
   ASSERT_NE(filename,std::string("f.txt"));

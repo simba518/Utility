@@ -9,6 +9,14 @@
 
 namespace QGLVEXT{
 
+  class SelectObserver{
+	
+  public: 
+	virtual void addSelection(const vector<int> &sel_ids) = 0;
+	virtual void removeSelection(const vector<int> &sel_ids) = 0;
+  };
+  typedef boost::shared_ptr<SelectObserver> pSelectObserver;
+
   enum SEL_STATUS{ADD_ELE,REMOVE_ELE,DO_NOTHING_ON_SEL};
   
   /**
@@ -32,6 +40,9 @@ namespace QGLVEXT{
 	void setSelector( pSelectable selector){
 	  this->selector = selector;
 	}
+	void setObserver( pSelectObserver observer){
+	  _observer = observer;
+	}
 	bool isActive()const{ return enable_op;	}
 
   public slots:
@@ -39,7 +50,6 @@ namespace QGLVEXT{
 	bool release (QMouseEvent *e);
 	bool move (QMouseEvent *e);
 
-  public slots:
 	void endSelection(const vector<int> sel_ids);
 	void togglePrintSelEle(){
 	  print_selected_nodes = (print_selected_nodes ? false:true);
@@ -60,10 +70,12 @@ namespace QGLVEXT{
 
   protected:
 	void createConnections();
+	void printSelection(const vector<int> &selIds, bool print=true)const;
 	
   protected:
 	pQGLViewerExt viewer;
 	pSelectable selector;
+	pSelectObserver _observer;
 	SEL_STATUS sel_status;
 	bool enable_op;
 	bool print_selected_nodes;

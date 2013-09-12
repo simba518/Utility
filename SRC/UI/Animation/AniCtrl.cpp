@@ -1,9 +1,9 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-using namespace boost;
-
 #include <QtGui/QFileDialog>
 #include <AniCtrl.h>
+#include <assertext.h>
+using namespace boost;
 using namespace QGLVEXT;
 
 AniCtrl::AniCtrl
@@ -160,18 +160,14 @@ void AniCtrl::setCurrentFrame(const int frame_num){
 
 void AniCtrl::setAnimationPeriod(const int period){
   
-  /// @todo
-  // ASSERTGT (period,0);
-  assert (period > 0);
-  assert (viewer != NULL);
-  viewer->setAnimationPeriod(period);
+  assert_gt (period,0);
+  if (viewer != NULL)
+	viewer->setAnimationPeriod(period);
 }
 
 void AniCtrl::setFPS(const int fps){
   
-  /// @todo
-  // ASSERTGT (fps , 0);
-  assert (fps > 0);
+  assert_gt (fps , 0);
   const int period = 1000/fps;
   this->setAnimationPeriod(period);
 }
@@ -190,6 +186,7 @@ int AniCtrl::totalFrameNum()const{
 void AniCtrl::updateObserveViewers(){
   
   BOOST_FOREACH(pQGLViewerExt ele, observe_viewers){
-	ele->update();
+	if(ele)
+	  ele->update();
   }
 }

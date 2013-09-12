@@ -4,10 +4,10 @@
 #include <stack>
 #include <QList>
 #include <QGLViewer/qglviewer.h>
-using namespace qglviewer;
-
 #include <SelfRenderEle.h>
+#include <TextForRender.h>
 #include <Selectable.h>
+using namespace qglviewer;
 
 namespace QGLVEXT{
   
@@ -21,6 +21,8 @@ namespace QGLVEXT{
 	// render
 	void addSelfRenderEle (pSelfRenderEle ele);
 	void removeSelfRenderEle (pSelfRenderEle ele);
+	void addTextForRender (pTextForRender ele);
+	void removeTextForRender (pTextForRender ele);
 	bool toggleRemoveAddSelfRenderEle(pSelfRenderEle ele);//true if added
 	bool contains(pSelfRenderEle ele)const{return self_render_ele.contains(ele);}
 
@@ -114,6 +116,7 @@ namespace QGLVEXT{
 	// rendering
 	virtual void draw ();
 	virtual void selfRender ();
+	virtual void displayText();
 
 	// other
 	virtual QString helpString ()const;
@@ -124,6 +127,7 @@ namespace QGLVEXT{
 
   protected:
 	QList<pSelfRenderEle > self_render_ele;
+	QList<pTextForRender> _textForRender;
 	pSelectable selector;
 	bool step_by_step; // control animation
 	QPoint mouse_pos; // mouse position: (screen_x, screen_y).

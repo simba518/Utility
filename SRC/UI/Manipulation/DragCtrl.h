@@ -1,5 +1,5 @@
-#ifndef _DRAG3D_H_
-#define _DRAG3D_H_
+#ifndef _DRAGCTRL_H_
+#define _DRAGCTRL_H_
 
 #include <QObject>
 #include <QGLViewerExt.h>
@@ -15,10 +15,21 @@ namespace QGLVEXT{
   class DragHook{
 	
   public:
-	virtual void getDragedPoint(const double point[3])const = 0;
+	virtual void getDragedPoint(double point[3])const = 0;
 
   };
   typedef boost::shared_ptr<DragHook> pDragHook;
+
+  class DragObserver{
+	
+  public: 
+	virtual void selectDragEle(int id) = 0;
+	virtual void startDrag (int screen_x,int screen_y) = 0;
+	virtual void startDrag (double x,double y,double z) = 0;
+	virtual void dragTo (double x,double y,double z) = 0;
+	virtual void stopDrag (double x,double y,double z) = 0;
+  };
+  typedef boost::shared_ptr<DragObserver> pDragObserver;
 
   /**
    * @class DragCtrl control the drag operation.
@@ -28,7 +39,8 @@ namespace QGLVEXT{
 	Q_OBJECT
 	
   public:
-	DragCtrl(pQGLViewerExt_const viewer);
+	DragCtrl(pQGLViewerExt viewer);
+	DragCtrl(pQGLViewerExt viewer, pSelectable selector);
 	void setKeyMouse(Qt::KeyboardModifiers key,Qt::MouseButton m_button){
 	  this->modify_key = key;
 	  this->mouse_button = m_button;
@@ -39,22 +51,32 @@ namespace QGLVEXT{
 	void setDragHook(pDragHook drag_hook){
 	  this->drag_hook = drag_hook;
 	}
+	void setObserver(pDragObserver observer){
+	  _observer = observer;
+	}
 	void initZ_Deepth();
 
-  protected:
-	bool press (const QMouseEvent *e);
-	bool release (const QMouseEvent *e);
-	bool move (const QMouseEvent *e);
+  public slots:
+	bool press (QMouseEvent *e);
+	bool release (QMouseEvent *e);
+	bool move (QMouseEvent *e);
+	void selectDragEle(const vector<int> ids);
 	
   signals:
+	void selectDragEle(int id);
 	void startDrag (int screen_x,int screen_y);
 	void startDrag (double x,double y,double z);
 	void dragTo (double x,double y,double z);
 	void stopDrag (double x,double y,double z);
+
+  protected:
+	void createConnections();
 	
   private:
-	pQGLViewerExt_const viewer;
+	pQGLViewerExt viewer;
 	pDragHook drag_hook;
+	pDragObserver _observer;
+	pSelectable _selector;
 
 	/**
 	 * the mouse button and modify key that trags the draging operation, could
@@ -66,10 +88,11 @@ namespace QGLVEXT{
 	double z_deepth;
 	bool begin_drag;
 	bool is_dragging;
+	bool _selected;
   };
 
   typedef boost::shared_ptr< DragCtrl > pDragCtrl;
   
 }//end of namespace
 
-#endif /*_DRAG3D_H_*/
+#endif /* _DRAGCTRL_H_ */

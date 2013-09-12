@@ -45,20 +45,16 @@ void SelectCtrl::createConnections(){
 
 void SelectCtrl::endSelection(const vector<int> sel_ids){
 
-  if (print_selected_nodes) {
-
-	cout <<"select nodes number: "<<sel_ids.size() << endl;
-	cout <<"( ";
-	BOOST_FOREACH(int ele, sel_ids){
-	  cout << ele<< ",";
-	}
-	cout <<")" << endl;
-  }
   if(sel_status == ADD_ELE){
+	if(_observer)
+	  _observer->addSelection(sel_ids);
 	emit addSelEleMsg(sel_ids);
   }else if(sel_status == REMOVE_ELE){
+	if(_observer)
+	  _observer->removeSelection(sel_ids);
 	emit removeSelEleMsg(sel_ids);
   }
+  printSelection(sel_ids,print_selected_nodes);
   sel_status = DO_NOTHING_ON_SEL;
 }
 
@@ -107,4 +103,17 @@ bool SelectCtrl::move (QMouseEvent *e){
 	emit rectChanged();
   }
   return perferm;
+}
+
+void SelectCtrl::printSelection(const vector<int> &selIds, bool print)const{
+  
+  if (print) {
+
+	cout <<"select nodes number: "<<selIds.size() << endl;
+	cout <<"( ";
+	BOOST_FOREACH(int ele, selIds){
+	  cout << ele<< ",";
+	}
+	cout <<")" << endl;
+  }
 }

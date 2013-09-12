@@ -4,85 +4,80 @@
 #include <string>
 #include <iostream>
 
-namespace UTILITY{
+template<class T>
+inline void PRINT_MSG(const std::string &title,const T&event,bool cond=false,const std::string file="",const int line=0){
+  if(cond){
+	return ;
+  }
+  std::cout<<"*"<<title<<"\t: "<<event;
+  if(file.size() > 1){
+	std::cout<<"\t at\t: "<<file<<":"<<line<<std::endl;
+  }else{
+	std::cout<<std::endl;
+  }
+}
 
-  template<class T>
-  inline void PRINT_MSG(const std::string &title,const T&event,bool cond=true,const std::string file="",const int line=0){
-	if(cond){
-	  return ;
-	}
-	std::cout<<"*"<<title<<"\t: "<<event;
-	if(file.size() > 1){
-	  std::cout<<"\t at\t: "<<file<<":"<<line<<std::endl;
-	}else{
-	  std::cout<<std::endl;
-	}
+#define PRINT_MSG_MICRO(title,event,cond)				\
+  if(!cond){											\
+	std::cout<<"*"<<title<<"\t: "<<event<<std::endl;	\
   }
 
-#define PRINT_MSG_MICRO(title,event,cond)					\
-  if(!cond){													\
-	std::cout<<"*"<<title<<"\t: "<<event<<std::endl;		\
+#define PRINT_MSG_MICRO_EXT(title,event,cond,file,line)	\
+  if(!cond){											\
+	std::cout<<"*"<<title<<"\t: "<<event;				\
+	std::cout<<"\t at\t: "<<file<<":"<<line<<std::endl;	\
   }
 
-#define PRINT_MSG_MICRO_EXT(title,event,cond,file,line)		\
-  if(!cond){													\
-	std::cout<<"*"<<title<<"\t: "<<event;					\
-	std::cout<<"\t at\t: "<<file<<":"<<line<<std::endl;		\
-  }
-
-  /************************ERROR******************************/
+/************************ERROR******************************/
 #ifdef LOG_ERROR
 #define ERROR_LOG_COND(event,cond) {PRINT_MSG_MICRO_EXT("ERROR",event,cond,__FILE__,__LINE__);}
-#define ERROR_LOG(event) {PRINT_MSG_MICRO_EXT("ERROR",event,true,__FILE__,__LINE__);}
+#define ERROR_LOG(event) {PRINT_MSG_MICRO_EXT("ERROR",event,false,__FILE__,__LINE__);}
 #else
 #define ERROR_LOG_COND(event,cond)
 #define ERROR_LOG(event)
 #endif
 
-  /************************WARN******************************/
+/************************WARN******************************/
 #ifdef LOG_WARN
 #define WARN_LOG_COND(event,cond) {PRINT_MSG_MICRO_EXT("WARN",event,cond,__FILE__,__LINE__);}
-#define WARN_LOG(event) {PRINT_MSG_MICRO_EXT("WARN",event,true,__FILE__,__LINE__);}
+#define WARN_LOG(event) {PRINT_MSG_MICRO_EXT("WARN",event,false,__FILE__,__LINE__);}
 #else
 #define WARN_LOG_COND(event,cond)
 #define WARN_LOG(event)
 #endif
 
-  /************************TRACE******************************/
+/************************TRACE******************************/
 #ifdef LOG_TRACE
-  class TRACE_CLASS{
-  public:
-	TRACE_CLASS(std::string funInfo):_funInfo(funInfo){
-	  PRINT_MSG("ENETER_FUN: ",_funInfo);
-	}
-	~TRACE_CLASS(){
-	  PRINT_MSG("OUT_FUN: ",_funInfo);
-	}
-  private:
-	const std::string _funInfo;
-  };
+class TRACE_CLASS{
+public:
+  TRACE_CLASS(std::string funInfo):_funInfo(funInfo){
+	PRINT_MSG("ENETER_FUN: ",_funInfo);
+  }
+  ~TRACE_CLASS(){
+	PRINT_MSG("OUT_FUN: ",_funInfo);
+  }
+private:
+  const std::string _funInfo;
+};
 #define TRACE_FUN() TRACE_CLASS _m_trace_class(__PRETTY_FUNCTION__);
 #else
 #define TRACE_FUN()
 #endif
 
-  /************************INFO******************************/
+/************************INFO******************************/
 #ifdef LOG_INFO
-#define INFO_LOG(event) {PRINT_MSG("INFO",event);}
+#define INFO_LOG(event) {PRINT_MSG_MICRO("INFO",event,false);}
 #define INFO_LOG_COND(event,cond) {PRINT_MSG_MICRO("INFO",event,cond);}
 #else
 #define INFO_LOG(event)
 #define INFO_LOG_COND(event,cond)
 #endif
 
-  /************************DEBUG******************************/
+/************************DEBUG******************************/
 #ifdef LOG_DEBUG
-  template<class T> 
-  inline void DEBUG_LOG(const T&event,bool cond=true) {PRINT_MSG("DEBUG",event,cond);}
+#define DEBUG_LOG(event) {PRINT_MSG_MICRO_EXT("DEBUG",event,false,__FILE__,__LINE__);}
 #else
-#define DEBUG_LOG(event,...)
+#define DEBUG_LOG(event)
 #endif
-  
-}
 
 #endif /* _LOG_H_ */

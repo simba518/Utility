@@ -4,6 +4,7 @@ using namespace std;
 #include <QMouseEvent>
 #include <boost/foreach.hpp>
 #include <QFileDialog>
+#include <Log.h>
 #include "QGLViewerExt.h"
 
 using namespace QGLVEXT;
@@ -20,7 +21,7 @@ void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
 	if (ele){
 	  self_render_ele.push_back(ele);
 	}else{
-		cout << "ERROR: QGLViewerExt::addSelfRenderEle(.), the input pSelfRenderEle is null!" << endl;
+	  ERROR_LOG("the input pSelfRenderEle is null!");
 	}
   }
   update();
@@ -29,6 +30,22 @@ void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
 void QGLViewerExt::removeSelfRenderEle (pSelfRenderEle ele){
   
   self_render_ele.removeAll(ele);
+  update();
+}
+
+void QGLViewerExt::addTextForRender (pTextForRender ele){
+  if(!_textForRender.contains(ele)){
+	if (ele){
+	  _textForRender.push_back(ele);
+	}else{
+	  ERROR_LOG("the input pTextForRender is null!");
+	}
+  }
+  update();
+}
+
+void QGLViewerExt::removeTextForRender (pTextForRender ele){
+  _textForRender.removeAll(ele);
   update();
 }
 
@@ -81,16 +98,26 @@ void QGLViewerExt::selfRender(){
 void QGLViewerExt::draw(){
 
   selfRender();
-  // displayText();
+  displayText();
 
   // debug lights
   if (draw_lights){
-
   	drawLight(GL_LIGHT0);
   	drawLight(GL_LIGHT1);
   	drawLight(GL_LIGHT2);
   }
+}
 
+void QGLViewerExt::displayText(){
+
+  qglColor(QColor(0,0,0));
+  glDisable(GL_LIGHTING);
+  BOOST_FOREACH(pTextForRender textSet, _textForRender){
+	BOOST_FOREACH(const TextWithPosition &t, *textSet){
+	  drawText(t.getX(),t.getY(),t.getContent().c_str(),t.getFont());
+	}
+  }
+  glEnable(GL_LIGHTING);
 }
 
 void QGLViewerExt::mousePressEvent (QMouseEvent *e){
