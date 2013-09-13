@@ -202,7 +202,6 @@ namespace CASADI{
 		M(i,j) = SM.elem(i,j).getValue();
 	  }
 	}
-	return M;
   }
 
   template<class T> 
