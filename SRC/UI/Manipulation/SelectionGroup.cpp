@@ -1,6 +1,6 @@
 #include <boost/foreach.hpp>
 #include "SelectionGroup.h"
-using namespace QGLVEXT;
+using namespace UTILITY;
 
 void SelectionGroup::addGroup( const set<int>& g){
 

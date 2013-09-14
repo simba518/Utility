@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <boost/filesystem.hpp>
 
 template<class T>
 inline void PRINT_MSG(const std::string &title,const T&event,bool cond=false,const std::string file="",const int line=0){
@@ -79,5 +80,14 @@ private:
 #else
 #define DEBUG_LOG(event)
 #endif
+
+/************************FILE CHECK*************************/
+#define CHECK_DIR_EXIST(dir){											\
+	ERROR_LOG_COND("directory is not existed: "<<dir,boost::filesystem::is_directory(dir)); \
+  }														
+
+#define CHECK_FILE_EXIST(f){											\
+	ERROR_LOG_COND("file is not existed: "<<f,(boost::filesystem::exists(f) &&!(boost::filesystem::is_directory(f)))); \
+  }														
 
 #endif /* _LOG_H_ */

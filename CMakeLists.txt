@@ -74,9 +74,16 @@ INCLUDE_FOR_PROJECT(${PROJECT_NAME}
   SRC/UI/Animation
   SRC/UI/Manipulation
   SRC/UI/Render
+  SRC/UI/Shader
   SRC/Common
   SRC/Math
   SRC/Cuda
+  )
+
+FIND_INTERNAL_PACKAGE(${PROJECT_SOURCE_DIR}/Lib/${CMAKE_BUILD_TYPE_DIR}
+
+  utility_math
+  utility_ui
   )
 
 # projects

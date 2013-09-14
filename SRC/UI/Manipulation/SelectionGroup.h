@@ -3,11 +3,13 @@
 
 #include <vector>
 #include <set>
-using namespace std;
-
+#include <string>
 #include <boost/shared_ptr.hpp>
+using std::vector;
+using std::set;
+using std::string;
 
-namespace QGLVEXT{
+namespace UTILITY{
   
   /**
    * @class SelectionGroup manager selection group, including adding, remomve

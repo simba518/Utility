@@ -1,10 +1,13 @@
 SET(LIBRARY_NAME utility_ui)
 
+AUX_SOURCE_DIRECTORY(./Shader shader_src)
+
 SET(NONE_QT_CPP
 
   Render/SelfRenderRect.cpp
   Render/FileDialog.cpp
   Manipulation/SelectionGroup.cpp
+  ${shader_src}
 )
 
 SET(UI_SOURCES
@@ -40,6 +43,6 @@ ADD_LIBRARY(${LIBRARY_NAME}
 )
 
 # install
-FILE(GLOB header ${header} ./Animation/*.h ./Manipulation/*.h ./Render/*.h CACHE INTERNAL)
+FILE(GLOB header ${header} ./Animation/*.h ./Manipulation/*.h ./Render/*.h ./Shader/*.h ./Shader/*.glsl CACHE INTERNAL)
 INSTALL(FILES ${header} DESTINATION ${HEADFILE_DEST})
 INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DEST})
