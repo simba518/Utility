@@ -16,10 +16,10 @@
   BOOST_CHECK_MESSAGE(predicate,stringStreamPre.str()+msg);			\
   }
 
-#define ASSERT_MSG(msg,predicate)			\
+#define TEST_ASSERT_MSG(msg,predicate)			\
   UNIT_TEST_ASSERT_MESSAGE(msg,predicate);
 
-#define ASSERT(predicate)						\
+#define TEST_ASSERT(predicate)					\
   UNIT_TEST_ASSERT_MESSAGE("",predicate);
 
 // assert "value_a == value_b", if not, print the values and abort.
