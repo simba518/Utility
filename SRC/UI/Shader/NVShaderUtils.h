@@ -115,7 +115,7 @@ inline GLuint LinkGLSLProgram( GLuint vertexShader, GLuint fragmentShader)
 
     char * infoLog = new char[infoLogLength];
     glGetProgramInfoLog(program, infoLogLength, &charsWritten, infoLog);
-    printf(infoLog);
+    // printf(infoLog);
     delete [] infoLog;
 #endif
 
@@ -152,7 +152,7 @@ inline GLuint LinkGLSLProgram( GLuint vertexShader, GLuint geometryShader, GLint
 
     char * infoLog = new char[infoLogLength];
     glGetProgramInfoLog(program, infoLogLength, &charsWritten, infoLog);
-    printf(infoLog);
+    // printf(infoLog);
     delete [] infoLog;
 #endif
 

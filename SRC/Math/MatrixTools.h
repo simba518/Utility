@@ -142,6 +142,31 @@ namespace EIGEN3EXT{
   	R = U*Vt;
   	S = Vt.transpose()*D*Vt;
   }
+
+
+  // comput the pseudoinverse of a dense matrix using SVD.
+  // https://inst.eecs.berkeley.edu/~ee127a/book/login/def_pseudo_inv.html
+  template <class T>
+  inline void PseudoInverse(const Eigen::Matrix<T,-1,-1> &A, Eigen::Matrix<T,-1,-1> &invA){
+	Eigen::JacobiSVD <Eigen::Matrix<T,-1,-1> > svd(A,Eigen::ComputeThinU|Eigen::ComputeThinV);
+	const Eigen::Matrix<T,-1,-1> &U = svd.matrixU();
+	const Eigen::Matrix<T,-1,-1> &V = svd.matrixV();
+	const Eigen::Matrix<T,-1,1>  &s = svd.singularValues();
+	Eigen::Matrix<T,-1,1> invS = s;
+	for (int i = 0; i < invS.size(); ++i){
+	  if(invS[i] != 0)
+		invS[i] = 1.0f/invS[i];
+	}
+	invA = V*invS.asDiagonal()*U.transpose();
+  }
+
+  template <class T>
+  inline Eigen::Matrix<T,-1,-1> PseudoInverse(const Eigen::Matrix<T,-1,-1> &A){
+	Eigen::JacobiSVD <Eigen::Matrix<T,-1,-1> > svd(A,Eigen::ComputeThinU|Eigen::ComputeThinV);
+	Eigen::Matrix<T,-1,-1> invA;
+	PseudoInverse(A,invA);
+	return invA;
+  }
   
 }
 

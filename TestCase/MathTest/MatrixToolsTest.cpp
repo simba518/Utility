@@ -63,4 +63,33 @@ BOOST_AUTO_TEST_CASE(convertTest){
   ASSERT_EQ(M,U);
 }
 
+BOOST_AUTO_TEST_CASE(pseudoinverseTest){
+  
+  MatrixXd U2x2(2,2);
+  U2x2 << 3,0.5,1,4;
+  const MatrixXd invU2x2 = PseudoInverse(U2x2);
+  const MatrixXd I2x2 = MatrixXd::Identity(2,2);
+  const MatrixXd A = (U2x2*invU2x2);
+  const MatrixXd B = (invU2x2*U2x2);
+  ASSERT_EQ_SMALL_MAT_TOL(A,I2x2,1e-10);
+  ASSERT_EQ_SMALL_MAT_TOL(B,I2x2,1e-10);
+
+  // this example is obatined from
+  // https://inst.eecs.berkeley.edu/~ee127a/book/login/exa_pinv_4by5.html
+  MatrixXd U4x5(4,5);
+  U4x5.setZero();
+  U4x5(0,0) = 1;
+  U4x5(0,4) = 2;
+  U4x5(1,2) = 3;
+  U4x5(3,1) = 4;
+  const MatrixXd invU4x5 = PseudoInverse(U4x5);
+  MatrixXd cU(5,4);
+  cU.setZero();
+  cU(0,0) = 0.2;
+  cU(1,3) = 0.25;
+  cU(2,1) = 1.0f/3.0f;
+  cU(4,0) = 0.4;
+  ASSERT_EQ_SMALL_MAT_TOL(invU4x5,cU,1e-8);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
