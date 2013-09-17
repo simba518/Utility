@@ -18,4 +18,16 @@ BOOST_AUTO_TEST_CASE(convert2VecTest){
   ASSERT_EQ(a,v);
 }
 
+BOOST_AUTO_TEST_CASE(makeEyeMatrixTest){
+  
+  VectorXd a(3);
+  a << 1,2,3;
+  const CasADi::SXMatrix A = makeEyeMatrix(a);
+  const MatrixXd Ms = convert<double>(A);
+  MatrixXd M(3,3);
+  M.setZero();
+  M(0,0)=1;   M(1,1)=2;   M(2,2)=3;
+  ASSERT_EQ(Ms,M);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

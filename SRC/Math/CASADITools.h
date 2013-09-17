@@ -84,6 +84,15 @@ namespace CASADI{
 	return v;
   }
 
+  template<class VEC>
+  inline CasADi::SXMatrix makeEyeMatrix(const VEC &v){
+	CasADi::SXMatrix out(v.size(),v.size());
+	for (size_t i = 0; i < v.size(); ++i){
+	  out(i,i) = v[i];
+	}
+	return out;
+  }
+
   template<class T>
   inline void evaluate(CasADi::SXFunction fun,const Eigen::Matrix<T,-1,1> &x,Eigen::Matrix<T,-1,1> &rlst){
 	fun.setInput(&x[0]);
