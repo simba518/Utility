@@ -15,10 +15,10 @@ namespace UTILITY{
    * given a set of points (xi,yi), generate a python script to for drawing this
    * curve, and save it to a file.
    */
+  template<class VECTOR>
   class PythonScriptDraw2DCurves{
   
   public:
-	template<class VECTOR>
 	static bool write(const string fname,const VECTOR &y,const double dx=1.0,const double x0=0.0f){
 
 	  VECTOR x(y.size());
@@ -27,41 +27,25 @@ namespace UTILITY{
 	  }
 	  return write(fname,y,x);
 	}
-
-	template<class VECTOR>
 	static bool write(const string fname,const VECTOR &y,const VECTOR &x){
+	  return write(fname,defineCurve(y,x));
+	}
 
-	  assert_eq(x.size(),y.size());
-	  if(y.size() <= 0){
-		ERROR_LOG("the input data is zero");
-		return false;
+	bool add(const string name,const VECTOR &y,const double dx=1.0,const double x0=0.0f,const string style=""){
+
+	  VECTOR x(y.size());
+	  for (int i = 0; i < x.size(); ++i){
+		x[i] = x0+i*dx;
 	  }
-
-	  stringstream script;
-	  script << head();
-
-	  script << "x = [" << x[0];
-	  for (int i = 1; i < x.size(); ++i){
-		script << "," << x[i];
-	  }	  
-	  script << "];\n";
-
-	  script << "y = [" << y[0];
-	  for (int i = 1; i < y.size(); ++i){
-		script << "," << y[i];
-	  }
-	  script << "];\n";
-
-	  script << "plt.plot(x,y);\n";
-	  script << end();
-
-	  std::ofstream file;
-	  file.open(fname.c_str());
-	  ERROR_LOG_COND("failed to open file for writing: "<<fname,file.is_open());
-	  file << script.str();
-	  const bool succ = file.is_open();
-	  file.close();
-	  return succ;
+	  return add(name,y,x,style);
+	}
+	bool add(const string name,const VECTOR &y,const VECTOR &x,const string style=""){
+	  const string curve = defineCurve(y,x,name,style);
+	  curvesData = curvesData + "\n" + curve;
+	  return (curve.size() > 0);
+	}
+	bool write(const string fname)const{
+	  return write(fname,curvesData);
 	}
 
   protected:
@@ -74,7 +58,50 @@ namespace UTILITY{
 	static string end(){
 	  return string("plt.show()");
 	}
+	static string defineCurve(const VECTOR &y,const VECTOR &x,const string name="",const string style=""){
 
+	  assert_eq(x.size(),y.size());
+	  if(y.size() <= 0){
+		ERROR_LOG("the input data is zero");
+		return string("");
+	  }
+
+	  stringstream script;
+	  const string xName = name+"_x";
+	  const string yName = name+"_y";
+	  script<< xName << " = [" << x[0];
+	  for (int i = 1; i < x.size(); ++i){
+		script << "," << x[i];
+	  }
+	  script << "];\n";
+
+	  script << yName << " = [" << y[0];
+	  for (int i = 1; i < y.size(); ++i){
+		script << "," << y[i];
+	  }
+	  script << "];\n";
+	  if(style.size() > 0){
+		script << "plt.plot("<<xName<<","<<yName<<",\'"<<style<< "\');\n";
+	  }else{
+		script << "plt.plot("<<xName<<","<<yName<< ");\n";
+	  }
+	  return script.str();
+	}
+	static bool write(const string fname, const string curves){
+
+	  const string script = head()+string("\n")+curves+end();
+	  std::ofstream file;
+	  file.open(fname.c_str());
+	  ERROR_LOG_COND("failed to open file for writing: "<<fname,file.is_open());
+	  file << script;
+	  const bool succ = file.is_open();
+	  file.close();
+	  return succ;
+	}
+
+  private:
+	string name;
+	string curvesData;
   };
 }
 #endif /* _DRAWCURVES_H_ */
