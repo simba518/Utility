@@ -47,6 +47,9 @@ namespace UTILITY{
 	bool write(const string fname)const{
 	  return write(fname,curvesData);
 	}
+	void clear(){
+	  curvesData.clear();
+	}
 
   protected:
 	static string head(){
@@ -100,7 +103,6 @@ namespace UTILITY{
 	}
 
   private:
-	string name;
 	string curvesData;
   };
 }
