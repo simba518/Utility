@@ -19,16 +19,16 @@ namespace UTILITY{
   class PythonScriptDraw2DCurves{
   
   public:
-	static bool write(const string fname,const VECTOR &y,const double dx=1.0,const double x0=0.0f){
+	static bool write(const string fname,const VECTOR &y,const double dx=1.0,const double x0=0.0f,const string style=""){
 
 	  VECTOR x(y.size());
 	  for (int i = 0; i < x.size(); ++i){
 		x[i] = x0+i*dx;
 	  }
-	  return write(fname,y,x);
+	  return write(fname,y,x,style);
 	}
-	static bool write(const string fname,const VECTOR &y,const VECTOR &x){
-	  return write(fname,defineCurve(y,x));
+	static bool write(const string fname,const VECTOR &y,const VECTOR &x,const string style=""){
+	  return write(fname,defineCurve(y,x,"",style),false);
 	}
 
 	bool add(const string name,const VECTOR &y,const double dx=1.0,const double x0=0.0f,const string style=""){
@@ -58,8 +58,8 @@ namespace UTILITY{
 	  const string line3("import matplotlib.pyplot as plt\n");
 	  return line1+line2+line3;
 	}
-	static string end(){
-	  return string("plt.show()");
+	static string end(bool useLabel){
+	  return useLabel?(string("plt.legend()\nplt.show()")):string("plt.show()");
 	}
 	static string defineCurve(const VECTOR &y,const VECTOR &x,const string name="",const string style=""){
 
@@ -72,6 +72,8 @@ namespace UTILITY{
 	  stringstream script;
 	  const string xName = name+"_x";
 	  const string yName = name+"_y";
+	  const string labelCmd = string(",label=\'")+name+"\'";
+	  const string styleCmd = style.size()>0?(string(",\'")+style+string("\'")):(string(""));
 	  script<< xName << " = [" << x[0];
 	  for (int i = 1; i < x.size(); ++i){
 		script << "," << x[i];
@@ -83,16 +85,12 @@ namespace UTILITY{
 		script << "," << y[i];
 	  }
 	  script << "];\n";
-	  if(style.size() > 0){
-		script << "plt.plot("<<xName<<","<<yName<<",\'"<<style<< "\');\n";
-	  }else{
-		script << "plt.plot("<<xName<<","<<yName<< ");\n";
-	  }
+	  script << "plt.plot("<<xName<<","<<yName<<styleCmd<<labelCmd<<");\n";
 	  return script.str();
 	}
-	static bool write(const string fname, const string curves){
+	static bool write(const string fname, const string curves,bool useLabel=true){
 
-	  const string script = head()+string("\n")+curves+end();
+	  const string script = head()+string("\n")+curves+end(useLabel);
 	  std::ofstream file;
 	  file.open(fname.c_str());
 	  ERROR_LOG_COND("failed to open file for writing: "<<fname,file.is_open());
