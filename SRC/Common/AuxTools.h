@@ -22,17 +22,15 @@ namespace UTILITY{
 #define REPC(I, C) for (int I = 0; !(C); ++I)
 
   ////////////////////io///////////////////////////////////
-#define OUTFILE(file,name){												\
+#define OUTFILE(file,name)												\
 	std::ofstream file;													\
 	file.open(name);													\
-	ERROR_LOG_COND("failed to open file for output: "<<name,file.is_open()); \
-  }
+	ERROR_LOG_COND("failed to open file for output: "<<name,file.is_open()); 
 
-#define INFILE(file,name){												\
+#define INFILE(file,name)												\
 	std::ifstream file;													\
 	file.open(name);													\
-	ERROR_LOG_COND("failed to open file for readin: "<<name,file.is_open()); \
-  }
+	ERROR_LOG_COND("failed to open file for readin: "<<name,file.is_open()); 
 
   template <class SCALAR>
   inline void printVec(const SCALAR *vec,const int len,const std::string space=","){
