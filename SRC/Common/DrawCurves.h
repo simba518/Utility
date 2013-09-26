@@ -28,7 +28,7 @@ namespace UTILITY{
 	  return write(fname,y,x,style);
 	}
 	static bool write(const string fname,const VECTOR &y,const VECTOR &x,const string style=""){
-	  return write(fname,defineCurve(y,x,"",style),false);
+	  return realWrite(fname,defineCurve(y,x,"",style),false);
 	}
 
 	bool add(const string name,const VECTOR &y,const double dx=1.0,const double x0=0.0f,const string style=""){
@@ -44,8 +44,8 @@ namespace UTILITY{
 	  curvesData = curvesData + "\n" + curve;
 	  return (curve.size() > 0);
 	}
-	bool write(const string fname)const{
-	  return write(fname,curvesData);
+	bool write(const string fname,const string saveFigTo="")const{
+	  return realWrite(fname,curvesData,true,saveFigTo);
 	}
 	void clear(){
 	  curvesData.clear();
@@ -58,8 +58,15 @@ namespace UTILITY{
 	  const string line3("import matplotlib.pyplot as plt\n");
 	  return line1+line2+line3;
 	}
-	static string end(bool useLabel){
-	  return useLabel?(string("plt.legend()\nplt.show()")):string("plt.show()");
+	static string end(bool useLabel,const string saveFigTo=""){
+	  string e = "";
+	  if (useLabel)
+		e += string("plt.legend()\n");
+	  if(saveFigTo.size()>0)
+		e += string("plt.savefig(\"")+saveFigTo+"\"+\".png\")";
+	  else
+		e += string("plt.show()");
+	  return e;
 	}
 	static string defineCurve(const VECTOR &y,const VECTOR &x,const string name="",const string style=""){
 
@@ -88,11 +95,11 @@ namespace UTILITY{
 	  script << "plt.plot("<<xName<<","<<yName<<styleCmd<<labelCmd<<");\n";
 	  return script.str();
 	}
-	static bool write(const string fname, const string curves,bool useLabel=true){
+	static bool realWrite(const string fname, const string curves,bool useLabel=true,const string saveFigTo=""){
 
-	  const string script = head()+string("\n")+curves+end(useLabel);
+	  const string script = head()+string("\n")+curves+end(useLabel,saveFigTo);
 	  std::ofstream file;
-	  file.open(fname.c_str());
+	  file.open(string(fname+".py").c_str());
 	  ERROR_LOG_COND("failed to open file for writing: "<<fname,file.is_open());
 	  file << script;
 	  const bool succ = file.is_open();
