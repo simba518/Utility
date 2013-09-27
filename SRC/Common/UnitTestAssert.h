@@ -10,6 +10,11 @@
 #include <iomanip>
 #include <boost/test/test_tools.hpp>
 
+#define UNIT_TEST_MESSAGE(msg){										\
+	std::ostringstream stringStreamPre;								\
+	BOOST_CHECK_MESSAGE(false,stringStreamPre.str()+msg);			\
+  }
+
 #define UNIT_TEST_ASSERT_MESSAGE(msg,predicate){					\
   std::ostringstream stringStreamPre;								\
   stringStreamPre << "\n " <<__STRING(predicate) << "\n ";			\
@@ -120,10 +125,11 @@
 			  v_a << std::setprecision(5) << vector_a[j]<<" ";			\
 			  v_b << std::setprecision(5) << vector_b[j]<<" ";			\
 			}															\
-		  v_a << " ) " << std::endl;											\
-		  v_b << " ) " << std::endl;											\
+		  v_a << " ) " << std::endl;									\
+		  v_b << " ) " << std::endl;									\
 		  v_a << v_b.str();												\
-		  UNIT_TEST_ASSERT_MESSAGE(v_a.str(),vector_a == vector_b);		\
+		  v_a << "\n " <<__STRING(vector_a)<<"=="<<__STRING(vector_b)<< "\n "; \
+		  UNIT_TEST_MESSAGE(v_a.str());									\
 		  break;														\
 		}																\
 	}																	\
@@ -143,10 +149,11 @@
 			  v_a << std::setprecision(5) << vector_a[j]<<" ";			\
 			  v_b << std::setprecision(5) << vector_b[j]<<" ";			\
 			}															\
-		  v_a << " ) " << std::endl;											\
-		  v_b << " ) " << std::endl;											\
+		  v_a << " ) " << std::endl;									\
+		  v_b << " ) " << std::endl;									\
 		  v_a << v_b.str();												\
-		  UNIT_TEST_ASSERT_MESSAGE(v_a.str(),vector_a == vector_b);		\
+		  v_a << "\n " <<__STRING(vector_a)<<"=="<<__STRING(vector_b)<< "\n "; \
+		  UNIT_TEST_MESSAGE(v_a.str());									\
 		  break;														\
 		}																\
 	}																	\
@@ -175,7 +182,8 @@
 			  std::ostringstream msg;									\
 			  msg << __STRING(mat_a)<<":\n" << mat_a << std::endl << std::endl;	\
 			  msg << __STRING(mat_b)<<":\n" << mat_b << std::endl << std::endl;	\
-			  UNIT_TEST_ASSERT_MESSAGE(msg.str(),mat_a == mat_b);			\
+			  msg << "\n " <<__STRING(mat_a)<<"=="<<__STRING(mat_b)<< "\n "; \
+			  UNIT_TEST_MESSAGE(msg.str());								\
 			  break;													\
 			}															\
 		}																\
@@ -189,8 +197,8 @@
 	msg<<__STRING(mat_b) << ".dimension()\n-";							\
 	msg<<__STRING(mat_a)<<":("<<mat_a.rows()<<","<<mat_a.cols()<<")\n-"; \
 	msg<<__STRING(mat_b)<<":("<<mat_b.rows()<<","<<mat_b.cols()<<")\n";	\
-	UNIT_TEST_ASSERT_MESSAGE(msg.str(),false);							\
-																		\
+	msg << "\n " <<__STRING(mat_a)<<"=="<<__STRING(mat_b)<< "\n ";		\
+	UNIT_TEST_MESSAGE(msg.str());										\
   }else{																\
   																		\
 	for (int i = 0; i < mat_a.rows(); ++i)								\
@@ -201,7 +209,8 @@
 			  std::ostringstream msg;									\
 			  msg << __STRING(mat_a)<<":\n" << mat_a << std::endl << std::endl;	\
 			  msg << __STRING(mat_b)<<":\n" << mat_b << std::endl << std::endl;	\
-			  UNIT_TEST_ASSERT_MESSAGE(msg.str(),mat_a == mat_b);			\
+			  msg << "\n " <<__STRING(mat_a)<<"=="<<__STRING(mat_b)<< "\n "; \
+			  UNIT_TEST_MESSAGE(msg.str());								\
 			  break;													\
 			}															\
 		}																\

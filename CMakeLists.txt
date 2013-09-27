@@ -82,6 +82,7 @@ INCLUDE_FOR_PROJECT(${PROJECT_NAME}
 
 FIND_INTERNAL_PACKAGE(${PROJECT_SOURCE_DIR}/Lib/${CMAKE_BUILD_TYPE_DIR}
 
+  utility_common
   utility_math
   utility_ui
   )

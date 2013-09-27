@@ -6,6 +6,7 @@ SET(NONE_QT_CPP
 
   Render/SelfRenderRect.cpp
   Render/FileDialog.cpp
+  Render/MeshRender.cpp
   Manipulation/SelectionGroup.cpp
   ${shader_src}
 )
