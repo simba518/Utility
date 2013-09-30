@@ -103,34 +103,34 @@ void TetMeshEmbeding::embedMesh(const VVec3d &verts){
 // 	}
 // }
 
-// void TetMeshEmbeding::generateNewVertexList(const VectorX& nodes,VectorV3& verts){
+void TetMeshEmbeding::generateNewVertexList(const VectorXd& nodes,VVec3d& verts){
 
-//   verts.resize(_mapping.size());
-//   for(size_t i=0;i<(size_t)_mapping.size();i++) {
+  verts.resize(_mapping.size());
+  for(size_t i=0;i<(size_t)_mapping.size();i++) {
 
-// 	  const VertexMap& vm=_mapping[i];
-// 	  const Vector4i& tet=_vol_mesh->tets()[vm._tid];
-// 	  Vector3d& pt=verts[i];
-// 	  pt= nodes.block<3,1>(tet[0]*3,0)*vm._bcCoord.x()+
-// 		nodes.block<3,1>(tet[1]*3,0)*vm._bcCoord.y()+
-// 		nodes.block<3,1>(tet[2]*3,0)*vm._bcCoord.z()+
-// 		nodes.block<3,1>(tet[3]*3,0)*vm._bcCoord.w();
-// 	}
-// }
+	  const VertexMap& vm=_mapping[i];
+	  const Vector4i& tet=_vol_mesh->tets()[vm._tid];
+	  Vector3d& pt=verts[i];
+	  pt= nodes.block<3,1>(tet[0]*3,0)*vm._bcCoord.x()+
+		nodes.block<3,1>(tet[1]*3,0)*vm._bcCoord.y()+
+		nodes.block<3,1>(tet[2]*3,0)*vm._bcCoord.z()+
+		nodes.block<3,1>(tet[3]*3,0)*vm._bcCoord.w();
+	}
+}
 
-// void TetMeshEmbeding::interpolateForces(const vector<int>& node_ids,const VVec3d& forces, VectorX& rlst_forces){
+void TetMeshEmbeding::interpolateForces(const vector<int>& node_ids,const VVec3d& forces, VectorXd& rlst_forces){
 
-//   /// @todo write testcases for void TetMeshEmbeding::interpolateForces
-//   assert_eq (rlst_forces.size()%3,0);
-//   assert_eq (node_ids.size(),forces.size());
-//   for (size_t i = 0; i < node_ids.size(); ++i){
+  /// @todo write testcases for void TetMeshEmbeding::interpolateForces
+  assert_eq (rlst_forces.size()%3,0);
+  assert_eq (node_ids.size(),forces.size());
+  for (size_t i = 0; i < node_ids.size(); ++i){
 
-// 	const VertexMap& vm=_mapping[node_ids[i]];
-// 	const Vector4i& tet=_vol_mesh->tets()[vm._tid];
+	const VertexMap& vm=_mapping[node_ids[i]];
+	const Vector4i& tet=_vol_mesh->tets()[vm._tid];
 
-// 	rlst_forces.block<3,1>(tet[0]*3,0) += vm._bcCoord.x()*forces[i];
-// 	rlst_forces.block<3,1>(tet[1]*3,0) += vm._bcCoord.y()*forces[i];
-// 	rlst_forces.block<3,1>(tet[2]*3,0) += vm._bcCoord.z()*forces[i];
-// 	rlst_forces.block<3,1>(tet[3]*3,0) += vm._bcCoord.w()*forces[i];
-//   }
-// }
+	rlst_forces.block<3,1>(tet[0]*3,0) += vm._bcCoord.x()*forces[i];
+	rlst_forces.block<3,1>(tet[1]*3,0) += vm._bcCoord.y()*forces[i];
+	rlst_forces.block<3,1>(tet[2]*3,0) += vm._bcCoord.z()*forces[i];
+	rlst_forces.block<3,1>(tet[3]*3,0) += vm._bcCoord.w()*forces[i];
+  }
+}

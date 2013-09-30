@@ -31,9 +31,7 @@ namespace UTILITY{
 	void embedMesh(const VVec3d &verts);
 	void generateNewVertexList(const VectorXd& nodes,VVec3d& verts);
 	void interpolateForces(const vector<int>& node_ids,const VVec3d& forces, VectorXd& rlst_forces);
-	const std::vector<VertexMap> &mapping()const{
-	  return _mapping;
-	}
+	const std::vector<VertexMap> &mapping()const{ return _mapping;}
 
 	// io
 	bool write(std::ostream& os)const{

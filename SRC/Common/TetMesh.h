@@ -99,6 +99,7 @@ namespace UTILITY{
 	// get 
 	const VVec3d& nodes() const{return _nodes;}
 	const VVec4i& tets() const{return _tets;}
+	const FaceId& faceId() const{return _faceId;}
 	const ElasticMaterial<double>& material() const{return _mtl;}
 	double volume(const int i) const{
 	  return tetrahedron(_nodes[_tets[i][0]],
