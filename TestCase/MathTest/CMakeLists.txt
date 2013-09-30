@@ -4,12 +4,9 @@ AUX_SOURCE_DIRECTORY(. MathTest_src)
 
 ADD_EXECUTABLE(${APPNAME} ${MathTest_src})
 
-LINK_PROJECT(${APPNAME}
-)
-
 TARGET_LINK_LIBRARIES( ${APPNAME} 
 
-  ${PROJECT_SOURCE_DIR}/Lib/${CMAKE_BUILD_TYPE_DIR}/libutility_math.a
+  ${LIBDIR}/libutility_math.a
   ${CASADI_LIBRARIES}
   ${Boost_LIBRARIES}
   )

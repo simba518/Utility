@@ -4,16 +4,11 @@ AUX_SOURCE_DIRECTORY(. Test_src)
 
 ADD_EXECUTABLE(${APPNAME} ${Test_src})
 
-LINK_PROJECT(${APPNAME}
-
-  utility_common
-  utility_math
-  utility_ui
-)
-
 TARGET_LINK_LIBRARIES( ${APPNAME} 
 
-  /home/simba/Workspace/Utility/Lib/Release/libutility_ui.a
+  ${LIBDIR}/libutility_ui.a
+  ${LIBDIR}/libutility_common.a
+  ${LIBDIR}/libutility_math.a
   ${QGLViewer_LIBRARIES}
   ${QT_LIBRARIES}
   ${OPENGL_LIBRARIES}
