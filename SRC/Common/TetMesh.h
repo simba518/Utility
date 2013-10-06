@@ -5,6 +5,7 @@
 #include <eigen3/Eigen/Dense>
 #include <algorithm>
 #include <HashedId.h>
+#include <assertext.h>
 using namespace std;
 using namespace Eigen;
 
@@ -29,20 +30,20 @@ namespace UTILITY{
   class tetrahedronTpl{
 
   public:
-	typedef typename Eigen::Matrix<T,2,1> PT2;
-	typedef typename Eigen::Matrix<T,3,1> PT;
-	typedef typename Eigen::Matrix<T,4,1> PT4;
-	typedef typename Eigen::Matrix<T,6,1> PT6;
-	typedef typename Eigen::Matrix<T,3,3> MAT3;
+	typedef Matrix<T,2,1> PT2;
+	typedef Matrix<T,3,1> PT;
+	typedef Matrix<T,4,1> PT4;
+	typedef Matrix<T,6,1> PT6;
+	typedef Matrix<T,3,3> MAT3;
   public:
 	tetrahedronTpl(){}
 	tetrahedronTpl(const PT& a,const PT& b,const PT& c,const PT& d)
 	  :_a(a),_b(b),_c(c),_d(d){
 	  _swap=false;
 	  if(volume() < 0.0f){
-		  swap(_c,_d);
-		  _swap=true;
-		}
+		swap(_c,_d);
+		_swap=true;
+	  }
 	}
 	PT4 bary(const PT& pt) const{
 	  MAT3 A;
@@ -60,6 +61,11 @@ namespace UTILITY{
 	  return (_b-_a).cross(_c-_a).dot(_d-_a)/6.0f;
 	}
 	const PT& getNode(const int& i) const{return (&_a)[i];}
+	const Vector3d center()const{
+	  const Vector3d pos = (_a+_b+_c+_d)*0.25;
+	  return pos;
+	}
+
   public:
 	//data
 	PT _a;
@@ -70,9 +76,9 @@ namespace UTILITY{
   };
   typedef tetrahedronTpl<double> tetrahedron;
 
-  typedef std::vector<Vector4i,Eigen::aligned_allocator<Vector4i> > VVec4i;
-  typedef std::vector<Vector3i,Eigen::aligned_allocator<Vector3i> > VVec3i;
-  typedef std::vector<Vector3d,Eigen::aligned_allocator<Vector3d> > VVec3d;
+  typedef std::vector<Vector4i,aligned_allocator<Vector4i> > VVec4i;
+  typedef std::vector<Vector3i,aligned_allocator<Vector3i> > VVec3i;
+  typedef std::vector<Vector3d,aligned_allocator<Vector3d> > VVec3d;
   typedef boost::unordered_map<HashedId,std::pair<int,int>,HashedIdHash> FaceId;
   typedef std::vector<boost::unordered_set<int> > VectorUseti;
  
@@ -113,6 +119,24 @@ namespace UTILITY{
 	const VectorUseti &nodeNeighNode()const{
 	  return _nodeNeighNode;
 	}
+	const Vector3d &node(const int ele, const int i)const{
+	  assert_in(i,0,3);
+	  assert_in(ele,0,_tets.size()-1);
+	  assert_in(_tets[ele][i],0,_nodes.size()-1);
+	  return _nodes[_tets[ele][i]];
+	}
+	const tetrahedron getTet(const int ele)const{
+	  assert_in(ele,0,_tets.size()-1);
+	  return tetrahedron(nodes()[_tets[ele][0]],nodes()[_tets[ele][1]],
+						 nodes()[_tets[ele][2]],nodes()[_tets[ele][3]]);
+	}
+	int getContainingElement(const Vector3d &pos)const;
+	int getClosestElement(const Vector3d &pos)const;
+
+	int buildInterpWeights(const VectorXd &vertices,vector<int> &nodes,
+						   VectorXd &weights,const double zeroThreshold=0.0f)const;
+	static void interpolate(const vector<int> &tetNodes,const VectorXd &weights,
+							const VectorXd& u,VectorXd& uTarget);
 
 	// io
 	bool read(const std::string& filename);

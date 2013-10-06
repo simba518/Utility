@@ -1,6 +1,8 @@
+#include <float.h>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/foreach.hpp>
 #include <TetMesh.h>
+#include <Log.h>
 using namespace UTILITY;
 
 /*each face belongs to two elements*/
@@ -73,4 +75,94 @@ bool TetMesh::read(const std::string& filename){
 bool TetMesh::write(const std::string& filename)const{
 
   return false;
+}
+
+int TetMesh::getContainingElement(const Vector3d &pos)const{
+
+  // linear scan
+  const int numElements = _tets.size();
+  for(int element=0; element < numElements; element++){
+	const tetrahedron t = getTet(element);
+	if (t.isInside(pos)) return element;
+  }
+  return -1;
+}
+
+int TetMesh::getClosestElement(const Vector3d &pos)const{
+
+  const int numElements = _tets.size();
+  double closestDist = DBL_MAX;
+  int closestElement = 0;
+  for(int element=0; element < numElements; element++){
+	const tetrahedron t = getTet(element);
+	const Vector3d center = t.center();
+	const double dist = (pos-center).norm();
+	if (dist < closestDist){
+	  closestDist = dist;
+	  closestElement = element;
+	}
+  }
+  return closestElement;
+}
+
+int TetMesh::buildInterpWeights(const VectorXd &vertices,vector<int> &nodes,
+								VectorXd &weights,const double zeroThreshold)const{
+  TRACE_FUN();
+
+  const int numElementVertices = 4;
+  const int numTargetLocations = vertices.size()/3;
+  nodes.resize( numElementVertices*numTargetLocations );
+  weights.resize( numElementVertices*numTargetLocations );
+
+  Vector4d baryWeights;
+  int numExternalVertices = 0;
+
+  INFO_LOG("Wait until reach " << numTargetLocations);
+  for (int i=0; i < numTargetLocations; i++){
+
+    if (i%100 == 0) { printf("%d ", i); fflush(NULL);}
+    const Vector3d &pos = vertices.segment(i*3,3);
+    int element = getContainingElement(pos);
+    if (element < 0) {
+      element = getClosestElement(pos);
+      numExternalVertices++;
+    }
+	const tetrahedron t = getTet(element);
+	baryWeights = t.bary(pos);
+    if (zeroThreshold > 0) {
+      // check whether vertex is close enough to the mesh
+      double minDistance = DBL_MAX;
+      int assignedZero = 0;
+      for(int ii=0; ii< numElementVertices;ii++) {
+		const double dist = (node(element,ii)-pos).norm();
+		minDistance = minDistance>dist ? dist:minDistance;
+      }
+      if (minDistance > zeroThreshold) {
+		baryWeights.setZero();
+        assignedZero++;
+        continue;
+      }
+    }
+    for(int ii=0; ii<numElementVertices; ii++){
+      nodes[numElementVertices*i+ii] = _tets[element][ii];
+      weights[numElementVertices*i+ii] = baryWeights[ii];
+    }
+  }
+  return numExternalVertices;
+}
+
+void TetMesh::interpolate(const vector<int> &tetNodes,const VectorXd &weights,
+						  const VectorXd& u,VectorXd& uTarget){
+
+  const int numTargetLocations = uTarget.size()/3;
+  const int numElementVertices = 4;
+  Vector3d defo;
+  for (int i=0; i < numTargetLocations; i++) {
+	defo.setZero();
+	for (int j=0; j < numElementVertices; j++) {
+	  const int k = tetNodes[numElementVertices*i+j];
+	  defo += weights[numElementVertices*i+j]*u.segment(k*3,3);
+	}
+	uTarget.segment(i*3,3) = defo;
+  }
 }

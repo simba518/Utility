@@ -2,6 +2,7 @@
 #include <UnitTestAssert.h>
 #include <eigen3/Eigen/Dense>
 #include <TetMesh.h>
+#include <TetMeshEmbeding.h>
 using namespace Eigen;
 using namespace UTILITY;
 
@@ -53,15 +54,14 @@ BOOST_AUTO_TEST_SUITE(TetMeshTest)
 
 BOOST_AUTO_TEST_CASE(initializeTest){
 
-    // create a simple mesh with two tets with five nodes
+  // create a simple mesh with two tets with five nodes
   pTetMesh tet_mesh = TetMeshFactoryForTest::tet2();
   TEST_ASSERT (tet_mesh != NULL);
 
   // check nodes, tets
   ASSERT_EQ (tet_mesh->nodes().size(), 5);
   ASSERT_EQ (tet_mesh->tets().size(), 2);
-  // check face ids
-  {
+  { // check face ids
   	const FaceId &faceId = tet_mesh->faceId();
   	ASSERT_EQ (faceId.size(), 7);
   	FaceId::const_iterator iter;
@@ -103,17 +103,15 @@ BOOST_AUTO_TEST_CASE(initializeTest){
   	iter=faceId.find(HashedId(0,1,8,0));
   	TEST_ASSERT ( iter == faceId.end() );
   }
-
-  // check neighors of tets sharing the same faces
-  {
+  
+  { // check neighors of tets sharing the same faces
   	const VVec4i &faceNeighTet = tet_mesh->faceNeighTet();
   	ASSERT_EQ (faceNeighTet.size(),2);
   	ASSERT_EQ ( faceNeighTet[0], Vector4i(-1,-1,-1,1));
   	ASSERT_EQ ( faceNeighTet[1], Vector4i(-1,-1,-1,0));
   }
-
-  // check neighors of nodes share the same edges.
-  {
+  
+  { // check neighors of nodes share the same edges.
   	const VectorUseti &nodeNeighNode = tet_mesh->nodeNeighNode();
 
   	ASSERT_EQ( nodeNeighNode.size(), 5 );
@@ -138,6 +136,73 @@ BOOST_AUTO_TEST_CASE(initializeTest){
 
 BOOST_AUTO_TEST_CASE(IOTest){
   
+}
+
+BOOST_AUTO_TEST_CASE(testContainingEle){
+ 
+  pTetMesh tet_mesh = TetMeshFactoryForTest::tet2();
+  Vector3d pos;
+
+  pos << -1,0,0;
+  ASSERT_EQ (tet_mesh->getContainingElement(pos),-1);
+
+  pos << 0,0,0;
+  ASSERT_EQ (tet_mesh->getContainingElement(pos),0);
+
+  pos << 0,-1,0;
+  ASSERT_EQ (tet_mesh->getContainingElement(pos),1);
+
+  pos << 0.1,-0.1,0.1;
+  ASSERT_EQ (tet_mesh->getContainingElement(pos),1);
+
+  pos << 0,-6,0;
+  ASSERT_EQ (tet_mesh->getContainingElement(pos),-1);
+}
+
+BOOST_AUTO_TEST_CASE(testClosestEle){
+
+  pTetMesh tet_mesh = TetMeshFactoryForTest::tet2();
+  Vector3d pos;
+
+  pos << 10,0,0;
+  ASSERT_EQ (tet_mesh->getClosestElement(pos),0);
+
+  pos << -1,0,0;
+  ASSERT_EQ (tet_mesh->getClosestElement(pos),0);
+
+  pos << 0,0,0;
+  ASSERT_EQ (tet_mesh->getClosestElement(pos),0);
+
+  pos << 0,-1,0;
+  ASSERT_EQ (tet_mesh->getClosestElement(pos),1);
+
+  pos << 0.1,-0.1,0.1;
+  ASSERT_EQ (tet_mesh->getClosestElement(pos),0);
+
+  pos << 0,-6,0;
+  ASSERT_EQ (tet_mesh->getClosestElement(pos),1);
+}
+
+BOOST_AUTO_TEST_CASE(testInterp){
+ 
+  pTetMesh tet_mesh = TetMeshFactoryForTest::tet2();
+
+  VectorXd vertices;
+  vector<int> nodes;
+  VectorXd weights; 
+  tet_mesh->buildInterpWeights(vertices,nodes,weights);
+
+  vertices.resize(9);
+  vertices << 1,2,3,4,5,6,7,8,9;
+  tet_mesh->buildInterpWeights(vertices,nodes,weights);
+
+  const VectorXd u = VectorXd::Random(nodes.size()*3);
+  VectorXd uTarget = vertices;
+
+  cout << uTarget.transpose() << endl << endl;
+  tet_mesh->interpolate(nodes,weights,u,uTarget);
+  cout << uTarget.transpose() << endl;
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
