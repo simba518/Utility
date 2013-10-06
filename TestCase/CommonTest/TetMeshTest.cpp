@@ -193,15 +193,18 @@ BOOST_AUTO_TEST_CASE(testInterp){
   tet_mesh->buildInterpWeights(vertices,nodes,weights);
 
   vertices.resize(9);
-  vertices << 1,2,3,4,5,6,7,8,9;
+  vertices << 0,-1,0,  0.1,0.1,0.1, -1,-10,1;
   tet_mesh->buildInterpWeights(vertices,nodes,weights);
 
-  const VectorXd u = VectorXd::Random(nodes.size()*3);
-  VectorXd uTarget = vertices;
+  VectorXd u(5*3);
+  u << 1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0;
 
-  cout << uTarget.transpose() << endl << endl;
+  VectorXd uTarget;
   tet_mesh->interpolate(nodes,weights,u,uTarget);
-  cout << uTarget.transpose() << endl;
+  ASSERT_EQ(uTarget.size(),9);
+  VectorXd correct_uTarget(9);
+  correct_uTarget << 1,0,0, 1,0,0, 1,0,0;
+  ASSERT_EQ_SMALL_VEC_TOL(uTarget,correct_uTarget,uTarget.size(),1e-12);
 
 }
 

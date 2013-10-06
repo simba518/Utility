@@ -67,16 +67,6 @@ void TetMesh::reset(const VVec3d& nodes, const VVec4i& tets){
   _mtl.reset(this->tets().size());
 }
 
-bool TetMesh::read(const std::string& filename){
-
-  return false;
-}
-
-bool TetMesh::write(const std::string& filename)const{
-
-  return false;
-}
-
 int TetMesh::getContainingElement(const Vector3d &pos)const{
 
   // linear scan
@@ -154,15 +144,29 @@ int TetMesh::buildInterpWeights(const VectorXd &vertices,vector<int> &nodes,
 void TetMesh::interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 						  const VectorXd& u,VectorXd& uTarget){
 
-  const int numTargetLocations = uTarget.size()/3;
+  assert_eq(tetNodes.size(),weights.size());
+  assert_eq(tetNodes.size()%4,0);
+  const int numTargetLocations = tetNodes.size()/4;
   const int numElementVertices = 4;
+  uTarget.resize(numTargetLocations*3);
   Vector3d defo;
   for (int i=0; i < numTargetLocations; i++) {
 	defo.setZero();
 	for (int j=0; j < numElementVertices; j++) {
 	  const int k = tetNodes[numElementVertices*i+j];
+	  assert_in(k*3,0,u.size()-2);
 	  defo += weights[numElementVertices*i+j]*u.segment(k*3,3);
 	}
 	uTarget.segment(i*3,3) = defo;
   }
+}
+
+bool TetMesh::read(const std::string& filename){
+
+  return false;
+}
+
+bool TetMesh::write(const std::string& filename)const{
+
+  return false;
 }
