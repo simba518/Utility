@@ -85,7 +85,7 @@ namespace UTILITY{
 	  while (numVertices < numTargetLocations-1){
 		numVertices++;
 		if ( feof(fin) ){
-		  ERROR_LOG("interpolation file is too short.");
+		  ERROR_LOG("interpolation file("<<fname<<") is too short:"<<numVertices-1<<"<"<<numTargetLocations);
 		  return false;
 		}
 		fscanf(fin, "%d", &currentVertex);
