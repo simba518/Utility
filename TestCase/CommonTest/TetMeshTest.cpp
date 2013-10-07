@@ -135,7 +135,25 @@ BOOST_AUTO_TEST_CASE(initializeTest){
 }
 
 BOOST_AUTO_TEST_CASE(IOTest){
-  
+
+  const std::string fname = "./TestCase/TestData/fish.abq";
+  TetMesh tetMesh;
+  TEST_ASSERT(tetMesh.load(fname));
+  ASSERT_EQ(tetMesh.nodes().size(),885);
+  ASSERT_EQ(tetMesh.tets().size(),3477);
+
+  Vector3d v;
+  v << 0.183433000000000, -0.316178000000000, -0.303435000000000;
+  ASSERT_EQ_SMALL_VEC_TOL(tetMesh.nodes()[0],v,3,1e-12);
+
+  v << -0.075092799520637,  0.212514873566465,  -0.485906600082581;
+  ASSERT_EQ_SMALL_VEC_TOL(tetMesh.nodes()[884],v,3,1e-12);
+
+  Vector4i t;
+  t << 572-1, 270-1, 373-1, 39-1;
+  ASSERT_EQ_SMALL_VEC_TOL(tetMesh.tets()[0],t,4,1e-12);
+  t << 675-1, 479-1, 473-1, 689-1;
+  ASSERT_EQ_SMALL_VEC_TOL(tetMesh.tets()[3476],t,4,1e-12);
 }
 
 BOOST_AUTO_TEST_CASE(testContainingEle){

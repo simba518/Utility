@@ -2,6 +2,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/foreach.hpp>
 #include <TetMesh.h>
+#include <AuxTools.h>
 #include <Log.h>
 using namespace UTILITY;
 
@@ -163,7 +164,49 @@ void TetMesh::interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 
 bool TetMesh::load(const std::string& filename){
 
-  return false;
+  VVec3d nodes;
+  VVec4i tets;
+  string line;
+  bool succ = false;
+
+  // load nodes
+  INFILE(is,filename.c_str());
+  while(getline(is,line) && (succ=(line.find("NODE")==string::npos))){};
+  Vector3d v;
+  char tc;
+  while (is.good() && !is.eof()){
+	is >> line;
+	if (line.find("ELEMENT") != string::npos){
+	  succ = true;
+	  getline(is,line);
+	  break;
+	}
+	is >> v[0] >> tc >> v[1]>> tc >> v[2];
+	nodes.push_back(v);
+  }
+
+  // load tets
+  Vector4i t;
+  const Vector4i t1 = Vector4i::Ones(4);
+  succ = false;
+  while (is.good() && !is.eof()){
+	is >> line;
+	if (line.find("ELSET") != string::npos){
+	  succ = true;
+	  break;
+	}
+	is >> t[0]>> tc >> t[1]>> tc >> t[2]>> tc >> t[3];
+	t -= t1;
+	assert_in(t[0],0,nodes.size()-1);
+	assert_in(t[1],0,nodes.size()-1);
+	assert_in(t[2],0,nodes.size()-1);
+	assert_in(t[3],0,nodes.size()-1);
+	tets.push_back(t);
+  }
+
+  is.close();
+  reset(nodes,tets);
+  return succ;
 }
 
 bool TetMesh::write(const std::string& filename)const{

@@ -12,7 +12,6 @@ namespace UTILITY{
 #define TOSTR(input) boost::lexical_cast<std::string>(input)
 #define TOINT(input) boost::lexical_cast<int>(input)
 #define TOFLOAT(input) boost::lexical_cast<double>(input)
-
   ////////////////////loop,size/////////////////////////////
 #define SZ(X) ((int)(X).size())
 #define ALL(X) (X).begin(), (X).end()
