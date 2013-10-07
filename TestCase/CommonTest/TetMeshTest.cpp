@@ -3,6 +3,7 @@
 #include <eigen3/Eigen/Dense>
 #include <TetMesh.h>
 #include <TetMeshEmbeding.h>
+using namespace std;
 using namespace Eigen;
 using namespace UTILITY;
 
@@ -224,6 +225,27 @@ BOOST_AUTO_TEST_CASE(testInterp){
   correct_uTarget << 1,0,0, 1,0,0, 1,0,0;
   ASSERT_EQ_SMALL_VEC_TOL(uTarget,correct_uTarget,uTarget.size(),1e-12);
 
+}
+
+BOOST_AUTO_TEST_CASE(testInterpIO){
+
+  const string tetfname = "./TestCase/TestData/dino.abq";
+  const string objfname = "./TestCase/TestData/dino.obj";
+  const string weightsfname = "./TestCase/TestData/dinoW.txt";
+  TetMeshEmbeding volobj;
+
+  TEST_ASSERT(volobj.loadTetMesh(tetfname));
+  TEST_ASSERT(volobj.loadObjMesh(objfname));
+  TEST_ASSERT(volobj.loadWeights(weightsfname));
+
+  ASSERT_EQ(volobj.getInterpNodes().size(),28098*4);
+  ASSERT_EQ(volobj.getInterpWeights().size(),28098*4);
+
+  ASSERT_EQ(volobj.getInterpNodes()[0],986);
+  ASSERT_EQ_TOL(volobj.getInterpWeights()[0],0.068584,1e-6);
+
+  ASSERT_EQ(volobj.getInterpNodes()[28098*4-1],1343);
+  ASSERT_EQ_TOL(volobj.getInterpWeights()[28098*4-1],0.282485,1e-6);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

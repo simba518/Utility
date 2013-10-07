@@ -1,6 +1,7 @@
 #ifndef _TETMESHEMBEDING_H_
 #define _TETMESHEMBEDING_H_
 
+#include <stdio.h>
 #include <TetMesh.h>
 #include <Objmesh.h>
 #include <ObjFileIO.h>
@@ -65,7 +66,41 @@ namespace UTILITY{
 	}
 	
 	bool loadWeights(const string fname){
-	  return false;
+
+	  FILE *fin = fopen(fname.c_str(),"ra");
+	  if (!fin){
+		ERROR_LOG("unable to open file"<<fname);
+		return false;
+	  }
+	  
+	  const int numElementVertices = 4;
+	  const int numTargetLocations = _objMesh->getVertsNum();
+	  _nodes.resize(numElementVertices*numTargetLocations);
+	  _weights.resize(_nodes.size());
+
+	  int numVertices = -1;
+	  int currentVertex;
+
+	  // read the elements one by one and accumulate entries
+	  while (numVertices < numTargetLocations-1){
+		numVertices++;
+		if ( feof(fin) ){
+		  ERROR_LOG("interpolation file is too short.");
+		  return false;
+		}
+		fscanf(fin, "%d", &currentVertex);
+		if (currentVertex != numVertices){
+		  ERROR_LOG("consecutive vertex index at position: "<<currentVertex<<" mismatch.");
+		  return false;
+		}
+		for(int j=0; j<numElementVertices; j++)
+		  fscanf(fin,"%d %lf", &(_nodes[currentVertex * numElementVertices+j]),
+				 &(_weights[currentVertex*numElementVertices+j]));
+		fscanf(fin,"\n");
+	  }
+
+	  fclose(fin);
+	  return true;
 	}
 	bool writeWeights(const string fname)const{
 	  return false;
@@ -86,6 +121,13 @@ namespace UTILITY{
 	  r = (r>=(max[1]-min[1]) ? r:(max[1]-min[1]));
 	  r = (r>=(max[2]-min[2]) ? r:(max[2]-min[2]));
 	  return r >= 0 ? r : 0;
+	}
+
+	const vector<int> &getInterpNodes()const{
+	  return _nodes;
+	}
+	const VectorXd &getInterpWeights()const{
+	  return _weights;
 	}
 
   private:
