@@ -9,10 +9,10 @@ using namespace Eigen;
 
 class ObjRender:public SelfRenderEle{
 public:
-  ObjRender(const ObjMesh &obj):_obj(obj){}
+  ObjRender(const Objmesh &obj):_obj(obj){}
   void draw()const{UTILITY::draw(_obj);}
 private:
-  const ObjMesh _obj;
+  const Objmesh _obj;
 };
 
 int main(int argc, char** argv){
@@ -23,7 +23,7 @@ int main(int argc, char** argv){
   // const string fn="/home/simba/Workspace/AnimationEditor/Data/bunny/bunny.obj";
   // const string fn="/home/simba/Workspace/AnimationEditor/Data/beam/beam.obj";
   const string fn = "./TestCase/TestData/dino.obj";
-  ObjMesh obj;
+  Objmesh obj;
   load(fn,obj);
   viewer.addSelfRenderEle(pSelfRenderEle(new ObjRender(obj)));
 

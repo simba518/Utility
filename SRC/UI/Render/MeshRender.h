@@ -1,11 +1,11 @@
 #ifndef _MESHRENDER_H_
 #define _MESHRENDER_H_
 
-#include <ObjMesh.h>
+#include <Objmesh.h>
 
 namespace UTILITY{
 
-  void draw(const ObjMesh& obj);
+  void draw(const Objmesh& obj);
 }
 
 #endif /* _MESHRENDER_H_ */

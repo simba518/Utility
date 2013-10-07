@@ -649,7 +649,7 @@ namespace UTILITY {
 	return err.str();
   }
 
-  bool load(const string fname,ObjMesh &mesh){
+  bool load(const string fname,Objmesh &mesh){
 
 	TRACE_FUN();
 	vector<shape_t> shapes;

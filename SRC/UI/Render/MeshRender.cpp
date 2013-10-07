@@ -1,7 +1,7 @@
 #include <MeshRender.h>
 #include <GL/gl.h>
 
-void UTILITY::draw(const ObjMesh& obj){
+void UTILITY::draw(const Objmesh& obj){
 
   const ObjMtl &mtl = obj.getMtl();
   const Eigen::VectorXd &verts = obj.getVerts();

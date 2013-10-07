@@ -2,6 +2,7 @@
 #define _BBOX_H_
 
 #include <vector>
+#include <eigen3/Eigen/Dense>
 
 namespace UTILITY{
 
@@ -99,6 +100,9 @@ namespace UTILITY{
 	VECTOR3D _rightUpFront;//max conner
 	VECTOR3D _center;
   };
+
+  typedef BBox<double,Eigen::Vector3d> BBoxD;
+
 }
 
 #endif /* _BBOX_H_ */

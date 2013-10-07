@@ -31,12 +31,12 @@ namespace UTILITY{
 
   }ObjMtl;
 
-  class ObjMesh{
+  class Objmesh{
 	
   public:
-	ObjMesh(){}
+	Objmesh(){}
 	template<class VECTOR_D, class VECTOR_I>
-	ObjMesh(const VECTOR_D &vertices,const VECTOR_I &faces){
+	Objmesh(const VECTOR_D&vertices,const VECTOR_I&faces){
 	  assert_eq(vertices.size()%3,0);
 	  setVerts(vertices);
 	  setFaces(faces);
@@ -52,7 +52,7 @@ namespace UTILITY{
 	template<class VECTOR>
 	void setFaces(const VECTOR &f){setVec(f,_faces);}
 	template<class VECTOR>
-	void setVertNormals(const VECTOR &v){setVec(v,_vertNormal);}
+	void setVertNormals(const VECTOR&v){setVec(v,_vertNormal);}
 
 	// get
 	const ObjMtl &getMtl()const{
@@ -83,8 +83,8 @@ namespace UTILITY{
 	  return _faces.size()/3;
 	}
 
-	BBox<double,Eigen::Vector3d> getBBox()const{
-	  BBox<double,Eigen::Vector3d> box;
+	BBoxD getBBox()const{
+	  BBoxD box;
 	  if(_verts.size()>0){
 		assert_eq(_verts.size()%3,0);
 		box.reset(&(_verts[0]),_verts.size()/3);
@@ -118,8 +118,8 @@ namespace UTILITY{
 	ObjMtl _mtl;
   };
   
-  typedef boost::shared_ptr<ObjMesh> pObjMesh;
-  typedef boost::shared_ptr<const ObjMesh> pObjMesh_const;
+  typedef boost::shared_ptr<Objmesh> pObjmesh;
+  typedef boost::shared_ptr<const Objmesh> pObjmesh_const;
 
 }
 

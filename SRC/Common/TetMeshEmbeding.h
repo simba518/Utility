@@ -2,26 +2,43 @@
 #define _TETMESHEMBEDING_H_
 
 #include <TetMesh.h>
-#include <ObjMesh.h>
+#include <Objmesh.h>
+#include <ObjFileIO.h>
 
 namespace UTILITY{
 
   class TetMeshEmbeding{
 
   public:
-	TetMeshEmbeding(){}
-	TetMeshEmbeding(pTetMesh_const tetMesh,pObjMesh objMesh){
-	  setTetMesh(tetMesh);
-	  setObjMesh(objMesh);
+	TetMeshEmbeding(){
+	  _objMesh = pObjmesh(new Objmesh());
+	  _tetMesh = pTetMesh(new TetMesh());
 	}
-	void setTetMesh(pTetMesh_const tetMesh){
+	TetMeshEmbeding(pTetMesh tetMesh,pObjmesh objMesh){
+	  setTetMesh(tetMesh);
+	  setObjmesh(objMesh);
+	}
+	void setTetMesh(pTetMesh tetMesh){
 	  assert(_tetMesh);
 	  _tetMesh = tetMesh;
 	}
-	void setObjMesh(pObjMesh objMesh){
+	void setObjmesh(pObjmesh objMesh){
 	  assert(_objMesh);
 	  _objMesh = objMesh;
 	  _objRestVerts = _objMesh->getVerts();
+	}
+
+	pTetMesh getTetMesh(){
+	  return _tetMesh;
+	}
+	pObjmesh getObjMesh(){
+	  return _objMesh;
+	}
+	pTetMesh_const getTetMesh()const{
+	  return _tetMesh;
+	}
+	pObjmesh_const getObjMesh()const{
+	  return _objMesh;
 	}
 
 	void buildInterpWeights(){
@@ -38,9 +55,42 @@ namespace UTILITY{
 	  _objMesh->setVerts(_uTarget);
 	}
 
+	bool loadObjMesh(const string filename){
+	  assert(_objMesh);
+	  return load(filename,*_objMesh);
+	}
+	bool loadTetMesh(const string filename){
+	  assert(_tetMesh);
+	  return _tetMesh->load(filename);
+	}
+	
+	bool loadWeights(const string fname){
+	  return false;
+	}
+	bool writeWeights(const string fname)const{
+	  return false;
+	}
+
+	void getBBox(double min[3],double max[3])const{
+	  assert(_tetMesh);
+	  assert(_objMesh);
+	  BBoxD b1 = _tetMesh->getBBox();
+	  const BBoxD b2 = _objMesh->getBBox();
+	  b1.add(b2);
+	  b1.getMaxConner(max);
+	  b1.getMinConner(min);
+	}
+	double getMaxRadius()const{
+	  double min[3],max[3];
+	  double r = max[0] - min[0];
+	  r = (r>=(max[1]-min[1]) ? r:(max[1]-min[1]));
+	  r = (r>=(max[2]-min[2]) ? r:(max[2]-min[2]));
+	  return r >= 0 ? r : 0;
+	}
+
   private:
-	pTetMesh_const _tetMesh;
-	pObjMesh _objMesh;
+	pTetMesh _tetMesh;
+	pObjmesh _objMesh;
 	VectorXd _objRestVerts;
 
 	vector<int> _nodes;
@@ -50,6 +100,7 @@ namespace UTILITY{
   };
   
   typedef boost::shared_ptr<TetMeshEmbeding> pTetMeshEmbeding;
+  typedef boost::shared_ptr<const TetMeshEmbeding> pTetMeshEmbeding_const;
 
 }//end of namespace
 

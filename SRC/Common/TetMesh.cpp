@@ -161,7 +161,7 @@ void TetMesh::interpolate(const vector<int> &tetNodes,const VectorXd &weights,
   }
 }
 
-bool TetMesh::read(const std::string& filename){
+bool TetMesh::load(const std::string& filename){
 
   return false;
 }

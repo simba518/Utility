@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <HashedId.h>
 #include <assertext.h>
+#include <BBox.h>
 using namespace std;
 using namespace Eigen;
 
@@ -91,6 +92,12 @@ namespace UTILITY{
 	  reset(nodes,tets);
 	}
 	void reset(const VVec3d& nodes, const VVec4i& tets);
+	template<class VECTOR>
+	void applyDeformation(const VECTOR &u){
+	  assert_eq(u.size(),_nodes.size()*3);
+	  for (size_t i = 0; i < _nodes.size(); ++i)
+		_nodes[i] += u.segment(i*3,3);
+	}
 
 	// set 
 	void setSingleMaterial(const double&dens,const double&E,const double&v){
@@ -104,6 +111,15 @@ namespace UTILITY{
 
 	// get 
 	const VVec3d& nodes() const{return _nodes;}
+	template<class VECTOR>
+	void nodes(VECTOR &x) const{
+	  x.resize(_nodes.size()*3);
+	  for (size_t i = 0; i < _nodes.size(); ++i){
+		x[i*3+0] = _nodes[i][0];
+		x[i*3+1] = _nodes[i][1];
+		x[i*3+2] = _nodes[i][2];
+	  }
+	}
 	const VVec4i& tets() const{return _tets;}
 	const FaceId& faceId() const{return _faceId;}
 	const ElasticMaterial<double>& material() const{return _mtl;}
@@ -138,8 +154,19 @@ namespace UTILITY{
 	static void interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 							const VectorXd& u,VectorXd& uTarget);
 
+	BBoxD getBBox()const{
+	  BBoxD box;
+	  VectorXd x;
+	  nodes(x);
+	  if(x.size()>0){
+		assert_eq(x.size()%3,0);
+		box.reset(&(x[0]),x.size()/3);
+	  }
+	  return box;
+	}
+
 	// io
-	bool read(const std::string& filename);
+	bool load(const std::string& filename);
 	bool write(const std::string& filename)const;
 
   private:

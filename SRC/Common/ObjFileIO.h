@@ -10,23 +10,21 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <ObjMesh.h>
+#include <Objmesh.h>
 #include <Log.h>
 
 namespace UTILITY {
 
   typedef ObjMtl material_t;
 
-  typedef struct
-  {
+  typedef struct {
     std::vector<float>          positions;
     std::vector<float>          normals;
     std::vector<float>          texcoords;
     std::vector<unsigned int>   indices;
   } mesh_t;
 
-  typedef struct
-  {
+  typedef struct {
     std::string  name;
     material_t   material;
     mesh_t       mesh;
@@ -42,9 +40,9 @@ namespace UTILITY {
 					   const char* mtl_basepath = NULL);
 
   // mesh io
-  bool load(const string fname,ObjMesh &mesh);
+  bool load(const string fname,Objmesh &mesh);
 
-  inline bool write(const string fname,const ObjMesh &mesh){
+  inline bool write(const string fname,const Objmesh &mesh){
 	ERROR_LOG("undefined function.");
 	return false;
   }
