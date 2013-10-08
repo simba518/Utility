@@ -154,8 +154,8 @@ void TetMesh::interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 
   assert_eq(tetNodes.size(),weights.size());
   assert_eq(tetNodes.size()%4,0);
-  const int numTargetLocations = tetNodes.size()/4;
   const int numElementVertices = 4;
+  const int numTargetLocations = tetNodes.size()/numElementVertices;
   uTarget.resize(numTargetLocations*3);
   Vector3d defo;
   for (int i=0; i < numTargetLocations; i++) {

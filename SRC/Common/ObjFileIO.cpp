@@ -226,7 +226,6 @@ namespace UTILITY {
 		indices.push_back(v1);
 		indices.push_back(v2);
 	  }
-
 	}
 
 	//

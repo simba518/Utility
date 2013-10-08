@@ -22,7 +22,7 @@ int main(int argc, char** argv){
 
   // const string fn="/home/simba/Workspace/AnimationEditor/Data/bunny/bunny.obj";
   // const string fn="/home/simba/Workspace/AnimationEditor/Data/beam/beam.obj";
-  const string fn = "./TestCase/TestData/dino.obj";
+  const string fn = "./TestCase/TestData/beam.obj";
   Objmesh obj;
   load(fn,obj);
   viewer.addSelfRenderEle(pSelfRenderEle(new ObjRender(obj)));

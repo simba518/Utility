@@ -42,15 +42,17 @@ void TetMeshEmbeding::buildInterpWeights(){
 void TetMeshEmbeding::interpolate(const VectorXd& u){
   assert(_tetMesh);
   assert(_objMesh);
-  _uTarget.resize(_objRestVerts.size());
   _tetMesh->interpolate(_nodes,_weights,u,_uTarget);
+  assert_eq(_objRestVerts.size(),_uTarget.size());
   _uTarget += _objRestVerts;
   _objMesh->setVerts(_uTarget);
 }
 
 bool TetMeshEmbeding::loadObjMesh(const string filename){
   assert(_objMesh);
-  return load(filename,*_objMesh);
+  const bool succ = load(filename,*_objMesh);
+  _objRestVerts = _objMesh->getVerts();
+  return succ;
 }
 bool TetMeshEmbeding::loadTetMesh(const string filename){
   assert(_tetMesh);
@@ -94,7 +96,22 @@ bool TetMeshEmbeding::loadWeights(const string fname){
   return succ;
 }
 bool TetMeshEmbeding::writeWeights(const string fname)const{
-  return false;
+
+  OUTFILE(outf,fname);
+  bool succ = outf.is_open();
+  assert_eq(_nodes.size(),_weights.size());
+  assert_eq(_nodes.size()%4,0);
+  for (int i = 0; i < _nodes.size()/4 && succ; ++i){
+	outf << i << " ";
+	for (int j = 0; j < 4; ++j){
+	  const int c = i*4+j;
+	  outf << _nodes[c] << " " << _weights[c] <<" ";
+	}
+	outf << endl;
+	succ = outf.good();
+  }
+  outf.close();
+  return succ;
 }
 
 void TetMeshEmbeding::getBBox(double min[3],double max[3])const{
@@ -107,7 +124,9 @@ void TetMeshEmbeding::getBBox(double min[3],double max[3])const{
   b1.getMinConner(min);
 }
 double TetMeshEmbeding::getMaxRadius()const{
+
   double min[3],max[3];
+  getBBox(min,max);
   double r = max[0] - min[0];
   r = (r>=(max[1]-min[1]) ? r:(max[1]-min[1]));
   r = (r>=(max[2]-min[2]) ? r:(max[2]-min[2]));
