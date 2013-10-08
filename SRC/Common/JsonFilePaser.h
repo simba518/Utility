@@ -23,40 +23,15 @@ namespace UTILITY{
   class JsonFilePaser{
 	
   public:
-	JsonFilePaser(bool print = false){
-	  _printData = print;
-	}
+	JsonFilePaser(bool print = false);
 
-	~JsonFilePaser(){
-	  close();
-	}
+	~JsonFilePaser();
 
-	bool open(const std::string filename){
+	bool open(const std::string filename);
+	void close();
 
-	  bool succ = false;
-	  close();
-	  _initFilename = filename;
-	  _file.open(filename.c_str());
-	  ERROR_LOG_COND("failed to open init file: "<<filename,_file.is_open());
-	  if(_file.is_open()){
-		try{
-		  json_parser::read_json(_file,_jsonData);
-		  succ = read("init_file_dir",_initFileDir);
-		  _initFileDir = replaceHomeDir(_initFileDir);
-		}catch(std::exception& ex){
-		  ERROR_LOG("file: "<< filename << ex.what());
-		}
-	  }
-	  return succ;
-	}
-	void close(){ if(_file.is_open()) _file.close();}
-
-	std::string getFileDir()const{
-	  return _initFileDir;
-	}
-	std::string getFileName()const{
-	  return _initFilename;
-	}
+	std::string getFileDir()const;
+	std::string getFileName()const;
 
 	template<class T>
 	bool read(const std::string eleName, T &value, const bool checkValidation = true){
@@ -91,51 +66,13 @@ namespace UTILITY{
 	  }
 	  return succ;
 	}
-	bool readFilePath(const std::string eleName, std::string &filePath,const bool checkFileExist = true){
-	  bool succ = false;
-	  if( read(eleName,filePath) ){
-		filePath = getFileDir()+filePath;
-		succ = fileIsExist(eleName,filePath,checkFileExist);
-	  }
-	  return succ;
-	}
-	bool readFilePath(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist = true){
-	  bool succ = false;
-	  if(read(eleName,filePathes)){
-		for (size_t i = 0; i < filePathes.size(); ++i){
-		  filePathes[i] = getFileDir()+filePathes[i];
-		  succ &= fileIsExist(eleName,filePathes[i],checkFileExist);
-		}
-	  }
-	  return succ;
-	}
-	std::string replaceHomeDir(const std::string &path,const bool checkPathExist = true){
-	  /// replace the first "~" as the home directory
-	  std::string newPath = path;
-	  if(path.size() > 0 && path[0] == '~')
-		newPath = getenv("HOME") + newPath.erase(0,1);
-	  dirIsExist("",newPath,checkPathExist);
-	  return newPath;
-	}
+	bool readFilePath(const std::string eleName, std::string &filePath,const bool checkFileExist = true);
+	bool readFilePath(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist = true);
+	std::string replaceHomeDir(const std::string &path,const bool checkPathExist = true);
 	
   protected:
-	bool fileIsExist(const std::string eleName,const std::string filePath,bool check=true)const{
-	  bool exist = true;
-	  if(check){
-		exist = (boost::filesystem::exists(filePath) && 
-				 !(boost::filesystem::is_directory(filePath)));
-		WARN_LOG_COND("file '"<< filePath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
-	  }
-	  return exist;
-	}
-	bool dirIsExist(const std::string eleName,const std::string dirPath,bool check)const{
-	  bool exist = true;
-	  if(check){
-		exist = boost::filesystem::is_directory(dirPath);
-		WARN_LOG_COND("dir '"<< dirPath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
-	  }
-	  return exist;
-	}
+	bool fileIsExist(const std::string eleName,const std::string filePath,bool check=true)const;
+	bool dirIsExist(const std::string eleName,const std::string dirPath,bool check)const;
 
 	template<class T>
 	void actualRead(const std::string eleName, T &value){

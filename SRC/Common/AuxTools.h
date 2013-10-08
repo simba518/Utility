@@ -23,12 +23,12 @@ namespace UTILITY{
   ////////////////////io///////////////////////////////////
 #define OUTFILE(file,name)												\
 	std::ofstream file;													\
-	file.open(name);													\
+	file.open(std::string(name).c_str());								\
 	ERROR_LOG_COND("failed to open file for output: "<<name,file.is_open()); 
 
 #define INFILE(file,name)												\
 	std::ifstream file;													\
-	file.open(name);													\
+	file.open(std::string(name).c_str());								\
 	ERROR_LOG_COND("failed to open file for readin: "<<name,file.is_open()); 
 
   template <class SCALAR>

@@ -24,7 +24,6 @@ namespace UTILITY{
 	std::vector<T> _rho; // Density
 	std::vector<T> _E; // Young's modulus
 	std::vector<T> _v; // Poisson's ratio
-  
   };
 
   template <typename T>
@@ -100,11 +99,7 @@ namespace UTILITY{
 	}
 
 	// set 
-	void setSingleMaterial(const double&dens,const double&E,const double&v){
-	  _mtl._rho.assign(_tets.size(),dens);
-	  _mtl._E.assign(_tets.size(),E);
-	  _mtl._v.assign(_tets.size(),v);
-	}
+	void setSingleMaterial(const double&dens,const double&E,const double&v);
 	void setRestPos(const VVec3d& pos){
 	  _nodes = pos;
 	}
@@ -150,20 +145,11 @@ namespace UTILITY{
 	int getClosestElement(const Vector3d &pos)const;
 
 	int buildInterpWeights(const VectorXd &vertices,vector<int> &nodes,
-						   VectorXd &weights,const double zeroThreshold=0.0f)const;
+						   VectorXd&weights,const double zeroThreshold=0.0f)const;
 	static void interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 							const VectorXd& u,VectorXd& uTarget);
 
-	BBoxD getBBox()const{
-	  BBoxD box;
-	  VectorXd x;
-	  nodes(x);
-	  if(x.size()>0){
-		assert_eq(x.size()%3,0);
-		box.reset(&(x[0]),x.size()/3);
-	  }
-	  return box;
-	}
+	BBoxD getBBox()const;
 
 	// io
 	bool load(const std::string& filename);

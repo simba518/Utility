@@ -68,6 +68,13 @@ void TetMesh::reset(const VVec3d& nodes, const VVec4i& tets){
   _mtl.reset(this->tets().size());
 }
 
+void TetMesh::setSingleMaterial(const double&dens,const double&E,const double&v){
+
+  _mtl._rho.assign(_tets.size(),dens);
+  _mtl._E.assign(_tets.size(),E);
+  _mtl._v.assign(_tets.size(),v);
+}
+
 int TetMesh::getContainingElement(const Vector3d &pos)const{
 
   // linear scan
@@ -212,4 +219,16 @@ bool TetMesh::load(const std::string& filename){
 bool TetMesh::write(const std::string& filename)const{
 
   return false;
+}
+
+BBoxD TetMesh::getBBox()const{
+
+  BBoxD box;
+  VectorXd x;
+  nodes(x);
+  if(x.size()>0){
+	assert_eq(x.size()%3,0);
+	box.reset(&(x[0]),x.size()/3);
+  }
+  return box;
 }
