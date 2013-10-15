@@ -11,9 +11,14 @@ using namespace std;
 
 namespace UTILITY{
 
-  typedef struct{
-	
-	std::string name;
+  typedef struct _ObjMtl{
+
+	_ObjMtl(){
+	  setDefault();
+	}
+	void setDefault();
+
+	string name;
 
     float ambient[3];
     float diffuse[3];
@@ -27,8 +32,7 @@ namespace UTILITY{
     string diffuse_texname;
     string specular_texname;
     string normal_texname;
-    map<string, string> unknown_parameter;
-
+	
   }ObjMtl;
 
   class Objmesh{
@@ -99,6 +103,16 @@ namespace UTILITY{
 	  return center;
 	}
 
+	// IO
+	// load triangle obj file
+	// 1. support only triangle mesh.
+	// 2. load only vertex normal.
+	// 3. load only one mtl.
+	// 4. no textures.
+	bool load(const string fname);
+	bool loadMtl(const string fname);
+	bool write(const string fname)const;
+
   protected:
 	template<class T> 
 	Eigen::Matrix<T,3,1> getSubV3(const Eigen::Matrix<T,-1,1> &V,int i)const{
@@ -110,6 +124,8 @@ namespace UTILITY{
 	  V.resize(inputV.size());
 	  for (int i = 0; i < V.size(); ++i) V[i] = inputV[i];
 	}
+	int type(const string &line)const;
+	bool getFaceVert(string &line,int &v1,int &v2,int &v3,int &vn1,int &vn2,int &vn3)const;
 	
   private:
 	Eigen::VectorXd _verts;

@@ -2,17 +2,16 @@
 #include <UnitTestAssert.h>
 #include <eigen3/Eigen/Dense>
 #include <Objmesh.h>
-#include <ObjFileIO.h>
 using namespace Eigen;
 using namespace UTILITY;
 
 BOOST_AUTO_TEST_SUITE(ObjmeshTest)
 
-BOOST_AUTO_TEST_CASE(testLoadObjFile){
+BOOST_AUTO_TEST_CASE(testObjLoader){
 
   const string fname = "./TestCase/TestData/dino.obj";
   Objmesh mesh;
-  TEST_ASSERT( load(fname,mesh) );
+  TEST_ASSERT( mesh.load(fname) );
   ASSERT_EQ (mesh.getVertsNum(),28098);
   ASSERT_EQ (mesh.getFacesNum(),56192);
 

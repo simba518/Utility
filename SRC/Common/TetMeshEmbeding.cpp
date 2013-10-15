@@ -1,5 +1,4 @@
 #include "AuxTools.h"
-#include "ObjFileIO.h"
 #include "TetMeshEmbeding.h"
 using namespace UTILITY;
 
@@ -50,7 +49,7 @@ void TetMeshEmbeding::interpolate(const VectorXd& u){
 
 bool TetMeshEmbeding::loadObjMesh(const string filename){
   assert(_objMesh);
-  const bool succ = load(filename,*_objMesh);
+  const bool succ = _objMesh->load(filename);
   _objRestVerts = _objMesh->getVerts();
   return succ;
 }
