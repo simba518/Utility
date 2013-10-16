@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(vectorIO)
   const std::string fname = "./TestCase/TestData/temptV.b";
   TEST_ASSERT(writeVec(fname,v1));
   TEST_ASSERT(loadVec(fname,v2));
-  ASSERT_EQ_SMALL_VEC(v1,v2,v1.size());
+  ASSERT_EQ_SMALL_VEC(v1,v2,(int)v1.size());
 }
 
 BOOST_AUTO_TEST_CASE(matrixIO)

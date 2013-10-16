@@ -132,12 +132,12 @@ namespace UTILITY{
 	}
 	const Vector3d &node(const int ele, const int i)const{
 	  assert_in(i,0,3);
-	  assert_in(ele,0,_tets.size()-1);
-	  assert_in(_tets[ele][i],0,_nodes.size()-1);
+	  assert_in(ele,0,(int)_tets.size()-1);
+	  assert_in(_tets[ele][i],0,(int)_nodes.size()-1);
 	  return _nodes[_tets[ele][i]];
 	}
 	const tetrahedron getTet(const int ele)const{
-	  assert_in(ele,0,_tets.size()-1);
+	  assert_in(ele,0,(int)_tets.size()-1);
 	  return tetrahedron(nodes()[_tets[ele][0]],nodes()[_tets[ele][1]],
 						 nodes()[_tets[ele][2]],nodes()[_tets[ele][3]]);
 	}

@@ -105,7 +105,7 @@ namespace UTILITY{
 
 	// IO
 	// load triangle obj file
-	// 1. support only triangle mesh.
+	// 1. load mesh as triangle mesh.
 	// 2. load only vertex normal.
 	// 3. load only one mtl.
 	// 4. no textures.
@@ -125,7 +125,6 @@ namespace UTILITY{
 	  for (int i = 0; i < V.size(); ++i) V[i] = inputV[i];
 	}
 	int type(const string &line)const;
-	bool getFaceVert(string &line,int &v1,int &v2,int &v3,int &vn1,int &vn2,int &vn3)const;
 	
   private:
 	Eigen::VectorXd _verts;

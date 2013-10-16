@@ -20,7 +20,7 @@ using namespace UTILITY;
   iter=_faceId.find(HashedId(tet[a],tet[b],tet[c],0));					\
   if(iter->second.second == -1)											\
 	fn[m]=-1;															\
-  else fn[m]=iter->second.first == i ? iter->second.second : iter->second.first;
+  else fn[m]=iter->second.first == (int)i ? iter->second.second : iter->second.first;
 
 void TetMesh::reset(const VVec3d& nodes, const VVec4i& tets){
 
@@ -152,7 +152,7 @@ int TetMesh::buildInterpWeights(const VectorXd &vertices,vector<int> &nodes,
 void TetMesh::interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 						  const VectorXd& u,VectorXd& uTarget){
 
-  assert_eq(tetNodes.size(),weights.size());
+  assert_eq((int)tetNodes.size(),weights.size());
   assert_eq(tetNodes.size()%4,0);
   const int numElementVertices = 4;
   const int numTargetLocations = tetNodes.size()/numElementVertices;
@@ -204,10 +204,10 @@ bool TetMesh::load(const std::string& filename){
 	}
 	is >> t[0]>> tc >> t[1]>> tc >> t[2]>> tc >> t[3];
 	t -= t1;
-	assert_in(t[0],0,nodes.size()-1);
-	assert_in(t[1],0,nodes.size()-1);
-	assert_in(t[2],0,nodes.size()-1);
-	assert_in(t[3],0,nodes.size()-1);
+	assert_in(t[0],0,(int)nodes.size()-1);
+	assert_in(t[1],0,(int)nodes.size()-1);
+	assert_in(t[2],0,(int)nodes.size()-1);
+	assert_in(t[3],0,(int)nodes.size()-1);
 	tets.push_back(t);
   }
 

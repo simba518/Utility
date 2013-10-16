@@ -98,9 +98,9 @@ bool TetMeshEmbeding::writeWeights(const string fname)const{
 
   OUTFILE(outf,fname);
   bool succ = outf.is_open();
-  assert_eq(_nodes.size(),_weights.size());
+  assert_eq((int)_nodes.size(),_weights.size());
   assert_eq(_nodes.size()%4,0);
-  for (int i = 0; i < _nodes.size()/4 && succ; ++i){
+  for (size_t i = 0; i < _nodes.size()/4 && succ; ++i){
 	outf << i << " ";
 	for (int j = 0; j < 4; ++j){
 	  const int c = i*4+j;

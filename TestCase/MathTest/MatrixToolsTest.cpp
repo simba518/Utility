@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(convertTest){
   MatrixXd U(2,3);
   std::vector<VectorXd> u;
   convert(U,u);
-  ASSERT_EQ(u.size(),U.cols());
+  ASSERT_EQ((int)u.size(),U.cols());
   ASSERT_EQ(u[0].size(),U.rows());
   ASSERT_EQ(u[1].size(),U.rows());
   ASSERT_EQ(u[2].size(),U.rows());

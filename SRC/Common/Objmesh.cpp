@@ -8,11 +8,11 @@ void ObjMtl::setDefault(){
 
   name = "defualt";
 
-  ambient[0] = 0.0f;       ambient[0] = 0.1f;       ambient[0] = 0.0f;
-  diffuse[0] = 0.0f;       diffuse[0] = 0.6f;       diffuse[0] = 0.0f;
-  specular[0] = 0.35f;      specular[0] = 0.35f;      specular[0] = 0.35f;
-  transmittance[0] = 1.0f; transmittance[0] = 1.0f; transmittance[0] = 1.0f;
-  emission[0] = 0.0f;      emission[0] = 0.0f;      emission[0] = 0.0f;
+  ambient[0] = 0.0f;       ambient[1] = 0.1f;       ambient[2] = 0.0f;
+  diffuse[0] = 0.0f;       diffuse[1] = 0.6f;       diffuse[2] = 0.0f;
+  specular[0] = 0.35f;      specular[1] = 0.35f;      specular[2] = 0.35f;
+  transmittance[0] = 1.0f; transmittance[1] = 1.0f; transmittance[2] = 1.0f;
+  emission[0] = 0.0f;      emission[1] = 0.0f;      emission[2] = 0.0f;
 
   shininess = 200;
   ior = 1;
@@ -39,43 +39,37 @@ int Objmesh::type(const string &line)const{
   return t;
 }
 
-bool Objmesh::getFaceVert(string &line,int &v1,int &v2,int &v3,int &vn1,int &vn2,int &vn3)const{
+// return value
+// 1: 1 2 3
+// 2: 1//1 2//2 3//3
+// 3: 1/1/1 2/1/2 3/3/3
+int getFaceNormal(string &line,vector<int>&faceNormal){
 
-  vn1=-1, vn2=-1, vn3=-1;
-  int numSlash = 0;
-  for (int i = 0; i < line.size(); ++i){
+  int faceType = 1;
+  faceNormal.clear();
+  for (size_t i = 0; i < line.size(); ++i){
     if('/' == line[i]){
+	  faceType = 3;
 	  line[i] = ' ';
-	  numSlash ++;
-	  if('/' == line[i+1])
+	  if('/' == line[i+1]){
+		faceType = 2;
 		line[i+1] = ' ';
+	  }
 	}
   }
   istringstream ss(line);
   string temp;
   ss >> temp;
-  if (numSlash == 0){
-	ss >> v1 >> v2 >> v3;
-  }else if (numSlash == 3){
-	ss >> v1>> vn1 >> v2>> vn2 >> v3 >> vn3;
-  }else if (numSlash == 6){
-	ss >> v1 >> temp >> vn1 >> v2 >> temp >> vn2  >> v3 >> temp >> vn3;
-  }else{
-	ERROR_LOG("the format of the face is not supported, only triangle mesh supported.");
-	return false;
+  int i;
+  while(!ss.eof()&&ss.good()){
+	ss >> i;
+	faceNormal.push_back(i-1);
   }
-  v1 -= 1;
-  v2 -= 1;
-  v3 -= 1;
-  vn1 -= 1;
-  vn2 -= 1;
-  vn3 -= 1;
-
-  return true;
+  return faceType;
 }
 
 // load triangle obj file
-// 1. support only triangle mesh.
+// 1. load all meshes as triangle mesh.
 // 2. load only one mtl.
 // 3. no textures.
 bool Objmesh::load(const string fname){
@@ -100,75 +94,90 @@ bool Objmesh::load(const string fname){
 	  mtlfile = dir + line.substr(7,line.size()-7);
 	}
   }
-  
-  _verts.resize(numType[0]*3);  
-  _verts.setZero();
-  _vertNormal.resize(numType[1]*3);
-  _vertNormal.setZero();
-  _faces.resize(numType[3]*3);
-  _faces.setZero();
+
+  vector<double> verts(numType[0]*3,0);
+  vector<double> vertNormal(numType[1]*3,0);
+  vector<int> faces, normalIndex;
+  faces.reserve(numType[3]*3);
+  normalIndex.reserve(numType[3]*3);
 
   // load real data
   inf.clear();
   inf.seekg(0,ios::beg);
-  int v=0,vn=0,f=0;
-  vector<int> normalIndex;
-  normalIndex.reserve(numType[3]*3);
+  int v=0,vn=0;
   bool succ = true;
   while(!inf.eof()&&getline(inf,line) && succ){
+
 	const int t = type(line);
 	if(t >= 0){
 	  istringstream ss(line);
-	  string temp;
-	  ss >> temp;
+	  string temp; ss >> temp;
 	  switch (t){
 	  case 0:{
-		ss >> _verts[v] >> _verts[v+1] >> _verts[v+2];
+		ss >> verts[v] >> verts[v+1] >> verts[v+2];
 		v += 3;
 		break;
 	  };
 	  case 1:{
-		ss >> _vertNormal[vn] >> _vertNormal[vn+1] >> _vertNormal[vn+2];
+		ss >> vertNormal[vn] >> vertNormal[vn+1] >> vertNormal[vn+2];
 		vn += 3;
 		break;
 	  };
 	  case 3:{
-		int vn1,vn2,vn3;
-		succ = getFaceVert(line,_faces[f],_faces[f+1],_faces[f+2],vn1,vn2,vn3);
-		f += 3;
-		if(succ && vn1 >= 0){
-		  normalIndex.push_back(vn1);
-		  normalIndex.push_back(vn2);
-		  normalIndex.push_back(vn3);
+		static vector<int> faceNormal;
+		const int ft = getFaceNormal(line,faceNormal);
+		assert_gt(ft,0);
+		for (size_t i = 1; i < faceNormal.size()/ft-1; i++){
+		  assert_in(i*ft+ft,0,faceNormal.size());
+		  const int p = i*ft;
+		  const int q = p+ft;
+		  faces.push_back(faceNormal[0]);
+		  faces.push_back(faceNormal[p]);
+		  faces.push_back(faceNormal[q]);
+		  if (ft >= 2){
+			assert_in(q+ft-1,0,faceNormal.size());
+			normalIndex.push_back(faceNormal[ft-1]);
+			normalIndex.push_back(faceNormal[p+ft-1]);
+			normalIndex.push_back(faceNormal[q+ft-1]);
+		  }
 		}
 		break;
 	  };
 	  }
 	}
   }
+  inf.close();
 
   // average the normals.
-  if(normalIndex.size() == _faces.size()){
+  if((int)normalIndex.size() == faces.size()){
 
-	vector<float> counter(_verts.size()/3,0);
-	const Eigen::VectorXd normal = _vertNormal;
-	_vertNormal.resize(_verts.size());
-	_vertNormal.setZero();
-	for (int i = 0; i < normalIndex.size(); ++i){
-	  const int vn = normalIndex[i];
-	  const int vi = _faces[i];
-	  assert_in(vn*3,0,normal.size()-3);
-	  assert_in(vi*3,0,_verts.size()-3);
-	  _vertNormal.segment(vi*3,3) += normal.segment(vn*3,3);
-	  counter[vi] ++;
+  	vector<double> counter(verts.size()/3,0);
+  	const vector<double> normal = vertNormal;
+  	vertNormal.resize(verts.size());
+	for (size_t i = 0; i < vertNormal.size(); ++i){
+	  vertNormal[i] = 0.0f;
 	}
-	for (int i = 0; i < counter.size(); ++i){
-	  assert_gt(counter[i],0.0f);
-	  _vertNormal.segment(i*3,3) /= counter[i];
-	}
+  	for (size_t i = 0; i < normalIndex.size(); ++i){
+  	  const int vn = normalIndex[i];
+  	  const int vi = faces[i];
+  	  assert_in(vn*3,0,normal.size()-3);
+  	  assert_in(vi*3,0,verts.size()-3);
+	  vertNormal[vi*3  ] += normal[vn*3];
+	  vertNormal[vi*3+1] += normal[vn*3+1];
+	  vertNormal[vi*3+2] += normal[vn*3+2];
+  	  counter[vi] ++;
+  	}
+  	for (size_t i = 0; i < counter.size(); ++i){
+	  if(counter[i] > 0){
+		vertNormal[i*3  ] /= counter[i];
+		vertNormal[i*3+1] /= counter[i];
+		vertNormal[i*3+2] /= counter[i];
+	  }
+  	}
   }
-
-  inf.close();
+  setVerts(verts);
+  setVertNormals(vertNormal);
+  setFaces(faces);
 
   // load mtl
   if(mtlfile.size() > 0){

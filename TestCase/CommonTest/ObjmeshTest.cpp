@@ -7,7 +7,7 @@ using namespace UTILITY;
 
 BOOST_AUTO_TEST_SUITE(ObjmeshTest)
 
-BOOST_AUTO_TEST_CASE(testObjLoad){
+BOOST_AUTO_TEST_CASE(testObjLoadDino){
 
   const string fname = "./TestCase/TestData/dino.obj";
   Objmesh mesh;
@@ -47,7 +47,55 @@ BOOST_AUTO_TEST_CASE(testObjLoad){
   ASSERT_EQ_TOL(mesh.getMtl().ior,Ni,1e-6);
 }
 
-BOOST_AUTO_TEST_CASE(testObjWrite){
+BOOST_AUTO_TEST_CASE(testObjLoadBeam){
+
+  const string fname = "./TestCase/TestData/beam.obj";
+  Objmesh mesh;
+  TEST_ASSERT( mesh.load(fname) );
+  ASSERT_EQ (mesh.getVertsNum(),1280);
+  ASSERT_EQ (mesh.getFacesNum(),822*2);
+
+  Vector3d v0,vT;
+  v0 << -12.48 ,-0.96 ,-2.24;
+  vT << 12.48 ,0.96 ,2.24;
+  ASSERT_EQ_SMALL_VEC_TOL (mesh.getVerts(0),v0,3,1e-2);
+  ASSERT_EQ_SMALL_VEC_TOL (mesh.getVerts(mesh.getVertsNum()-1),vT,3,1e-2);
+
+  // Vector3d vn0,vnT;
+  // vn0 << -1 ,0 ,0;
+  // vnT << 1, 0, 0;
+  // ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(0),vn0,3,1e-1);
+  // ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(mesh.getVertsNum()-1),vnT,3,1e-1); 
+
+  Vector3i f0,f1,fT1,fT;
+
+  f0 << 0,1,9;
+  f1 << 0,9,8;
+  fT1 << 1271-1,1279-1,1280-1;
+  fT << 1271-1,1280-1,1272-1;
+  ASSERT_EQ_SMALL_VEC (mesh.getFaces(0),f0,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getFaces(1),f1,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getFaces(mesh.getFacesNum()-2),fT1,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getFaces(mesh.getFacesNum()-1),fT,3);
+
+  Vector3d Kd,Ka,Tf,Ks;
+  Kd << 0.00,0.60,0.00;
+  Ka << 0.00,0.10,0.00;
+  Ks << 0.35,0.35,0.35;
+  const double Ni = 1.00;
+  const double Ns = 200;
+  
+  ASSERT_EQ_SMALL_VEC_TOL(mesh.getMtl().diffuse,Kd,3,1e-6);
+  ASSERT_EQ_SMALL_VEC_TOL(mesh.getMtl().ambient,Ka,3,1e-6);
+  ASSERT_EQ_SMALL_VEC_TOL(mesh.getMtl().specular,Ks,3,1e-6);
+  ASSERT_EQ_TOL(mesh.getMtl().shininess,Ns,1e-6);
+  ASSERT_EQ_TOL(mesh.getMtl().ior,Ni,1e-6);
+
+  const string outfname = "./TestCase/TestData/temptBeam.obj";
+  TEST_ASSERT( mesh.write(outfname) );
+}
+
+BOOST_AUTO_TEST_CASE(testObjWriteDino){
 
   const string fname = "./TestCase/TestData/dino.obj";
   Objmesh mesh;
@@ -55,7 +103,7 @@ BOOST_AUTO_TEST_CASE(testObjWrite){
   ASSERT_EQ (mesh.getVertsNum(),28098);
   ASSERT_EQ (mesh.getFacesNum(),56192);
 
-  const string outfname = "./TestCase/TestData/tempt.obj";
+  const string outfname = "./TestCase/TestData/temptDino.obj";
   TEST_ASSERT( mesh.write(outfname) );
   TEST_ASSERT( mesh.load(outfname) );
   ASSERT_EQ (mesh.getVertsNum(),28098);

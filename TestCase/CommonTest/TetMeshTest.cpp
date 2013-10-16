@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(testInterp){
 
 }
 
-BOOST_AUTO_TEST_CASE(testInterpIO){
+BOOST_AUTO_TEST_CASE(testInterpIODino){
 
   const string tetfname = "./TestCase/TestData/dino.abq";
   const string objfname = "./TestCase/TestData/dino.obj";
@@ -246,6 +246,28 @@ BOOST_AUTO_TEST_CASE(testInterpIO){
 
   ASSERT_EQ(volobj.getInterpNodes()[28098*4-1],1343);
   ASSERT_EQ_TOL(volobj.getInterpWeights()[28098*4-1],0.282485,1e-6);
+}
+
+BOOST_AUTO_TEST_CASE(testInterpIOBeam){
+
+  const string tetfname = "./TestCase/TestData/beam.abq";
+  const string objfname = "./TestCase/TestData/beam.obj";
+  const string weightsfname = "./TestCase/TestData/beamW.txt";
+  TetMeshEmbeding volobj;
+
+  TEST_ASSERT(volobj.loadTetMesh(tetfname));
+  TEST_ASSERT(volobj.loadObjMesh(objfname));
+  TEST_ASSERT(volobj.loadWeights(weightsfname));
+  
+  ASSERT_EQ(volobj.getInterpNodes().size(),1280*4);
+  ASSERT_EQ(volobj.getInterpWeights().size(),1280*4);
+
+  ASSERT_EQ(volobj.getInterpNodes()[0],147);
+  ASSERT_EQ_TOL(volobj.getInterpWeights()[0],-0.0,1e-8);
+
+  ASSERT_EQ(volobj.getInterpNodes()[1280*4-1],136);
+  ASSERT_EQ_TOL(volobj.getInterpWeights()[1280*4-1],0.0,1e-6);
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
