@@ -183,8 +183,50 @@ bool Objmesh::load(const string fname){
 
 bool Objmesh::write(const string fname)const{
 
-  
-  return false;  
+  ofstream outf;
+  outf.open(fname.c_str());
+  if(!outf.is_open()){
+	ERROR_LOG("failed to open file "<< fname <<" for writing.");
+	return false;  
+  }
+
+  const int nv = getVertsNum();
+  const int nf = getFacesNum();
+  outf << "# number of vertices "<< nv <<endl;
+  outf << "# number of faces "<< nf<< endl;
+  if(_vertNormal.size() == nv*3)
+	outf << "# number of normals " << nv << endl;
+  outf << endl;
+
+  for (int i = 0; i < nv; ++i){
+	outf<< "v " << _verts[i*3] << " ";
+	outf<< _verts[i*3+1] << " ";
+	outf<< _verts[i*3+2] << endl;
+  }
+  outf << endl;
+
+  if(_vertNormal.size() == nv*3){
+	for (int i = 0; i < nv; ++i){
+	  outf<< "vn " << _vertNormal[i*3] << " ";
+	  outf<< _vertNormal[i*3+1] << " ";
+	  outf<< _vertNormal[i*3+2] << endl;
+	}
+	outf << endl;
+	for (int i = 0; i < nf; ++i){
+	  outf<<"f "<< _faces[i*3]+1<<"//"<<_faces[i*3]+1<<" ";
+	  outf<< _faces[i*3+1]+1<<"//"<<_faces[i*3+1]+1<<" ";
+	  outf<< _faces[i*3+2]+1<<"//"<<_faces[i*3+2]+1<<endl;
+	}
+  }else{
+	for (int i = 0; i < nf; ++i){
+	  outf<<"f "<< _faces[i*3]+1<<" ";
+	  outf<< _faces[i*3+1]+1<<" ";
+	  outf<< _faces[i*3+2]+1<<endl;
+	}
+  }
+
+  outf.close();
+  return true;
 }
 
 bool Objmesh::loadMtl(const string fname){
