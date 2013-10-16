@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(testObjLoadDino){
   vn0 << 0.0862053, -0.99618,0.0139087;
   vnT << -0.0341522, 0.996979, 0.0697619;
   ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(0),vn0,3,1e-6);
-  ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(mesh.getVertsNum()-1),vnT,3,1e-6); 
+  ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(mesh.getNormalNum()-1),vnT,3,1e-6); 
 
   Vector3i f0,fT;
   f0 << 0,1,2;
@@ -54,6 +54,7 @@ BOOST_AUTO_TEST_CASE(testObjLoadBeam){
   TEST_ASSERT( mesh.load(fname) );
   ASSERT_EQ (mesh.getVertsNum(),1280);
   ASSERT_EQ (mesh.getFacesNum(),822*2);
+  ASSERT_EQ (mesh.getFacesNum()*3,mesh.getNormalIndex().size());
 
   Vector3d v0,vT;
   v0 << -12.48 ,-0.96 ,-2.24;
@@ -61,14 +62,13 @@ BOOST_AUTO_TEST_CASE(testObjLoadBeam){
   ASSERT_EQ_SMALL_VEC_TOL (mesh.getVerts(0),v0,3,1e-2);
   ASSERT_EQ_SMALL_VEC_TOL (mesh.getVerts(mesh.getVertsNum()-1),vT,3,1e-2);
 
-  // Vector3d vn0,vnT;
-  // vn0 << -1 ,0 ,0;
-  // vnT << 1, 0, 0;
-  // ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(0),vn0,3,1e-1);
-  // ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(mesh.getVertsNum()-1),vnT,3,1e-1); 
+  Vector3d vn0,vnT;
+  vn0 << -1 ,0 ,0;
+  vnT << 1, 0, 0;
+  ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(0),vn0,3,1e-1);
+  ASSERT_EQ_SMALL_VEC_TOL (mesh.getVertNormal(mesh.getNormalNum()-1),vnT,3,1e-1); 
 
   Vector3i f0,f1,fT1,fT;
-
   f0 << 0,1,9;
   f1 << 0,9,8;
   fT1 << 1271-1,1279-1,1280-1;
@@ -77,6 +77,16 @@ BOOST_AUTO_TEST_CASE(testObjLoadBeam){
   ASSERT_EQ_SMALL_VEC (mesh.getFaces(1),f1,3);
   ASSERT_EQ_SMALL_VEC (mesh.getFaces(mesh.getFacesNum()-2),fT1,3);
   ASSERT_EQ_SMALL_VEC (mesh.getFaces(mesh.getFacesNum()-1),fT,3);
+
+  Vector3i n0,n1,nT1,nT;
+  n0 << 0,0,0;
+  n1 << 0,0,0;
+  nT1 << 822-1,822-1,822-1;
+  nT << 822-1,822-1,822-1;
+  ASSERT_EQ_SMALL_VEC (mesh.getNormalIndex(0),n0,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getNormalIndex(1),n1,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getNormalIndex(mesh.getFacesNum()-2),nT1,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getNormalIndex(mesh.getFacesNum()-1),nT,3);
 
   Vector3d Kd,Ka,Tf,Ks;
   Kd << 0.00,0.60,0.00;
@@ -91,8 +101,8 @@ BOOST_AUTO_TEST_CASE(testObjLoadBeam){
   ASSERT_EQ_TOL(mesh.getMtl().shininess,Ns,1e-6);
   ASSERT_EQ_TOL(mesh.getMtl().ior,Ni,1e-6);
 
-  const string outfname = "./TestCase/TestData/temptBeam.obj";
-  TEST_ASSERT( mesh.write(outfname) );
+  // const string outfname = "./TestCase/TestData/temptBeam.obj";
+  // TEST_ASSERT( mesh.write(outfname) );
 }
 
 BOOST_AUTO_TEST_CASE(testObjWriteDino){
@@ -102,6 +112,7 @@ BOOST_AUTO_TEST_CASE(testObjWriteDino){
   TEST_ASSERT( mesh.load(fname) );
   ASSERT_EQ (mesh.getVertsNum(),28098);
   ASSERT_EQ (mesh.getFacesNum(),56192);
+  ASSERT_EQ (mesh.getFacesNum()*3,mesh.getNormalIndex().size());
 
   const string outfname = "./TestCase/TestData/temptDino.obj";
   TEST_ASSERT( mesh.write(outfname) );
@@ -124,8 +135,14 @@ BOOST_AUTO_TEST_CASE(testObjWriteDino){
   Vector3i f0,fT;
   f0 << 0,1,2;
   fT << 28094,28090,28091;
-  ASSERT_EQ_SMALL_VEC_TOL (mesh.getFaces(0),f0,3,1e-6);
-  ASSERT_EQ_SMALL_VEC_TOL (mesh.getFaces(mesh.getFacesNum()-1),fT,3,1e-6);
+  ASSERT_EQ_SMALL_VEC (mesh.getFaces(0),f0,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getFaces(mesh.getFacesNum()-1),fT,3);
+
+  Vector3i n0,n1,nT1,nT;
+  n0 << 1-1, 2-1, 3-1;
+  nT << 28095-1, 28091-1, 28092-1;
+  ASSERT_EQ_SMALL_VEC (mesh.getNormalIndex(0),n0,3);
+  ASSERT_EQ_SMALL_VEC (mesh.getNormalIndex(mesh.getFacesNum()-1),nT,3);
 
   Vector3d Kd,Ka,Tf,Ks;
   Kd << 0.00,0.60,0.00;

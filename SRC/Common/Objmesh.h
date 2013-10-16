@@ -54,9 +54,11 @@ namespace UTILITY{
 	template<class VECTOR>
 	void setVerts(const VECTOR &v){setVec(v,_verts);}
 	template<class VECTOR>
+	void setVertNormals(const VECTOR&vn){setVec(vn,_vertNormal);}
+	template<class VECTOR>
 	void setFaces(const VECTOR &f){setVec(f,_faces);}
 	template<class VECTOR>
-	void setVertNormals(const VECTOR&v){setVec(v,_vertNormal);}
+	void setNormalIndex(const VECTOR &ni){setVec(ni,_normalIndex);}
 
 	// get
 	const ObjMtl &getMtl()const{
@@ -65,26 +67,35 @@ namespace UTILITY{
 	const Eigen::VectorXd &getVerts()const{
 	  return _verts;
 	}
+	const Eigen::VectorXd &getVertNormal()const{
+	  return _vertNormal;
+	}
 	const Eigen::VectorXi &getFaces()const{
 	  return _faces;
 	}
-	const Eigen::VectorXd &getVertNormal()const{
-	  return _vertNormal;
+	const Eigen::VectorXi &getNormalIndex()const{
+	  return _normalIndex;
 	}
 	const Eigen::Vector3d getVerts(const int i)const{
 	  return getSubV3(_verts,i);
 	}
+	const Eigen::Vector3d getVertNormal(const int i)const{
+	  return getSubV3(_vertNormal,i);
+	}
 	const Eigen::Vector3i getFaces(const int i)const{
 	  return getSubV3(_faces,i);
 	}
-	const Eigen::Vector3d getVertNormal(const int i)const{
-	  return getSubV3(_vertNormal,i);
+	const Eigen::Vector3i getNormalIndex(const int i)const{
+	  return getSubV3(_normalIndex,i);
 	}
 	int getVertsNum()const{
 	  return _verts.size()/3;
 	}
 	int getFacesNum()const{
 	  return _faces.size()/3;
+	}
+	int getNormalNum()const{
+	  return _vertNormal.size()/3;
 	}
 
 	BBoxD getBBox()const{
@@ -128,8 +139,9 @@ namespace UTILITY{
 	
   private:
 	Eigen::VectorXd _verts;
-	Eigen::VectorXi _faces;
 	Eigen::VectorXd _vertNormal;
+	Eigen::VectorXi _faces;
+	Eigen::VectorXi _normalIndex;
 	ObjMtl _mtl;
   };
   

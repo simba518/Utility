@@ -148,36 +148,10 @@ bool Objmesh::load(const string fname){
   }
   inf.close();
 
-  // average the normals.
-  if((int)normalIndex.size() == faces.size()){
-
-  	vector<double> counter(verts.size()/3,0);
-  	const vector<double> normal = vertNormal;
-  	vertNormal.resize(verts.size());
-	for (size_t i = 0; i < vertNormal.size(); ++i){
-	  vertNormal[i] = 0.0f;
-	}
-  	for (size_t i = 0; i < normalIndex.size(); ++i){
-  	  const int vn = normalIndex[i];
-  	  const int vi = faces[i];
-  	  assert_in(vn*3,0,normal.size()-3);
-  	  assert_in(vi*3,0,verts.size()-3);
-	  vertNormal[vi*3  ] += normal[vn*3];
-	  vertNormal[vi*3+1] += normal[vn*3+1];
-	  vertNormal[vi*3+2] += normal[vn*3+2];
-  	  counter[vi] ++;
-  	}
-  	for (size_t i = 0; i < counter.size(); ++i){
-	  if(counter[i] > 0){
-		vertNormal[i*3  ] /= counter[i];
-		vertNormal[i*3+1] /= counter[i];
-		vertNormal[i*3+2] /= counter[i];
-	  }
-  	}
-  }
   setVerts(verts);
   setVertNormals(vertNormal);
   setFaces(faces);
+  setNormalIndex(normalIndex);
 
   // load mtl
   if(mtlfile.size() > 0){
