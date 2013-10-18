@@ -67,10 +67,27 @@ namespace CASADI{
 	return out;
   }
 
-  inline CasADi::SXMatrix convert(const VSX &in){
-	CasADi::SXMatrix out(in.size(),1);
-	for (size_t i = 0; i < in.size(); ++i){
-	  out(i) = in[i];
+  inline CasADi::SXMatrix convert(const VSX &in,const int cols=1,const bool columnMajor=true){
+
+	assert_ge(cols,1);
+	assert_ge(in.size()%cols,0);
+	assert_ge(in.size(),1);
+	CasADi::SXMatrix out(in.size()/cols,cols);
+	int i = 0;
+	if(columnMajor){
+	  for (int c = 0; c < out.size2(); ++c){
+		for (int r = 0; r < out.size1(); ++r){
+		  out.elem(r,c) = in[i];
+		  i ++;
+		}
+	  }
+	}else{
+	  for (int r = 0; r < out.size1(); ++r){
+		for (int c = 0; c < out.size2(); ++c){
+		  out.elem(r,c) = in[i];
+		  i ++;
+		}
+	  }	  
 	}
 	return out;
   }
@@ -94,7 +111,7 @@ namespace CASADI{
   }
 
   template<class T>
-  inline void evaluate(CasADi::SXFunction fun,const Eigen::Matrix<T,-1,1> &x,Eigen::Matrix<T,-1,1> &rlst){
+  inline void evaluate(CasADi::SXFunction &fun,const Eigen::Matrix<T,-1,1> &x,Eigen::Matrix<T,-1,1> &rlst){
 	fun.setInput(&x[0]);
 	fun.evaluate();
 	const CasADi::DMatrix &out = fun.output();
@@ -104,7 +121,7 @@ namespace CASADI{
   }
 
   template<class T> 
-  inline void evaluate(CasADi::SXFunction fun,const Eigen::Matrix<T,-1,1> &x,Eigen::Matrix<T,-1,-1> &rlst){
+  inline void evaluate(CasADi::SXFunction &fun,const Eigen::Matrix<T,-1,1> &x,Eigen::Matrix<T,-1,-1> &rlst){
 	fun.setInput(&x[0]);
 	fun.evaluate();
 	const CasADi::DMatrix &out = fun.output();
