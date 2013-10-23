@@ -107,6 +107,17 @@ namespace UTILITY{
 	  return succ;
 	}
 
+  protected:
+	static string removeSpaces(const string ss){
+	  string s = ss;
+	  for (size_t i = 0; i < s.size(); ++i){
+		if(s[i] == ' ' || s[i] == '\t'){
+		  s[i] = ' ';
+		}
+	  }
+	  return s;
+	}
+
   private:
 	string curvesData;
   };
