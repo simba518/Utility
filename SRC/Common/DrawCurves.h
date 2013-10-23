@@ -77,8 +77,8 @@ namespace UTILITY{
 	  }
 
 	  stringstream script;
-	  const string xName = name+"_x";
-	  const string yName = name+"_y";
+	  const string xName = removeSpaces(name+"_x");
+	  const string yName = removeSpaces(name+"_y");
 	  const string labelCmd = string(",label=\'")+name+"\'";
 	  const string styleCmd = style.size()>0?(string(",\'")+style+string("\'")):(string(""));
 	  script<< xName << " = [" << x[0];
@@ -112,7 +112,7 @@ namespace UTILITY{
 	  string s = ss;
 	  for (size_t i = 0; i < s.size(); ++i){
 		if(s[i] == ' ' || s[i] == '\t'){
-		  s[i] = ' ';
+		  s[i] = '_';
 		}
 	  }
 	  return s;
