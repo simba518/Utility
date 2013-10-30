@@ -49,22 +49,14 @@ namespace UTILITY{
 	  return succ;
 	}
 	template<class VECTOR>
-	bool readVecFile(const std::string eleName, VECTOR &value){
+	bool readVecFile(const std::string eleName, VECTOR &value,IO_TYPE io_type=BINARY){
 	  std::string vectorFile;
-	  bool succ = readFilePath(eleName,vectorFile,true);
-	  if(succ){
-		succ = loadVec(vectorFile,value);
-	  }
-	  return succ;
+	  return readFilePath(eleName,vectorFile,true)?loadVec(vectorFile,value,io_type):false;
 	}
 	template<class MATRIX>
-	bool readMatFile(const std::string eleName, MATRIX &value){
+	bool readMatFile(const std::string eleName, MATRIX &value,IO_TYPE io_type=BINARY){
 	  std::string matFile;
-	  bool succ = readFilePath(eleName,matFile,true);
-	  if(succ){
-		succ = loadMat(matFile,value);
-	  }
-	  return succ;
+	  return readFilePath(eleName,matFile,true)?loadMat(matFile,value,io_type):false;
 	}
 	bool readFilePath(const std::string eleName, std::string &filePath,const bool checkFileExist = true);
 	bool readFilePath(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist = true);
