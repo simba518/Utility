@@ -213,9 +213,10 @@ namespace CASADI{
   template<class T> 
   inline void convert(const CasADi::SXMatrix &SV, Eigen::Matrix<T,-1,1> &V){
 
-	V.resize(SV.size());
-	for (int i = 0; i < SV.size(); ++i){
-	  V[i] = SV.elem(i).getValue();
+	assert_eq(SV.size2(),1);
+	V.resize(SV.size1());
+	for (int i = 0; i < SV.size1(); ++i){
+	  V[i] = SV.elem(i,0).getValue();
 	}
   }
 
@@ -249,6 +250,7 @@ namespace CASADI{
 
   template<class T> 
   inline Eigen::Matrix<T,-1,1> convert2Vec(const CasADi::SXMatrix &SV){
+	assert_eq(SV.size2(),1);
 	Eigen::Matrix<T,-1,1> V;
 	convert(SV,V);
 	return V;
