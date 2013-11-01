@@ -124,7 +124,7 @@ namespace UTILITY{
 	  assert_gt(outPrecision,0);
 	  _PerformanceCounter.StopCounter();
 	  const double elapsed_time = _PerformanceCounter.GetElapsedTime();
-	  INFO_LOG_COND(msg<<std::setprecision(outPrecision)<<elapsed_time,printOut);
+	  INFO_LOG_COND(msg<<std::setprecision(outPrecision)<<elapsed_time,!printOut);
 	  return elapsed_time;
 	}
 	
