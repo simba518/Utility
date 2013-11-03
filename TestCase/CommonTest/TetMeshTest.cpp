@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(initializeTest){
 
 BOOST_AUTO_TEST_CASE(IOTest){
 
-  const std::string fname = "./TestCase/TestData/fish.abq";
+  const std::string fname = std::string(TEST_DATA_DIR)+"/fish.abq";
   TetMesh tetMesh;
   TEST_ASSERT(tetMesh.load(fname));
   ASSERT_EQ(tetMesh.nodes().size(),885);
@@ -229,9 +229,9 @@ BOOST_AUTO_TEST_CASE(testInterp){
 
 BOOST_AUTO_TEST_CASE(testInterpIODino){
 
-  const string tetfname = "./TestCase/TestData/dino.abq";
-  const string objfname = "./TestCase/TestData/dino.obj";
-  const string weightsfname = "./TestCase/TestData/dinoW.txt";
+  const string tetfname = std::string(TEST_DATA_DIR)+"dino.abq";
+  const string objfname = std::string(TEST_DATA_DIR)+"dino.obj";
+  const string weightsfname = std::string(TEST_DATA_DIR)+"dinoW.txt";
   TetMeshEmbeding volobj;
 
   TEST_ASSERT(volobj.loadTetMesh(tetfname));
@@ -250,9 +250,9 @@ BOOST_AUTO_TEST_CASE(testInterpIODino){
 
 BOOST_AUTO_TEST_CASE(testInterpIOBeam){
 
-  const string tetfname = "./TestCase/TestData/beam.abq";
-  const string objfname = "./TestCase/TestData/beam.obj";
-  const string weightsfname = "./TestCase/TestData/beamW.txt";
+  const string tetfname = std::string(TEST_DATA_DIR)+"beam.abq";
+  const string objfname = std::string(TEST_DATA_DIR)+"beam.obj";
+  const string weightsfname = std::string(TEST_DATA_DIR)+"beamW.txt";
   TetMeshEmbeding volobj;
 
   TEST_ASSERT(volobj.loadTetMesh(tetfname));

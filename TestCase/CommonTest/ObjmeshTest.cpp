@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_SUITE(ObjmeshTest)
 
 BOOST_AUTO_TEST_CASE(testObjLoadDino){
 
-  const string fname = "./TestCase/TestData/dino.obj";
+  const string fname = string(TEST_DATA_DIR)+"/dino.obj";
   Objmesh mesh;
   TEST_ASSERT( mesh.load(fname) );
   ASSERT_EQ (mesh.getVertsNum(),28098);
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(testObjLoadDino){
 
 BOOST_AUTO_TEST_CASE(testObjLoadBeam){
 
-  const string fname = "./TestCase/TestData/beam.obj";
+  const string fname = string(TEST_DATA_DIR)+"beam.obj";
   Objmesh mesh;
   TEST_ASSERT( mesh.load(fname) );
   ASSERT_EQ (mesh.getVertsNum(),1280);
@@ -107,14 +107,14 @@ BOOST_AUTO_TEST_CASE(testObjLoadBeam){
 
 BOOST_AUTO_TEST_CASE(testObjWriteDino){
 
-  const string fname = "./TestCase/TestData/dino.obj";
+  const string fname = string(TEST_DATA_DIR)+"/dino.obj";
   Objmesh mesh;
   TEST_ASSERT( mesh.load(fname) );
   ASSERT_EQ (mesh.getVertsNum(),28098);
   ASSERT_EQ (mesh.getFacesNum(),56192);
   ASSERT_EQ (mesh.getFacesNum()*3,mesh.getNormalIndex().size());
 
-  const string outfname = "./TestCase/TestData/temptDino.obj";
+  const string outfname = string(TEST_DATA_DIR)+"/temptDino.obj";
   TEST_ASSERT( mesh.write(outfname) );
   TEST_ASSERT( mesh.load(outfname) );
   ASSERT_EQ (mesh.getVertsNum(),28098);

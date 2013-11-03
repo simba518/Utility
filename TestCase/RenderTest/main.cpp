@@ -19,15 +19,11 @@ int main(int argc, char** argv){
   QApplication application(argc,argv);
   QGLViewerExt viewer(NULL);
 
-  // const string fn="/home/simba/Workspace/AnimationEditor/Data/bunny/bunny.obj";
-  // const string fn="/home/simba/Workspace/AnimationEditor/Data/beam/beam.obj";
-  const string fn = "./TestCase/TestData/beam.obj";
+  const string fn = string(TEST_DATA_DIR)+"beam.obj";
   Objmesh obj;
   obj.load(fn);
   viewer.addSelfRenderEle(pSelfRenderEle(new ObjRender(obj)));
-
   viewer.setWindowTitle("simpleViewer");
-  // viewer.toggleDrawLights();
   viewer.show();
   return application.exec();
 }

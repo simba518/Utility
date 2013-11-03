@@ -4,7 +4,7 @@
 
 struct JsonFilePaserTestInit{
   JsonFilePaserTestInit(){
-	jsonFilePath = "./TestCase/TestData/json.in";
+	jsonFilePath = std::string(TEST_DATA_DIR)+"json.in";
 	TEST_ASSERT_MSG("failed to open file:"<<jsonFilePath,jsonFile.open(jsonFilePath));
   }
   std::string jsonFilePath;
