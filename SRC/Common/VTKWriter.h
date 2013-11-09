@@ -10,8 +10,6 @@ using namespace std;
 
 namespace UTILITY{
   
-  enum VTK_IO_TYPE{VTK_ASCII, VTK_BINARY};
-
   template<typename T,int N>
   struct VectorXdTmp{
   public:	
@@ -30,6 +28,53 @@ namespace UTILITY{
     T d[N];
   };
 
+  class endianness{
+  public:
+	static bool isLittleEndian(){
+	  union u { 
+		unsigned long l; 
+		unsigned char c[sizeof(unsigned long)]; 
+	  };
+	  u dummy;
+	  dummy.l = 1;
+	  return dummy.c[0] == 1;
+	}
+	static void swap2Bytes(unsigned char* &ptr){ 
+	  unsigned char tmp;  
+	  tmp = ptr[0]; ptr[0] = ptr[1]; ptr[1] = tmp;
+	}
+	static void swap4Bytes(unsigned char* &ptr){ 
+	  unsigned char tmp; 
+	  tmp = ptr[0]; ptr[0] = ptr[3]; ptr[3] = tmp;
+	  tmp = ptr[1]; ptr[1] = ptr[2]; ptr[2] = tmp; 
+	}
+	static void swap8Bytes(unsigned char* &ptr){ 
+	  unsigned char tmp;
+	  tmp = ptr[0]; ptr[0] = ptr[7]; ptr[7] = tmp;
+	  tmp = ptr[1]; ptr[1] = ptr[6]; ptr[6] = tmp;
+	  tmp = ptr[2]; ptr[2] = ptr[5]; ptr[5] = tmp;
+	  tmp = ptr[3]; ptr[3] = ptr[4]; ptr[4] = tmp; 
+	}
+  };
+  template<class T2>
+  inline void byteSwap(T2& val){
+	size_t n=sizeof(T2);
+	unsigned char *p=(unsigned char*)&val;
+	switch( n ) 
+	  {case 1:return;
+	  case 2:endianness::swap2Bytes(p);break;
+	  case 4:endianness::swap4Bytes(p);break;
+	  case 8:endianness::swap8Bytes(p);break;
+	  default:break;}
+  }
+
+  template <typename T2>
+  inline void vtkWriteBinary(ostream& oss,T2 val){
+	if(endianness::isLittleEndian())
+	  byteSwap(val);
+	oss.write((const char*)&val,sizeof(T2));
+  }
+
   /**
    * @class VTKWriter auxiliary class for helping to write VTK files.
    * http://dunne.uni-hd.de/VisuSimple/documents/vtkfileformat.html
@@ -37,7 +82,12 @@ namespace UTILITY{
   class VTKWriter{
 	
   public:
-	VTKWriter(const VTK_IO_TYPE t=VTK_BINARY):_iotype(t){
+	VTKWriter(const bool binary=true):
+	  _binary(binary),
+	  _points(binary ? ios_base::binary : ios_base::out),
+	  _cells(binary ? ios_base::binary : ios_base::out),
+	  _cellTypes(binary ? ios_base::binary : ios_base::out){
+	  
 	  clear();
 	}
 
@@ -50,9 +100,28 @@ namespace UTILITY{
 
 	template<typename VECTOR_3D,typename ALLOCATOR>
 	void addPoints(const vector<VECTOR_3D,ALLOCATOR> &points){
-	  for (int i = 0; i < points.size(); ++i)
-		_points << points[i][0] << " " << points[i][1]<< " " << points[i][2] << endl;
+
+	  if (_binary){
+		for (int i = 0; i < points.size(); ++i){
+		  vtkWriteBinary(_points,points[i][0]);
+		  vtkWriteBinary(_points,points[i][1]);
+		  vtkWriteBinary(_points,points[i][2]);
+		}
+	  }else{
+		for (int i = 0; i < points.size(); ++i)
+		  _points << points[i][0] << " " << points[i][1]<< " " << points[i][2] << endl;
+	  }
 	  _nPoint += points.size();
+	  if (points.size() > 0){
+		_dataType = "double";
+		if (sizeof(points[0][0])==sizeof(float)){
+		  _dataType = "float";
+		}else if(sizeof(points[0][0])==sizeof(int)){
+		  _dataType = "int";
+		}else if(sizeof(points[0][0])!=sizeof(double)){
+		  ERROR_LOG("data type for the point is not support!");
+		}
+	  }
 	}
 
 	template<typename VECTOR>
@@ -64,13 +133,21 @@ namespace UTILITY{
 
 	template<typename VECTOR_3I,typename ALLOCATOR>
 	void addTriangles(const vector<VECTOR_3I,ALLOCATOR> &faces){
-	  
-	  for (int i = 0; i < faces.size(); ++i)
-		_cells<< 3 <<" "<< faces[i][0] << " " << faces[i][1]<< " " << faces[i][2] << endl;
 
-	  for (int i = 0; i < faces.size(); ++i)
-		_cellTypes << 5 << " ";
-
+	  if (_binary){
+		for (int i = 0; i < faces.size(); ++i){
+		  vtkWriteBinary(_cells,3);
+		  vtkWriteBinary(_cells,faces[i][0]);
+		  vtkWriteBinary(_cells,faces[i][1]);
+		  vtkWriteBinary(_cells,faces[i][2]);
+		  vtkWriteBinary(_cellTypes,5);
+		}
+	  }else{
+		for (int i = 0; i < faces.size(); ++i){
+		  _cells<< 3 <<" "<< faces[i][0] << " " << faces[i][1]<< " " << faces[i][2] << endl;
+		  _cellTypes << 5 << " ";
+		}
+	  }
 	  _nCells += faces.size();
 	  _nCellIndexes += faces.size()*(3+1);
 	}
@@ -84,24 +161,36 @@ namespace UTILITY{
 
 	template<typename VECTOR_4I,typename ALLOCATOR>
 	void addTets(const vector<VECTOR_4I,ALLOCATOR> &tets){
-
-	  for (int i = 0; i < tets.size(); ++i)
-		_cells<<4<<" "<<tets[i][0]<<" "<<tets[i][1]<<" "<<tets[i][2]<<" "<<tets[i][3]<<endl;
-
-	  for (int i = 0; i < tets.size(); ++i)
-		_cellTypes << 10 << " ";
+	  
+	  if (_binary){
+		for (int i = 0; i < tets.size(); ++i){
+		  vtkWriteBinary(_cells,4);
+		  vtkWriteBinary(_cells,tets[i][0]);
+		  vtkWriteBinary(_cells,tets[i][1]);
+		  vtkWriteBinary(_cells,tets[i][2]);
+		  vtkWriteBinary(_cells,tets[i][3]);
+		  vtkWriteBinary(_cellTypes,10);
+		}
+	  }else{
+		for (int i = 0; i < tets.size(); ++i){
+		  _cells<<4<<" "<<tets[i][0]<<" "<<tets[i][1]<<" "<<tets[i][2]<<" "<<tets[i][3]<<endl;
+		  _cellTypes << 10 << " ";
+		}
+	  }
 
 	  _nCells += tets.size();
 	  _nCellIndexes += tets.size()*(4+1);
 	}
 
-	bool write(const string filename)const{
+	bool write(const string filename){
 
-	  ofstream outf(filename.c_str());
+	  ofstream outf(filename.c_str(),_binary?ios_base::binary:ios_base::out);
 	  bool succ = outf.is_open();
 	  if (succ){
+		if (_nCells <= 0)
+		  createVertexCells();
 		outf << head() << endl;
-		outf << "\nPOINTS " << _nPoint<<" FLOAT" << endl;
+		outf << "\nPOINTS " << _nPoint<<" "<< _dataType << endl;
 		outf << _points.str() << endl;
 		outf << "\nCELLS " << _nCells<<" " << _nCellIndexes << endl;
 		outf << _cells.str() << endl;
@@ -124,8 +213,8 @@ namespace UTILITY{
   protected:
 	string head()const{
 	  const string s1="# vtk DataFile Version 3.1\n";
-	  const string s2="generated by UTILITY::VTKWriter in the Utility library,author: simba\n";
-	  const string s3=(VTK_BINARY==_iotype ? "BINARY\n":"ASCII\n");
+	  const string s2="generated by UTILITY::VTKWriter in Utility library,author: simba\n";
+	  const string s3=(_binary ? "BINARY\n":"ASCII\n");
 	  const string s4="DATASET UNSTRUCTURED_GRID\n";
 	  return s1+s2+s3+s4;
 	}
@@ -141,11 +230,30 @@ namespace UTILITY{
 		vvec[i][2] = vec[i*3+2];
 	  }
 	}
+
+	void createVertexCells(){
+	  if (_binary){
+		for (int i = 0; i < _nPoint; ++i){
+		  vtkWriteBinary(_cells,1);
+		  vtkWriteBinary(_cells,i);
+		  vtkWriteBinary(_cellTypes,1);
+		}
+	  }else{
+		for (int i = 0; i < _nPoint; ++i){
+		  _cells<<1<< " " << i << endl;
+		  _cellTypes << 1 << " ";
+		}
+	  }
+
+	  _nCells += _nPoint;
+	  _nCellIndexes += _nPoint*2;
+	}
 	
   private:
-	const VTK_IO_TYPE _iotype;
+	const bool _binary;
 	size_t _nPoint,_nCells,_nCellIndexes;
 	ostringstream _points,_cells,_cellTypes;
+	string _dataType;
   };
   
 }//end of namespace

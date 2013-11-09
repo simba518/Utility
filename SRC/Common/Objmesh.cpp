@@ -212,9 +212,9 @@ bool Objmesh::write(const string fname)const{
   return true;
 }
 
-bool Objmesh::writeVTK(const std::string& filename,const VTK_IO_TYPE t)const{
+bool Objmesh::writeVTK(const std::string& filename,const bool binary)const{
 
-  VTKWriter writer(t);
+  VTKWriter writer(binary);
   writer.addPoints(_verts);
   writer.addTets(_faces);
   return writer.write(filename);

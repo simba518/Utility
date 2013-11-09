@@ -124,7 +124,7 @@ namespace UTILITY{
 	bool load(const string fname);
 	bool loadMtl(const string fname);
 	bool write(const string fname)const;
-	bool writeVTK(const std::string& filename,const VTK_IO_TYPE t=VTK_BINARY)const;
+	bool writeVTK(const std::string& filename,const bool binary=true)const;
 
   protected:
 	template<class T> 

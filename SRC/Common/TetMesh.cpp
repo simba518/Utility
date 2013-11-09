@@ -233,11 +233,21 @@ BBoxD TetMesh::getBBox()const{
   return box;
 }
 
-bool TetMesh::writeVTK(const std::string& filename,const VTK_IO_TYPE t)const{
+bool TetMesh::writeVTK(const std::string& filename,const bool binary)const{
 
-  VTKWriter writer(t);
+  VTKWriter writer(binary);
   writer.addPoints(_nodes);
   writer.addTets(_tets);
   writer.addTriangles(_surface);
   return writer.write(filename);
+}
+
+bool TetMesh::writeVTK(const std::string&filename,const MatrixXd &U,const bool binary)const{
+
+  bool succ = true;
+  for (int i = 0; i < U.cols() && succ; ++i){
+    const VectorXd &u = U.col(i);
+	succ = writeVTK(filename+TOSTR(i)+".vtk",u,binary);
+  }
+  return succ;
 }

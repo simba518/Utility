@@ -164,8 +164,11 @@ BOOST_AUTO_TEST_CASE(VTK_IOTest){
   TEST_ASSERT(tetMesh.load(fname));
   ASSERT_EQ(tetMesh.nodes().size(),885);
   ASSERT_EQ(tetMesh.tets().size(),3477);
-  const std::string vtkfname = std::string(TEST_DATA_DIR)+"/tempt_fish.vtk";
-  TEST_ASSERT(tetMesh.writeVTK(vtkfname,VTK_ASCII));
+  const std::string vtkfname = std::string(TEST_DATA_DIR)+"/tempt_fish_ascii.vtk";
+  TEST_ASSERT(tetMesh.writeVTK(vtkfname,false));
+
+  const std::string vtkfname2 = std::string(TEST_DATA_DIR)+"/tempt_fish_binary.vtk";
+  TEST_ASSERT(tetMesh.writeVTK(vtkfname2,true));
 }
 
 BOOST_AUTO_TEST_CASE(testContainingEle){

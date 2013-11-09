@@ -155,7 +155,18 @@ namespace UTILITY{
 	// io
 	bool load(const std::string& filename);
 	bool write(const std::string& filename)const;
-	bool writeVTK(const std::string& filename,const VTK_IO_TYPE t=VTK_BINARY)const;
+	bool writeVTK(const std::string& filename,const bool binary=true)const;
+	template<class VECTOR>
+	bool writeVTK(const std::string& filename,const VECTOR &u,
+				  const bool binary=true)const{
+	  const VVec3d nodes = _nodes;
+	  const_cast<TetMesh*>(this)->applyDeformation(u);
+	  bool succ = writeVTK(filename,binary);
+	  const_cast<TetMesh*>(this)->_nodes = nodes;
+	  return succ;
+	}
+	bool writeVTK(const std::string& filename,const MatrixXd &U,
+				  const bool binary=true)const;
 
   private:
 	VVec3d _nodes;
