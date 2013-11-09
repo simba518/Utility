@@ -7,6 +7,7 @@
 #include <Eigen/Dense>
 #include <BBox.h>
 #include <assertext.h>
+#include <VTKWriter.h>
 using namespace std;
 
 namespace UTILITY{
@@ -123,6 +124,7 @@ namespace UTILITY{
 	bool load(const string fname);
 	bool loadMtl(const string fname);
 	bool write(const string fname)const;
+	bool writeVTK(const std::string& filename,const VTK_IO_TYPE t=VTK_BINARY)const;
 
   protected:
 	template<class T> 

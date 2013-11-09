@@ -232,3 +232,12 @@ BBoxD TetMesh::getBBox()const{
   }
   return box;
 }
+
+bool TetMesh::writeVTK(const std::string& filename,const VTK_IO_TYPE t)const{
+
+  VTKWriter writer(t);
+  writer.addPoints(_nodes);
+  writer.addTets(_tets);
+  writer.addTriangles(_surface);
+  return writer.write(filename);
+}

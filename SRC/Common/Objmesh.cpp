@@ -212,6 +212,14 @@ bool Objmesh::write(const string fname)const{
   return true;
 }
 
+bool Objmesh::writeVTK(const std::string& filename,const VTK_IO_TYPE t)const{
+
+  VTKWriter writer(t);
+  writer.addPoints(_verts);
+  writer.addTets(_faces);
+  return writer.write(filename);
+}
+
 bool Objmesh::loadMtl(const string fname){
   
   std::ifstream inf;

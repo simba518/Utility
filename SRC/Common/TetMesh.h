@@ -7,6 +7,7 @@
 #include <HashedId.h>
 #include <assertext.h>
 #include <BBox.h>
+#include <VTKWriter.h>
 using namespace std;
 using namespace Eigen;
 
@@ -154,6 +155,7 @@ namespace UTILITY{
 	// io
 	bool load(const std::string& filename);
 	bool write(const std::string& filename)const;
+	bool writeVTK(const std::string& filename,const VTK_IO_TYPE t=VTK_BINARY)const;
 
   private:
 	VVec3d _nodes;
