@@ -134,6 +134,8 @@ namespace UTILITY{
 	template<typename VECTOR_3I,typename ALLOCATOR>
 	void addTriangles(const vector<VECTOR_3I,ALLOCATOR> &faces){
 
+	  if (faces.size() > 0)
+		assert_eq(faces[0].size(),3);
 	  if (_binary){
 		for (int i = 0; i < faces.size(); ++i){
 		  vtkWriteBinary(_cells,3);
@@ -161,7 +163,10 @@ namespace UTILITY{
 
 	template<typename VECTOR_4I,typename ALLOCATOR>
 	void addTets(const vector<VECTOR_4I,ALLOCATOR> &tets){
-	  
+
+	  if (tets.size() > 0)
+		assert_eq(tets[0].size(),4);
+
 	  if (_binary){
 		for (int i = 0; i < tets.size(); ++i){
 		  vtkWriteBinary(_cells,4);

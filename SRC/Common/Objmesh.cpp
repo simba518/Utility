@@ -216,7 +216,7 @@ bool Objmesh::writeVTK(const std::string& filename,const bool binary)const{
 
   VTKWriter writer(binary);
   writer.addPoints(_verts);
-  writer.addTets(_faces);
+  writer.addTriangles(_faces);
   return writer.write(filename);
 }
 

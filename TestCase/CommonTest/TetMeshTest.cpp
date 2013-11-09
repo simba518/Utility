@@ -169,6 +169,14 @@ BOOST_AUTO_TEST_CASE(VTK_IOTest){
 
   const std::string vtkfname2 = std::string(TEST_DATA_DIR)+"/tempt_fish_binary.vtk";
   TEST_ASSERT(tetMesh.writeVTK(vtkfname2,true));
+
+
+  TetMesh tetMeshB;
+  const std::string fnamebeam = std::string(TEST_DATA_DIR)+"/beam.abq";
+  TEST_ASSERT(tetMeshB.load(fnamebeam));
+
+  const std::string beamfout = std::string(TEST_DATA_DIR)+"/tempt_beamtet_binary.vtk";
+  TEST_ASSERT(tetMeshB.writeVTK(beamfout,true));
 }
 
 BOOST_AUTO_TEST_CASE(testContainingEle){

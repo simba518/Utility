@@ -158,4 +158,17 @@ BOOST_AUTO_TEST_CASE(testObjWriteDino){
   ASSERT_EQ_TOL(mesh.getMtl().ior,Ni,1e-6);
 }
 
+BOOST_AUTO_TEST_CASE(testObjBeamVtKWrite){
+  
+  const string fname = string(TEST_DATA_DIR)+"beam.obj";
+  Objmesh mesh;
+  TEST_ASSERT( mesh.load(fname) );
+
+  const string fnameout = string(TEST_DATA_DIR)+"tempt_beam_binary.vtk";
+  mesh.writeVTK(fnameout,true);
+
+  const string fnameout2 = string(TEST_DATA_DIR)+"tempt_beam_ascii.vtk";
+  mesh.writeVTK(fnameout2,false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
