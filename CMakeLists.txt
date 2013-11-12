@@ -77,6 +77,7 @@ INCLUDE_FOR_PROJECT(${PROJECT_NAME}
   SRC/UI/Manipulation
   SRC/UI/Render
   SRC/UI/Shader
+  SRC/UI/RecordAndPlay
   SRC/Common
   SRC/Math
   SRC/Cuda

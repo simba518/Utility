@@ -4,6 +4,7 @@ AUX_SOURCE_DIRECTORY(./Shader shader_src)
 
 SET(NONE_QT_CPP
 
+  RecordAndPlay/EventSerialization.cpp
   Render/SelfRenderRect.cpp
   Render/FileDialog.cpp
   Render/MeshRender.cpp
@@ -15,6 +16,7 @@ SET(NONE_QT_CPP
 
 SET(UI_SOURCES
 
+  RecordAndPlay/QInputEventRecorder.cpp
   Manipulation/SelectCtrl.cpp
   Manipulation/DragCtrl.cpp
   Animation/AniCtrl.cpp
@@ -23,6 +25,7 @@ SET(UI_SOURCES
 
 SET(UI_HEADERS 
 
+  RecordAndPlay/QInputEventRecorder.h
   Manipulation/SelectCtrl.h
   Manipulation/DragCtrl.h
   Manipulation/VolObjCtrl.h
