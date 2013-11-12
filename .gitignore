@@ -21,3 +21,5 @@ temp*
 
 *.py
 .qglviewer.xml
+
+*.qt_act_recorder.txt
