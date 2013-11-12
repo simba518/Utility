@@ -118,6 +118,8 @@ namespace UTILITY{
 	}
 	const VVec4i& tets() const{return _tets;}
 	const FaceId& faceId() const{return _faceId;}
+	const VVec3i& surface() const{return _surface;}
+	const VVec3d& normal() const{return _normal;}
 	const ElasticMaterial<double>& material() const{return _mtl;}
 	double volume(const int i) const{
 	  return tetrahedron(_nodes[_tets[i][0]],
@@ -168,6 +170,9 @@ namespace UTILITY{
 	bool writeVTK(const std::string& filename,const MatrixXd &U,
 				  const bool binary=true)const;
 
+  protected:
+	void computeSurfaceNormal();
+
   private:
 	VVec3d _nodes;
 	VVec4i _tets;
@@ -177,6 +182,7 @@ namespace UTILITY{
 	VVec4i _faceNeighTet; // 4 neighbor tets(same face) of one tet.
 	VectorUseti _nodeNeighNode; // the neighbor nodes of each node.
 	VVec3i _surface; // surface's faces
+	VVec3d _normal; // surface's faces' normal
   };
 
   typedef boost::shared_ptr<TetMesh> pTetMesh;

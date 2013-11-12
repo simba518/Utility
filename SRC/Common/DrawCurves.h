@@ -19,6 +19,9 @@ namespace UTILITY{
   class PythonScriptDraw2DCurves{
   
   public:
+	PythonScriptDraw2DCurves(const bool useLabel=false){
+	  _useLabel = useLabel;
+	}
 	static bool write(const string fname,const VECTOR &y,const double dx=1.0,const double x0=0.0f,const string style=""){
 
 	  VECTOR x(y.size());
@@ -31,6 +34,9 @@ namespace UTILITY{
 	  return realWrite(fname,defineCurve(y,x,"",style),false);
 	}
 
+	void setUseLabel(const bool useLabel){
+	  _useLabel = useLabel;
+	}
 	bool add(const string name,const VECTOR &y,const double dx=1.0,const double x0=0.0f,const string style=""){
 
 	  VECTOR x(y.size());
@@ -41,14 +47,17 @@ namespace UTILITY{
 	}
 	bool add(const string name,const VECTOR &y,const VECTOR &x,const string style=""){
 	  const string curve = defineCurve(y,x,name,style);
-	  curvesData = curvesData + "\n" + curve;
+	  _curvesData = _curvesData + "\n" + curve;
 	  return (curve.size() > 0);
 	}
 	bool write(const string fname,const string saveFigTo="")const{
-	  return realWrite(fname,curvesData,true,saveFigTo);
+	  return realWrite(fname,_curvesData,isUseLabel(),saveFigTo);
 	}
 	void clear(){
-	  curvesData.clear();
+	  _curvesData.clear();
+	}
+	bool isUseLabel()const{
+	  return _useLabel;
 	}
 
   protected:
@@ -106,8 +115,6 @@ namespace UTILITY{
 	  file.close();
 	  return succ;
 	}
-
-  protected:
 	static string removeSpaces(const string ss){
 	  string s = ss;
 	  for (size_t i = 0; i < s.size(); ++i){
@@ -119,7 +126,8 @@ namespace UTILITY{
 	}
 
   private:
-	string curvesData;
+	string _curvesData;
+	bool _useLabel;
   };
 }
 #endif /* _DRAWCURVES_H_ */

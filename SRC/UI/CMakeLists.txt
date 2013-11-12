@@ -7,6 +7,8 @@ SET(NONE_QT_CPP
   Render/SelfRenderRect.cpp
   Render/FileDialog.cpp
   Render/MeshRender.cpp
+  Render/VolNodeGroupRender.cpp
+  Render/DragGroupSelDraw.cpp
   Manipulation/SelectionGroup.cpp
   ${shader_src}
 )
@@ -23,6 +25,7 @@ SET(UI_HEADERS
 
   Manipulation/SelectCtrl.h
   Manipulation/DragCtrl.h
+  Manipulation/VolObjCtrl.h
   Animation/AniCtrl.h
   Animation/AniSliderBar.h
   Render/QGLViewerExt.h

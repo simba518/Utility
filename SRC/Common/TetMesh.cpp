@@ -66,6 +66,8 @@ void TetMesh::reset(const VVec3d& nodes, const VVec4i& tets){
   	SET_NEIGH(0,1,2,3);
   }
   _mtl.reset(this->tets().size());
+
+  computeSurfaceNormal();
 }
 
 void TetMesh::setSingleMaterial(const double&dens,const double&E,const double&v){
@@ -250,4 +252,20 @@ bool TetMesh::writeVTK(const std::string&filename,const MatrixXd &U,const bool b
 	succ = writeVTK(filename+TOSTR(i)+".vtk",u,binary);
   }
   return succ;
+}
+
+void TetMesh::computeSurfaceNormal(){
+  
+  const VVec3d &p = nodes();
+  const VVec3i &f = surface();
+  _normal.resize(f.size());
+  for (int i = 0; i < _normal.size(); ++i){
+	assert_in(f[i][0],0,p.size()-1);
+	assert_in(f[i][1],0,p.size()-1);
+	assert_in(f[i][2],0,p.size()-1);
+	const Vector3d &v0 = p[f[i][0]];
+	const Vector3d &v1 = p[f[i][1]];
+	const Vector3d &v2 = p[f[i][2]];
+    _normal[i] = (v0-v1).cross(v0-v2).normalized();
+  }
 }
