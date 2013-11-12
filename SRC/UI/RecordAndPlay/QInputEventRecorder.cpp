@@ -133,18 +133,17 @@ bool QInputEventRecorder::eventFilter(QObject *obj, QEvent *ev)
   return false;
 }
 
-void QInputEventRecorder::save(const QString &fileName)
-{
+void QInputEventRecorder::save(const QString &fileName){
+
   QFile f(fileName);
   if (!f.open(QFile::WriteOnly))
 	return;
   QDataStream ds(&f);
-  foreach(EventDelivery ed, m_Recording)
-	{
-	  ds << (qint32) ed.timeOffset() << ed.clsName() << ed.objName();
-	  QEvent *ev(ed.event());
-	  ds << static_cast<QInputEvent*>(ev);
-	}
+  foreach(EventDelivery ed, m_Recording){
+	ds << (qint32) ed.timeOffset() << ed.clsName() << ed.objName();
+	QEvent *ev(ed.event());
+	ds << static_cast<QInputEvent*>(ev);
+  }
 }
 
 void QInputEventRecorder::load(const QString &fileName)
@@ -213,8 +212,6 @@ void QInputEventRecorder::replay(float speedFactor)
 }
 
 void QInputEventRecorder::replay(){
-
-  cout << "replay " << m_ReplayPos << "/" << m_Recording.size() << endl;
 
   EventDelivery& rec(m_Recording[m_ReplayPos++]);
 
