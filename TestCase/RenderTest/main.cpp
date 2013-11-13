@@ -13,9 +13,17 @@ int main(int argc, char** argv){
   QApplication application(argc,argv);
   QWidget window;
   QGLViewerExt viewer(&window);
-  QInputEventRecorderCmd recorder(&window,false);
+  QInputEventRecorderCmd recorder(&window);
 
-  {
+  { // parse record command
+	if (2 == argc)
+	  recorder.setCmd(argv[argc-1]);
+	else if(3 == argc)
+	  recorder.setCmd(argv[argc-2],argv[argc-1]);
+  }
+
+
+  { // load meshses
   	const string fn = string(TEST_DATA_DIR)+"beam.obj";
   	Objmesh obj;
   	obj.load(fn);
