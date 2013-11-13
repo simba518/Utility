@@ -71,7 +71,7 @@ public:
 
   bool eventFilter(QObject *obj, QEvent *ev);
 
-  void setObj(QObject *obj) { m_Obj = obj; }
+  void setObj(QObject *obj);
 
   void save(const QString &fileName);
   void load(const QString &fileName);

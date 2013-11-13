@@ -24,15 +24,16 @@
    authors and should not be interpreted as representing official policies, either expressed
    or implied, of Stanislaw Adaszewski. */
 
-#include "QInputEventRecorder.h"
 #include <QContextMenuEvent>
 #include <QFile>
 #include <QDataStream>
 #include <QTimer>
 #include <QWidget>
 #include <QApplication>
-#include "EventSerialization.h"
 #include <iostream>
+#include <Log.h>
+#include "QInputEventRecorder.h"
+#include "EventSerialization.h"
 using namespace std;
 
 //
@@ -54,12 +55,8 @@ static QString objectPath(QObject *obj)
 static bool isChild(QObject *obj, QObject *parent)
 {
   while ((obj = obj->parent())){
-	cout << "eventFilter failed: "<< obj->metaObject()->className() << endl;
 	if (obj == parent)
 	  return true;
-  }
-  if (NULL == obj && NULL == parent){
-	return true;
   }
   return false;
 }
@@ -111,39 +108,36 @@ QInputEventRecorder::~QInputEventRecorder()
   delete m_Timer;
 }
 
-bool QInputEventRecorder::eventFilter(QObject *obj, QEvent *ev)
-{
+bool QInputEventRecorder::eventFilter(QObject *obj, QEvent *ev){
 
-  /// @todo
-  // if (!isChild(obj, m_Obj)){	
-  // 	// cout << "eventFilter failed: "<< obj->metaObject()->className() << endl;
-  // 	return false;
-  // }
-
+  if (!isChild(obj, m_Obj)){
+	// WARN_LOG("QObject "<<obj->metaObject()->className()<<
+	// 		 " is not the child of "<<
+	// 		 m_Obj->metaObject()->className()<<endl);
+	return false;
+  }
   QEvent *clonedEv = cloneEvent(ev);
-
-  if (clonedEv)
-	{
-	  int timeOffset;
-	  QDateTime curDt(QDateTime::currentDateTime());
-	  timeOffset = m_RecordingStartTime.daysTo(curDt) * 24 * 3600 * 1000 + m_RecordingStartTime.time().msecsTo(curDt.time());
-	  m_Recording.push_back(EventDelivery(timeOffset, obj, clonedEv));
-	}
-
+  if (clonedEv){
+	int timeOffset;
+	QDateTime curDt(QDateTime::currentDateTime());
+	timeOffset = m_RecordingStartTime.daysTo(curDt) * 24 * 3600 * 1000 + m_RecordingStartTime.time().msecsTo(curDt.time());
+	m_Recording.push_back(EventDelivery(timeOffset, obj, clonedEv));
+  }
   return false;
 }
 
-void QInputEventRecorder::save(const QString &fileName){
-
+void QInputEventRecorder::save(const QString &fileName)
+{
   QFile f(fileName);
   if (!f.open(QFile::WriteOnly))
 	return;
   QDataStream ds(&f);
-  foreach(EventDelivery ed, m_Recording){
-	ds << (qint32) ed.timeOffset() << ed.clsName() << ed.objName();
-	QEvent *ev(ed.event());
-	ds << static_cast<QInputEvent*>(ev);
-  }
+  foreach(EventDelivery ed, m_Recording)
+	{
+	  ds << (qint32) ed.timeOffset() << ed.clsName() << ed.objName();
+	  QEvent *ev(ed.event());
+	  ds << static_cast<QInputEvent*>(ev);
+	}
 }
 
 void QInputEventRecorder::load(const QString &fileName)
@@ -155,8 +149,7 @@ void QInputEventRecorder::load(const QString &fileName)
   m_Recording.clear();
 
   QDataStream ds(&f);
-  while (!ds.atEnd())
-	{
+  while (!ds.atEnd()){
 	  qint32 timeOffset;
 	  QString clsName, objName;
 	  ds >> timeOffset >> clsName >> objName;
@@ -196,9 +189,6 @@ void QInputEventRecorder::stop()
 
 void QInputEventRecorder::replay(float speedFactor)
 {
-
-  cout << m_Recording.size() << endl;
-  
   if (m_Recording.size() == 0)
 	{
 	  emit replayDone();
@@ -211,28 +201,45 @@ void QInputEventRecorder::replay(float speedFactor)
   m_Timer->start();
 }
 
-void QInputEventRecorder::replay(){
-
+void QInputEventRecorder::replay()
+{
   EventDelivery& rec(m_Recording[m_ReplayPos++]);
 
   QStringList path = rec.objName().split("/", QString::KeepEmptyParts);
-  if (path.size() > 0){
-	QList<QObject*> objects = m_Obj->findChildren<QObject*>(path.last());
-	foreach(QObject *obj, objects){
-	  if (obj->metaObject()->className()==rec.clsName()&&objectPath(obj)==rec.objName()){
-		qApp->postEvent(obj, cloneEvent(rec.event()));
-		break;
-	  }
+  if (path.size() > 0)
+	{
+	  QList<QObject*> objects = m_Obj->findChildren<QObject*>(path.last());
+	  foreach(QObject *obj, objects)
+		{
+		  if (obj->metaObject()->className() == rec.clsName() && objectPath(obj) == rec.objName())
+			{
+			  qApp->postEvent(obj, cloneEvent(rec.event()));
+			  break;
+			}
+		}
 	}
-  }
 
-  if (m_ReplayPos >= m_Recording.size()){
-	cout << "replay done!" << endl;
-	emit replayDone();
-	return;
-  }
+  if (m_ReplayPos >= m_Recording.size())
+	{
+	  emit replayDone();
+	  return;
+	}
 
-  int delta = m_Recording[m_ReplayPos].timeOffset()-m_Recording[m_ReplayPos-1].timeOffset();
+  int delta = m_Recording[m_ReplayPos].timeOffset() - m_Recording[m_ReplayPos - 1].timeOffset();
   m_Timer->setInterval(delta > 0 ? delta * m_ReplaySpeedFactor : 0);
   m_Timer->start();
+}
+
+void QInputEventRecorder::setObj(QObject *obj) { 
+
+  m_Obj = obj; 
+  if (m_Obj){
+	INFO_LOG("the object to record is: " << m_Obj->metaObject()->className());
+	string p = "its parent is: ";
+	if (m_Obj->parent())
+	  p += m_Obj->parent()->metaObject()->className();
+	else
+	  p += "NULL";
+	INFO_LOG(p);
+  }
 }
