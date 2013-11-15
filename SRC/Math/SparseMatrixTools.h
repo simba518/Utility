@@ -109,6 +109,22 @@ namespace EIGEN3EXT{
 
   
   /************************************ block *********************************/
+  template <class T>
+  const std::vector<Eigen::Triplet<T> > &getTriplet(const Eigen::SparseMatrix<T>&S,std::vector<Eigen::Triplet<T> >&tri){
+	
+	tri.reserve(S.nonZeros());
+	for(int k=0;k<S.outerSize();++k)
+	  for(typename Eigen::SparseMatrix<T>::InnerIterator it(S,k);it;++it)
+		tri.push_back(Eigen::Triplet<T>(it.row(),it.col(),it.value()));
+	return tri;
+  }
+
+  template <class T>
+  std::vector<Eigen::Triplet<T> > getTriplet(const Eigen::SparseMatrix<T> &S){
+	std::vector<Eigen::Triplet<T> > tri;
+	getTriplet(S,tri);
+	return tri;
+  }
 
   /** 
    * Generate the sparse matrix P which will remove the rows of Matrix A in
@@ -160,7 +176,7 @@ namespace EIGEN3EXT{
 
   template <class T>
   Eigen::SparseMatrix<T> genReshapeMatrix(const int total_rows, 
-										  const std::set<int> &remove_rows_set, 							 
+										  const std::set<int> &remove_rows_set,			 
 										  const bool remove = true){
 	Eigen::SparseMatrix<T> P;
 	genReshapeMatrix(total_rows,remove,P,remove);
@@ -197,7 +213,7 @@ namespace EIGEN3EXT{
   template <class T>
   Eigen::SparseMatrix<T> genReshapeMatrix(const int total_rows, 
 										  const int r,
-										  const std::set<int> &remove_rows_set,							    
+										  const std::set<int> &remove_rows_set,		    
 										  const bool remove = true){
 	Eigen::SparseMatrix<T> P;
 	genReshapeMatrix(total_rows,r,remove_rows_set,P, remove);
@@ -208,28 +224,42 @@ namespace EIGEN3EXT{
   const Eigen::SparseMatrix<T> block(const Eigen::SparseMatrix<T> &S, 
 									 const int r0, const int c0, 
 									 const int rows, const int cols){
-	
-	assert_ge (r0,0);
-	assert_ge (c0,0);
-	assert_gt (rows,0);
-	assert_gt (cols,0);
-	assert_le (r0+rows, S.rows());
-	assert_le (c0+cols, S.cols());
-
-	std::set<int> remove_rows_set, remove_cols_set;
-	for (int i = 0; i < rows; ++i)  remove_rows_set.insert(r0+i);
-	for (int i = 0; i < cols; ++i)  remove_cols_set.insert(c0+i);
-
-	Eigen::SparseMatrix<T> B, P1, P2;
-	genReshapeMatrix(S.rows(), remove_rows_set, P1, false);
-	genReshapeMatrix(S.cols(), remove_cols_set, P2, false);
-	assert_eq (P1.cols(), S.rows());
-	assert_eq (P2.cols(), S.cols());
-
-	B = (P1*S)*(P2.transpose());
-	return B;
+	return S.block(r0,c0,rows,cols);
   }
 
+  template <class T>
+  std::vector<Eigen::Triplet<T> > &addToBlock(std::vector<Eigen::Triplet<T> > &M,
+								 const std::vector<Eigen::Triplet<T> > &sub, 
+								 const int r0, const int c0){
+	assert_ge(r0,0);
+	assert_ge(c0,0);
+	M.reserve(M.size()+sub.size());
+	for (size_t i = 0; i < sub.size(); ++i)
+	  M.push_back(Eigen::Triplet<T>(sub[i].row()+r0,sub[i].col()+c0,sub[i].value()));
+	return M;
+  }
+
+  template <class T>
+  std::vector<Eigen::Triplet<T> > &addToBlock(std::vector<Eigen::Triplet<T> > &M,
+								 const Eigen::SparseMatrix<T> &sub,
+								 const int r0, const int c0){
+	std::vector<Eigen::Triplet<T> > tripletList;
+	getTriplet(sub,tripletList);
+	return addToBlock(M,tripletList,r0,c0);
+  }
+ 
+  template <class T>
+  Eigen::SparseMatrix<T> &addToBlock(Eigen::SparseMatrix<T> &M,
+									  const Eigen::SparseMatrix<T> &sub,
+									  const int r0, const int c0){
+	assert_le(r0+sub.rows(),M.rows());
+	assert_le(c0+sub.cols(),M.cols());
+	std::vector<Eigen::Triplet<T> > tripletList;
+	getTriplet(M,tripletList);
+	addToBlock(tripletList,sub,r0,c0);
+	M.setFromTriplets(tripletList.begin(), tripletList.end());
+	return M;
+  }
 
   /************************************ inverse *********************************/
   template <class T>

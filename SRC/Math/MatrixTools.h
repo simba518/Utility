@@ -176,9 +176,9 @@ namespace EIGEN3EXT{
 	for(int i=0;i<n;i++){
 	  for(int j=0;j<i;j++){
 		const T a = (U.col(j).dot(M*U.col(j)));
-		assert_gt(a,0.0f);
+		assert_ne(a,0.0f);
 		const T alpha=(U.col(i).dot(M*U.col(j)))/a;
-		assert_gt(alpha,0.0f);
+		assert_ne(alpha,0.0f);
 		U.col(i)-=alpha*U.col(j);
 	  }
 	  U.col(i)/=sqrt((U.col(i).dot(M*U.col(i))));
