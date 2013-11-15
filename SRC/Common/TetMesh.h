@@ -16,15 +16,54 @@ namespace UTILITY{
   template <typename T>
   struct ElasticMaterial{
 
+	void reset(const int elements_num,const T rho,
+			   const T E/*Young's*/,
+			   const T v/*Poisson*/){
+	  assert_ge(elements_num,0);
+	  assert_gt(rho,0.0f);
+	  assert_gt(E,0.0f);
+	  assert_gt(v,0.0f);
+	  assert_in(v,0.0f,0.5f);
+	  _rho.assign(elements_num,rho);
+	  const Matrix<T,2,1> gl = toLameConstant(E,v);
+	  _G.assign(elements_num,gl[0]);
+	  _lambda.assign(elements_num,gl[1]);
+	}
 	void reset(const int elements_num){
-	  _rho.assign(elements_num,0.1f);
-	  _E.assign(elements_num,0.2f);
-	  _v.assign(elements_num,0.3f);
+	  reset(elements_num,1000.0f,2e6,0.45);
+	}
+	void reset(const T rho,const T E,const T v){
+	  const size_t elements_num = _rho.size();
+	  reset(elements_num,rho,E,v);
 	}
   
+	/// yp: [ Young's modulus(E), Poisson's ratio(v)]
+	/// gl: [ Shear modulus(G),  Lamé's first parameter(Lambda)]
+	/// http://en.wikipedia.org/wiki/Lam%C3%A9%27s_first_parameter
+	static Matrix<T,2,1> toLameConstant(const Matrix<T,2,1>& yp){
+	  Matrix<T,2,1> gl;
+	  gl.x()=yp.x()/(2.0f*(1.0f+yp.y()));
+	  gl.y()=yp.x()*yp.y()/((1.0f+yp.y())*(1.0f-2.0f*yp.y()));
+	  return gl;
+	}
+	static Matrix<T,2,1> fromLameConstant(const Matrix<T,2,1>& gl){
+	  Matrix<T,2,1> yp;
+	  yp.x()=gl.x()*(3.0f*gl.y()+2.0f*gl.x())/(gl.x()+gl.y());
+	  yp.y()=gl.y()/(2.0f*(gl.x()+gl.y()));
+	  return yp;
+	}
+	static Matrix<T,2,1> toLameConstant(const T y,const T p){
+	  Matrix<T,2,1> yp;  yp[0] = y; yp[1] = p;
+	  return toLameConstant(yp);
+	}
+	static Matrix<T,2,1> fromLameConstant(const T g, const T L){
+	  Matrix<T,2,1> gl;  gl[0]=g; gl[1]=L;
+	  return fromLameConstant(gl);
+	}
+
 	std::vector<T> _rho; // Density
-	std::vector<T> _E; // Young's modulus
-	std::vector<T> _v; // Poisson's ratio
+	std::vector<T> _G; // Shear modulus.
+	std::vector<T> _lambda; // Lamé's first parameter.
   };
 
   template <typename T>
@@ -100,7 +139,9 @@ namespace UTILITY{
 	}
 
 	// set 
-	void setSingleMaterial(const double&dens,const double&E,const double&v);
+	void setSingleMaterial(const double&dens,const double&E,const double&v){
+	  _mtl.reset(_tets.size(),dens,E,v);
+	}
 	void setRestPos(const VVec3d& pos){
 	  _nodes = pos;
 	}
@@ -121,6 +162,7 @@ namespace UTILITY{
 	const VVec3i& surface() const{return _surface;}
 	const VVec3d& normal() const{return _normal;}
 	const ElasticMaterial<double>& material() const{return _mtl;}
+	ElasticMaterial<double>& material() {return _mtl;}
 	double volume(const int i) const{
 	  return tetrahedron(_nodes[_tets[i][0]],
 	  					 _nodes[_tets[i][1]],

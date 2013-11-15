@@ -70,13 +70,6 @@ void TetMesh::reset(const VVec3d& nodes, const VVec4i& tets){
   computeSurfaceNormal();
 }
 
-void TetMesh::setSingleMaterial(const double&dens,const double&E,const double&v){
-
-  _mtl._rho.assign(_tets.size(),dens);
-  _mtl._E.assign(_tets.size(),E);
-  _mtl._v.assign(_tets.size(),v);
-}
-
 int TetMesh::getContainingElement(const Vector3d &pos)const{
 
   // linear scan
