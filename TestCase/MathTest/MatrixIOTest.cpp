@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(matrixIO){
 BOOST_AUTO_TEST_CASE(sparseMatrixIO){
  
   const std::string fname = std::string(TEST_DATA_DIR)+"temptSM.b";
-  const SparseMatrix<double> s2 = EIGEN3EXT::random(3,2,1.0f);
+  const SparseMatrix<double> s2 = EIGEN3EXT::random(3,2,(double)1.0f);
 
   SparseMatrix<double> s1;
   TEST_ASSERT(write(s2,fname));
