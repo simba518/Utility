@@ -23,23 +23,23 @@ BOOST_AUTO_TEST_SUITE(SparseGenEigenSolverTest)
 BOOST_AUTO_TEST_CASE(TestEigenSolver){
   
   const int n = 3;
-  Eigen::SparseMatrix<double> K(n,n),M(n,n);
+  Eigen::SparseMatrix<double> K(n,n);
   K.insert (0,0) = 1.0f;
   K.insert (1,0) = 0.10f;
   K.insert (1,1) = 2.0f;
   K.insert (2,2) = 3.0f;
 
-  M.insert (0,0) = 2.3f;
-  M.insert (1,1) = 1.2f;
-  M.insert (2,2) = 3.9f;
+  Eigen::DiagonalMatrix<double,-1> M(n);
+  M.diagonal()[0] = 2.3;
+  M.diagonal()[1] = 1.2;
+  M.diagonal()[2] = 3.9;
 
   MatrixXd eig_vec;
   VectorXd eig_val;
   const int max_eig_num = 2;
   K.makeCompressed();
-  M.makeCompressed();
 
-  TEST_ASSERT( EigenSparseGenEigenSolver<double>::solve(K,M,eig_vec,eig_val,max_eig_num) );
+  TEST_ASSERT( EigenSparseGenEigenSolver::solve(K,M,eig_vec,eig_val,max_eig_num) );
 
   const MatrixXd Km = K;
   const MatrixXd Mm = M;
