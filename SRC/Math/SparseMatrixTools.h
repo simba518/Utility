@@ -229,8 +229,8 @@ namespace EIGEN3EXT{
 
   template <class T>
   std::vector<Eigen::Triplet<T> > &addToBlock(std::vector<Eigen::Triplet<T> > &M,
-								 const std::vector<Eigen::Triplet<T> > &sub, 
-								 const int r0, const int c0){
+											  const std::vector<Eigen::Triplet<T> > &sub, 
+											  const int r0, const int c0){
 	assert_ge(r0,0);
 	assert_ge(c0,0);
 	M.reserve(M.size()+sub.size());
@@ -241,8 +241,8 @@ namespace EIGEN3EXT{
 
   template <class T>
   std::vector<Eigen::Triplet<T> > &addToBlock(std::vector<Eigen::Triplet<T> > &M,
-								 const Eigen::SparseMatrix<T> &sub,
-								 const int r0, const int c0){
+											  const Eigen::SparseMatrix<T> &sub,
+											  const int r0, const int c0){
 	std::vector<Eigen::Triplet<T> > tripletList;
 	getTriplet(sub,tripletList);
 	return addToBlock(M,tripletList,r0,c0);
@@ -250,8 +250,8 @@ namespace EIGEN3EXT{
  
   template <class T>
   Eigen::SparseMatrix<T> &addToBlock(Eigen::SparseMatrix<T> &M,
-									  const Eigen::SparseMatrix<T> &sub,
-									  const int r0, const int c0){
+									 const Eigen::SparseMatrix<T> &sub,
+									 const int r0, const int c0){
 	assert_le(r0+sub.rows(),M.rows());
 	assert_le(c0+sub.cols(),M.cols());
 	std::vector<Eigen::Triplet<T> > tripletList;
@@ -259,6 +259,20 @@ namespace EIGEN3EXT{
 	addToBlock(tripletList,sub,r0,c0);
 	M.setFromTriplets(tripletList.begin(), tripletList.end());
 	return M;
+  }
+
+  template <class T>
+  Eigen::SparseMatrix<T> getLower(const Eigen::SparseMatrix<T> &M){
+	
+	std::vector<Eigen::Triplet<T> > tri;
+	tri.reserve(M.nonZeros());
+	for(int k=0;k<M.outerSize();++k)
+	  for(typename Eigen::SparseMatrix<T>::InnerIterator it(M,k);it;++it)
+		if (it.row() >= it.col())
+		  tri.push_back(Eigen::Triplet<T>(it.row(),it.col(),it.value()));
+	Eigen::SparseMatrix<T> L(M.rows(),M.cols());
+	L.setFromTriplets(tri.begin(),tri.end());
+	return L;
   }
 
   /************************************ inverse *********************************/

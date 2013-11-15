@@ -80,4 +80,13 @@ BOOST_AUTO_TEST_CASE(addToBlockTest){
   ASSERT_EQ((M.block(r0,c0,r,c)-oldM.block(r0,c0,r,c)-sub).norm(),0.0f);
 }
 
+BOOST_AUTO_TEST_CASE(getLowerTest){
+ 
+  const SparseMatrix<double> M = random(8,8,1.0);
+  const SparseMatrix<double> L = getLower(M);
+  const SparseMatrix<double> M2 = L.selfadjointView<Lower>();
+  const SparseMatrix<double> M3 = M.selfadjointView<Lower>();
+  ASSERT_EQ((M2-M3).norm(),0.0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
