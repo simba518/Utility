@@ -167,6 +167,23 @@ namespace EIGEN3EXT{
 	PseudoInverse(A,invA);
 	return invA;
   }
+
+  template<class T>
+  inline void MGramSchmidt(const Eigen::Matrix<T,-1,-1> &M,Eigen::Matrix<T,-1,-1> &U){
+
+	assert_eq(M.rows(),M.cols());
+	const int n = U.cols();
+	for(int i=0;i<n;i++){
+	  for(int j=0;j<i;j++){
+		const T a = (U.col(j).dot(M*U.col(j)));
+		assert_gt(a,0.0f);
+		const T alpha=(U.col(i).dot(M*U.col(j)))/a;
+		assert_gt(alpha,0.0f);
+		U.col(i)-=alpha*U.col(j);
+	  }
+	  U.col(i)/=sqrt((U.col(i).dot(M*U.col(i))));
+	}
+  }
   
 }
 

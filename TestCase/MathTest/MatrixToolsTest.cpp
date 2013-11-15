@@ -2,8 +2,10 @@
 #include <UnitTestAssert.h>
 #include <eigen3/Eigen/Dense>
 #include <MatrixTools.h>
+#include <iostream>
 using namespace Eigen;
 using namespace EIGEN3EXT;
+using namespace std;
 
 BOOST_AUTO_TEST_SUITE(MatrixTools)
 
@@ -90,6 +92,20 @@ BOOST_AUTO_TEST_CASE(pseudoinverseTest){
   cU(2,1) = 1.0f/3.0f;
   cU(4,0) = 0.4;
   ASSERT_EQ_SMALL_MAT_TOL(invU4x5,cU,1e-8);
+}
+
+BOOST_AUTO_TEST_CASE(MGramSchmidtTest){
+
+  const int n = 10;
+  const int r = 3;
+  MatrixXd M1 = MatrixXd::Random(n,n)+MatrixXd::Identity(n,n)*10.0f;
+  const MatrixXd M = M1.transpose() + M1;
+  MatrixXd U = MatrixXd::Random(n,r);
+  
+  EIGEN3EXT::MGramSchmidt(M,U);
+  const MatrixXd UtMU = U.transpose()*M*U;
+  const MatrixXd I = MatrixXd::Identity(r,r);
+  ASSERT_EQ_SMALL_MAT_TOL(UtMU,I,1e-12);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,29 +1,17 @@
 #include <iostream>
-#include <map>
-#include <string>
+#include <MatrixTools.h>
+#include <eigen3/Eigen/Dense>
 using namespace std;
-
-typedef struct{
-  int num;
-  string name;
-}Student;
+using namespace Eigen;
 
 int main(int argc, char *argv[]){
-
-  map<int,string> stu;
-  stu[1] = "a;dkfjasd;lkfj";
-  map<int,string>::const_iterator it;
-  it = stu.find(1);
-  if (it != stu.end()){
-	cout << it->first << endl;
-	cout << it->second << endl;
-  }
-
-  // Student s[] = {
-  // 	{100,"hh"},
-  // 	{101,"hh"},
-  // 	{102,"haa"}
-  // };
   
+  MatrixXd M1 = MatrixXd::Random(4,4)+MatrixXd::Identity(4,4)*10.0f;
+  const MatrixXd M = M1.transpose() + M1;
+  MatrixXd U = MatrixXd::Random(4,2);
+
+  cout << U.transpose()*M*U << endl;
+  EIGEN3EXT::MGramSchmidt(M,U);
+  cout << U.transpose()*M*U << endl;
   return 0;
 }
