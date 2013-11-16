@@ -1,6 +1,42 @@
 #include <ElasticForceTetFullStVK.h>
 using namespace UTILITY;
 
+void ElasticForceTetFullStVK::forceHessian(HessianOpHcIJ& op,const VectorXd& X,const VectorXd& V){
+
+  for(int i=0;i<(int)_vol_mesh->tets().size();i++){
+
+	const Vector4i& tet=_vol_mesh->tets()[i];
+	const derivF& dF=_def_grad.dF()[i];
+	Matrix3d df[4][4];
+	Matrix3d F;
+	deformationGrad(F,i,X,V);
+	for(int x2=0;x2<4;x2++)
+	  for(int d2=0;d2<3;d2++){
+
+		const Matrix3d& dFxd2=dF._dF[x2][d2];
+		for(int x=0;x<4;x++)
+		  for(int d=0;d<3;d++){
+			const Matrix3d& dFxd=dF._dF[x][d];
+			Matrix3d deriv;
+			ddPF(deriv,dFxd,dFxd2,F,_vol_mesh->material()._G[i],_vol_mesh->material()._lambda[i],i);
+			deriv=-_volume[i]*deriv*_def_grad.invDm()[i].transpose();
+			
+			for(int fx=0;fx<3;fx++)
+			  for(int fd=0;fd<3;fd++)
+				df[fx][x](fd,d)=deriv(fd,fx);
+		  }
+		df[3][0]=-df[0][0]-df[1][0]-df[2][0];
+		df[3][1]=-df[0][1]-df[1][1]-df[2][1];
+		df[3][2]=-df[0][2]-df[1][2]-df[2][2];
+		df[3][3]=-df[0][3]-df[1][3]-df[2][3];
+		
+		for(int fc=0;fc<4;fc++)
+		  for(int nd=0;nd<4;nd++)
+			op(tet[x2]*3+d2,tet[fc],tet[nd],df[fc][nd]);
+	  }
+  }
+}
+
 void ElasticForceTetFullStVK::force_tet(mat3x4& f,const int& i,const VectorXd& X){
 
   Matrix3d  F;
@@ -13,11 +49,11 @@ void ElasticForceTetFullStVK::force_tet(mat3x4& f,const int& i,const VectorXd& X
 
 void ElasticForceTetFullStVK::forceDerivX_tet(TetDF &df, const int& i, const VectorXd& X){
 
-	Matrix3d  F;
-	_def_grad.evalFe(F,X,i);
+  Matrix3d  F;
+  _def_grad.evalFe(F,X,i);
 
-	const derivF& dF=_def_grad.dF()[i];
-	for(int x=0;x<4;x++)
+  const derivF& dF=_def_grad.dF()[i];
+  for(int x=0;x<4;x++)
 	for(int d=0;d<3;d++){
 
 	  const Matrix3d& dFxd=dF._dF[x][d];
@@ -30,10 +66,10 @@ void ElasticForceTetFullStVK::forceDerivX_tet(TetDF &df, const int& i, const Vec
 		  df.df[fx][x](fd,d)=deriv(fd,fx);
 	}
 
-	df.df[3][0]=-df.df[0][0]-df.df[1][0]-df.df[2][0];
-	df.df[3][1]=-df.df[0][1]-df.df[1][1]-df.df[2][1];
-	df.df[3][2]=-df.df[0][2]-df.df[1][2]-df.df[2][2];
-	df.df[3][3]=-df.df[0][3]-df.df[1][3]-df.df[2][3];
+  df.df[3][0]=-df.df[0][0]-df.df[1][0]-df.df[2][0];
+  df.df[3][1]=-df.df[0][1]-df.df[1][1]-df.df[2][1];
+  df.df[3][2]=-df.df[0][2]-df.df[1][2]-df.df[2][2];
+  df.df[3][3]=-df.df[0][3]-df.df[1][3]-df.df[2][3];
 }
 
 void ElasticForceTetFullStVK::forceDerivXdX_tet(mat3x4& dfdX,const int& i,const VectorXd& dx,const VectorXd& X){
@@ -70,4 +106,12 @@ void ElasticForceTetFullStVK::dPF(Matrix3d& deriv,const Matrix3d& dF,const Matri
   const Matrix3d  E=(F.transpose()*F-Matrix3d::Identity())*0.5f;
   const Matrix3d  derivE=(dF.transpose()*F+F.transpose()*dF)*0.5f;
   deriv=2.0f*G*(dF*E+F*derivE)+lambda*(E.trace()*dF+derivE.trace()*F);
+}
+
+void ElasticForceTetFullStVK::ddPF(Matrix3d& deriv,const Matrix3d& dF,const Matrix3d& dF2,const Matrix3d& F,const double&G,const double&lambda,const int&i) const{
+  const Matrix3d derivE=(dF.transpose()*F+F.transpose()*dF)*0.5f;
+  const Matrix3d derivE2=(dF2.transpose()*F+F.transpose()*dF2)*0.5f;
+  const Matrix3d derivE12=(dF.transpose()*dF2+dF2.transpose()*dF)*0.5f;
+  deriv=2.0f*G*(dF*derivE2+dF2*derivE+F*derivE12)+
+	lambda*(derivE2.trace()*dF+derivE12.trace()*F+derivE.trace()*dF2);
 }

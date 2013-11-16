@@ -5,6 +5,17 @@
 #include <ElasticForceTetFull.h>
 
 namespace UTILITY{
+
+  struct HessianOpHcIJ{
+  public:
+	HessianOpHcIJ(VectorXd& out,const VectorXd& I,const VectorXd& J):_out(out),_I(I),_J(J){out.setZero();}
+	virtual void operator()(const int& depth,const int& i,const int& j,const Matrix3d& m){
+	  _out.block<3,1>(i*3,0) += (m*_I[depth])*_J.block<3,1>(j*3,0);
+	}
+	VectorXd& _out;
+	const VectorXd& _I;
+	const VectorXd& _J;
+  };
   
   /**
    * @class ElasticForceTetFullStVK full force using StVK constitutive model.
@@ -16,6 +27,12 @@ namespace UTILITY{
   public:
 	ElasticForceTetFullStVK(pTetMesh_const vol_mesh):
 	  ElasticForceTetFull(vol_mesh){}
+
+	void forceHessian(HessianOpHcIJ& oper,const VectorXd& X,const VectorXd& V);
+    void forceHessianHcIJ(VectorXd& HIJ,const VectorXd& I,const VectorXd& J,const VectorXd& X,const VectorXd& V){
+	  HessianOpHcIJ op(HIJ,I,J);
+	  forceHessian(op,X,V);
+	}
 
   protected:
 	void computeTetForces(VecMat3x4 &tet_forces, const VectorXd &X){
@@ -44,6 +61,7 @@ namespace UTILITY{
 	void W(double& W,const Matrix3d& F,const double& G,const double& lambda,const double& V) const;
 	void PF(Matrix3d& P,const Matrix3d& F,const double& G,const double& lambda) const;
 	void dPF(Matrix3d& deriv,const Matrix3d& dF,const Matrix3d& F,const double& G,const double& lambda) const;
+	void ddPF(Matrix3d& deriv,const Matrix3d& dF,const Matrix3d& dF2,const Matrix3d& F,const double&G,const double&lambda,const int&i)const;
   };
   
   typedef boost::shared_ptr<ElasticForceTetFullStVK> pElasticForceTetFullStVK;

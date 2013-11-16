@@ -34,7 +34,22 @@ namespace UTILITY{
 	virtual void computeTetForceDerivX(std::vector<TetDF>&df,const VectorXd &X)=0;
 	virtual void computeTetForceDerivXdX(VecMat3x4 &tet_kdx,const VectorXd &dx,const VectorXd &X)=0;
 	void initKEntry(SparseMatrix<double> &K,std::vector<int> &entries)const;
-	
+	void deformationGrad(Matrix3d& F,const int& i,const VectorXd& X,const VectorXd& V) const{
+	  const Vector4i& e=_vol_mesh->tets()[i];
+	  deformationGradEntry(F,_def_grad.invDm()[i],
+						   X.block<3,1>(e[0]*3,0),X.block<3,1>(e[1]*3,0),
+						   X.block<3,1>(e[2]*3,0),X.block<3,1>(e[3]*3,0));
+	}
+
+	template <typename T,typename T2,typename T3>
+	void deformationGradEntry(Eigen::Matrix<T,3,3>& ret,const Eigen::Matrix<T2,3,3>& invDm,const T3& a,const T3& b,const T3& c,const T3& d) const{
+	  Eigen::Matrix<T,3,3> Ds;
+	  Ds.col(0)=a-d;
+	  Ds.col(1)=b-d;
+	  Ds.col(2)=c-d;
+	  ret=Ds*invDm;
+	}
+
   protected:
 	pTetMesh_const _vol_mesh;
 	DefGradTet _def_grad;
