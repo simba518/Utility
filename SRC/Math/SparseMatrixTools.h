@@ -137,6 +137,11 @@ namespace EIGEN3EXT{
    * @param remove if it is false, the rows in remove_rows_set will be
    * preserved, and others will be removed.
    * @note all indices in remove_rows_set should be in [0,total_rows-1].
+   * @usage (see MatrixReshape.pdf):
+   * remove rows: A = P*A
+   * add rows: A = P.t*A
+   * remove cols: A = A*P.t
+   * add cols: A = A*P
    */	
   template <class T>
   const Eigen::SparseMatrix<T> &genReshapeMatrix(const int total_rows, 
