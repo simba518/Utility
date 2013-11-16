@@ -168,8 +168,8 @@ namespace EIGEN3EXT{
 	return invA;
   }
 
-  template<class T>
-  inline void MGramSchmidt(const Eigen::Matrix<T,-1,-1> &M,Eigen::Matrix<T,-1,-1> &U){
+  template<class MATRIX_TMP, class T>
+  inline void MGramSchmidt(const MATRIX_TMP &M,Eigen::Matrix<T,-1,-1> &U){
 
 	assert_eq(M.rows(),M.cols());
 	const int n = U.cols();
