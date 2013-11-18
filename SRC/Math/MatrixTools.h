@@ -178,7 +178,6 @@ namespace EIGEN3EXT{
 		const T a = (U.col(j).dot(M*U.col(j)));
 		assert_ne(a,0.0f);
 		const T alpha=(U.col(i).dot(M*U.col(j)))/a;
-		assert_ne(alpha,0.0f);
 		U.col(i)-=alpha*U.col(j);
 	  }
 	  U.col(i)/=sqrt((U.col(i).dot(M*U.col(i))));
