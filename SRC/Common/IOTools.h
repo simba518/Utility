@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <set>
 #include <assertext.h>
 #include <Log.h>
 
@@ -126,6 +127,17 @@ namespace UTILITY{
 	  }
 	}
 	in.close();
+	return succ;
+  }
+
+  template<class T>
+  inline bool load(const std::string fname,std::set<T> &data,IO_TYPE io_type=BINARY){
+	std::vector<T> dv;
+	const bool succ = loadVec(fname,dv,io_type);
+	data.clear();
+	if (succ)
+	  for (size_t i = 0; i < dv.size(); ++i)
+		data.insert(dv[i]);
 	return succ;
   }
 

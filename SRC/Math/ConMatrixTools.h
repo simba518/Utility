@@ -29,16 +29,22 @@ namespace UTILITY{
   }
 
   // Compute con matrix fixed all of the provided nodes, not only barycenter.
-  inline void computeConM(const vector<int> &con_nodes, SparseMatrix<double> &C, const int total_node_num){
+  template<class VECTOR_I>
+  inline void computeConM(const VECTOR_I &con_nodes, SparseMatrix<double> &C, const int total_node_num){
   
 	assert_gt(total_node_num,0);
 	assert_gt(con_nodes.size(),0);
 
 	C.resize(con_nodes.size()*3, total_node_num*3);
 	C.reserve(con_nodes.size()*3);
-	for (int i = 0; i < (int)con_nodes.size(); ++i){
-	  insertI3x3(C, con_nodes[i], i);
-	}
+
+	vector<int> con_nodes_vec;
+	con_nodes_vec.reserve((con_nodes.size()));
+	BOOST_FOREACH(int ele, con_nodes)
+	  con_nodes_vec.push_back(ele);
+	
+	for (int i = 0; i < (int)con_nodes_vec.size(); ++i)
+	  insertI3x3(C, con_nodes_vec[i], i);
   }
 
   // compute the constraint matrix of the barycenter constraints.
