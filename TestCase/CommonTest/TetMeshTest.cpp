@@ -206,6 +206,30 @@ BOOST_AUTO_TEST_CASE(testInterp){
 
 }
 
+BOOST_AUTO_TEST_CASE(testInterpMatrix){
+
+  pTetMesh tet_mesh = TetMeshFactoryForTest::tet2();
+  VectorXd vertices;
+  vector<int> nodes;
+  VectorXd weights; 
+  vertices.resize(9);
+  vertices << 0,-1,0,  0.1,0.1,0.1, -1,-10,1;
+  tet_mesh->buildInterpWeights(vertices,nodes,weights);
+  SparseMatrix<double> A;
+  tet_mesh->buildInterpMatrix(nodes,weights,tet_mesh->nodes().size(),A);
+
+  VectorXd u(5*3);
+  u << 1,0,0, 1,0,0, 1,0,0, 1,0,0, 1,0,0;
+
+  VectorXd uTarget_1;
+  tet_mesh->interpolate(nodes,weights,u,uTarget_1);
+
+  ASSERT_EQ(A.rows(),uTarget_1.size());
+  ASSERT_EQ(A.cols(),u.size());
+  const VectorXd uTarget_2 = A*u;
+  ASSERT_EQ(uTarget_1,uTarget_2);
+}
+
 BOOST_AUTO_TEST_CASE(testInterpIODino){
 
   const string tetfname = std::string(TEST_DATA_DIR)+"dino.abq";

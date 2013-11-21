@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Sparse>
 #include <algorithm>
 #include <HashedId.h>
 #include <assertext.h>
@@ -193,6 +194,8 @@ namespace UTILITY{
 						   VectorXd&weights,const double zeroThreshold=0.0f)const;
 	static void interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 							const VectorXd& u,VectorXd& uTarget);
+	static void buildInterpMatrix(const vector<int> &tetNodes,const VectorXd &weights,
+								  const int tetNodesNum, SparseMatrix<double>& A);
 
 	BBoxD getBBox()const;
 

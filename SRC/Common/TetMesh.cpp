@@ -158,10 +158,29 @@ void TetMesh::interpolate(const vector<int> &tetNodes,const VectorXd &weights,
 	for (int j=0; j < numElementVertices; j++) {
 	  const int k = tetNodes[numElementVertices*i+j];
 	  assert_in(k*3,0,u.size()-2);
-	  defo += weights[numElementVertices*i+j]*u.segment(k*3,3);
+	  defo += weights[numElementVertices*i+j]*u.segment<3>(k*3);
 	}
-	uTarget.segment(i*3,3) = defo;
+	uTarget.segment<3>(i*3) = defo;
   }
+}
+
+void TetMesh::buildInterpMatrix(const vector<int> &tetNodes,const VectorXd &weights,
+								const int tetNodesNum, SparseMatrix<double>& A){
+  
+  const int n = weights.size()/4;
+  vector< Triplet<double> > tri;
+  tri.reserve(3*tetNodes.size());
+
+  for (int i = 0; i < n; ++i){
+	for (int j = i*4; j < i*4+4; ++j){
+	  tri.push_back(Triplet<double>(i*3+0, tetNodes[j]*3+0,weights[j] ));
+	  tri.push_back(Triplet<double>(i*3+1, tetNodes[j]*3+1,weights[j] ));
+	  tri.push_back(Triplet<double>(i*3+2, tetNodes[j]*3+2,weights[j] ));
+	}
+  }
+
+  A.resize(n*3,tetNodesNum*3);
+  A.setFromTriplets(tri.begin(),tri.end());
 }
 
 bool TetMesh::load(const std::string& filename){
