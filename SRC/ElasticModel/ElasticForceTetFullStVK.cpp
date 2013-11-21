@@ -115,3 +115,25 @@ void ElasticForceTetFullStVK::ddPF(Matrix3d& deriv,const Matrix3d& dF,const Matr
   deriv=2.0f*G*(dF*derivE2+dF2*derivE+F*derivE12)+
 	lambda*(derivE2.trace()*dF+derivE12.trace()*F+derivE.trace()*dF2);
 }
+
+double ElasticForceTetFullStVK::energy(const VectorXd &X){
+  
+  VectorM3x3 F;
+  _def_grad.evalF(F,X);
+  const ElasticMaterial<double>& mtl = _vol_mesh->material();
+
+  double energy_phi = 0.0f;
+  for (int i = 0; i < F.size(); ++i){
+
+	const double lambda = mtl._lambda[i];
+	const double mu = mtl._G[i];
+    Matrix3d E = F[i].transpose()*F[i];
+	E(0,0) -= 1.0f;
+	E(1,1) -= 1.0f;
+	E(2,2) -= 1.0f;
+	E *= 0.5f;
+	const double traceE = E(0,0)+E(1,1)+E(2,2);
+	energy_phi += (lambda*traceE*traceE*0.5f+mu*contract(E,E))*_volume[i];
+  }
+  return energy_phi;
+}

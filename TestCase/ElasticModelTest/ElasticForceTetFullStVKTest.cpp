@@ -81,4 +81,27 @@ BOOST_AUTO_TEST_CASE(testK){
   ASSERT_LT((K+ref_K).norm(),1e-5); /// @bug here we use -K.
 }
 
+BOOST_AUTO_TEST_CASE(testEnergy){
+  
+  const string tet_fname = std::string(TEST_DATA_DIR)+"beam.abq";
+  pTetMesh mesh = pTetMesh(new TetMesh);
+  TEST_ASSERT ( mesh->load(tet_fname) );
+  mesh->material().reset(1000.0f,2E6,0.45);
+  const int n = mesh->nodes().size();
+
+  const string u_str = std::string(TEST_DATA_DIR)+"disp_for_test_elastic_energy.b";
+  VectorXd u;
+  TEST_ASSERT( load(u_str,u) );
+  VectorXd x;
+  mesh->nodes(x);
+  ASSERT_EQ(x.size(),u.size());
+  x += u;
+
+  ElasticForceTetFullStVK elas(mesh);
+  const double energy = elas.energy(x);
+  ASSERT_EQ_TOL(energy,11720539881.8642311,1e-3);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
+
+// -87.3405

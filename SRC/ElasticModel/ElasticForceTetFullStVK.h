@@ -28,6 +28,7 @@ namespace UTILITY{
 	ElasticForceTetFullStVK(pTetMesh_const vol_mesh):
 	  ElasticForceTetFull(vol_mesh){}
 
+	double energy(const VectorXd &X);
 	void forceHessian(HessianOpHcIJ& oper,const VectorXd& X,const VectorXd& V);
     void forceHessianHcIJ(VectorXd& HIJ,const VectorXd& I,const VectorXd& J,const VectorXd& X,const VectorXd& V){
 	  HessianOpHcIJ op(HIJ,I,J);

@@ -24,6 +24,7 @@ namespace UTILITY{
 	ElasticForceTetFull(pTetMesh_const vol_mesh):_vol_mesh(vol_mesh){
 	  this->prepare();
 	}
+	virtual double energy(const VectorXd &X) = 0;
 	virtual void force(const VectorXd &X, VectorXd &out);
 	virtual const SparseMatrix<double> &K(const VectorXd &X);
 	virtual void Kdx(const VectorXd &dx, const VectorXd &X, VectorXd &out);
@@ -48,6 +49,13 @@ namespace UTILITY{
 	  Ds.col(1)=b-d;
 	  Ds.col(2)=c-d;
 	  ret=Ds*invDm;
+	}
+	
+	template <typename T>
+	inline static double contract(const Eigen::Matrix<T,3,3> &A,const Eigen::Matrix<T,3,3> &B){
+	  return A(0,0)*B(0,0)+A(0,1)*B(0,1)+A(0,2)*B(0,2)+
+		A(1,0)*B(1,0)+A(1,1)*B(1,1)+A(1,2)*B(1,2)+
+		A(2,0)*B(2,0)+A(2,1)*B(2,1)+A(2,2)*B(2,2);
 	}
 
   protected:
