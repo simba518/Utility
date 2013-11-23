@@ -43,15 +43,15 @@ namespace UTILITY{
 	  assert_eq(pc.cols(),_con_groups.numNodes());
 	  _pc = pc;
 	}
-	void moveOneGroup(const Vector3d &u,const int group_id){
+	void updatePc(const Matrix<double,3,-1> &pc,const int group_id){
 
 	  assert_in(group_id,0,numGroup()-1);
 	  const int nodes = getConNodesSet()[group_id].size();
+	  assert_eq(pc.cols(),nodes);
 	  int c0 = 0;
 	  for (int i = 0; i < group_id; ++i)
 		c0 += getConNodesSet()[i].size();
-	  for (int c = c0; c < _pc.cols(); ++c)
-		_pc.col(c) += u;
+	  _pc.block(0,c0,3,nodes) = pc;
 	}
 
 	const vector<set<int> > &getConNodesSet()const{
