@@ -23,11 +23,11 @@ namespace QGLVEXT{
   class DragObserver{
 	
   public: 
-	virtual void selectDragEle(int id) = 0;
-	virtual void startDrag (int screen_x,int screen_y) = 0;
-	virtual void startDrag (double x,double y,double z) = 0;
-	virtual void dragTo (double x,double y,double z) = 0;
-	virtual void stopDrag (double x,double y,double z) = 0;
+	virtual void selectDragEle(int id){}
+	virtual void startDragScreen (int screen_x,int screen_y){}
+	virtual void startDrag (double x,double y,double z){}
+	virtual void dragTo (double x,double y,double z){}
+	virtual void stopDrag (double x,double y,double z){}
   };
   typedef boost::shared_ptr<DragObserver> pDragObserver;
 

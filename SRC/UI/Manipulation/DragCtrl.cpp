@@ -45,7 +45,7 @@ bool DragCtrl::press (QMouseEvent *e){
 
 	  begin_drag = true;
 	  if(_observer)
-		_observer->startDrag(e->pos().x(),e->pos().y());
+		_observer->startDragScreen(e->pos().x(),e->pos().y());
 	  emit startDrag (e->pos().x(),e->pos().y());
 
 	  if(_selector){

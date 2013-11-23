@@ -10,7 +10,6 @@ SET(NONE_QT_CPP
   Render/MeshRender.cpp
   Render/VolNodeGroupRender.cpp
   Render/DragGroupSelDraw.cpp
-  Manipulation/SelectionGroup.cpp
   ${shader_src}
 )
 
