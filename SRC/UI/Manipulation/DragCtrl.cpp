@@ -11,7 +11,7 @@ DragCtrl::DragCtrl(pQGLViewerExt _viewer):viewer(_viewer){
   is_dragging = false;
   _selected = false;
   mouse_button = Qt::LeftButton;
-  modify_key = Qt::ControlModifier;
+  modify_key = Qt::NoModifier;
   z_deepth = 0.5f;
   createConnections();
 }
@@ -23,7 +23,7 @@ DragCtrl::DragCtrl(pQGLViewerExt _viewer, pSelectable selector):
   is_dragging = false;
   _selected = false;
   mouse_button = Qt::LeftButton;
-  modify_key = Qt::ControlModifier;
+  modify_key = Qt::NoModifier;
   z_deepth = 0.5f;
   createConnections();
 }
@@ -109,9 +109,12 @@ void DragCtrl::initZ_Deepth(){
 void DragCtrl::selectDragEle(const vector<int> ids){
   
   if(_selected && ids.size() > 0){
-	_selected = false;
 	if(_observer)
 	  _observer->selectDragEle(ids[0]);
 	emit selectDragEle(ids[0]);
+  }else{
+	begin_drag = false;
+	is_dragging = false;
   }
+  _selected = false;
 }

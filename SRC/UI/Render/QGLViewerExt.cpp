@@ -234,6 +234,17 @@ void QGLViewerExt::init(){
   glBlendFunc(GL_ONE, GL_ONE);
 
   resetSceneBoundBox(-20,-20,-20,20,20,20);
+
+  // set mouse binding
+  setMouseBinding(Qt::MiddleButton, CAMERA, NO_MOUSE_ACTION);
+  setMouseBinding(Qt::LeftButton, CAMERA, NO_MOUSE_ACTION);
+  setMouseBinding(Qt::RightButton, CAMERA, NO_MOUSE_ACTION);
+  setWheelBinding(Qt::NoModifier, CAMERA, NO_MOUSE_ACTION);
+  
+  setMouseBinding(Qt::MiddleButton+Qt::CTRL, CAMERA, ZOOM);
+  setMouseBinding(Qt::LeftButton+Qt::CTRL, CAMERA, ROTATE);
+  setMouseBinding(Qt::RightButton+Qt::CTRL, CAMERA, TRANSLATE);
+  setWheelBinding(Qt::ControlModifier, CAMERA, MOVE_FORWARD);
 }
 
 void QGLViewerExt::select(const QMouseEvent *event){

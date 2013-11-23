@@ -8,16 +8,16 @@ using namespace std;
 
 using namespace QGLVEXT;
 
-SelectCtrl::SelectCtrl(pQGLViewerExt viewer,pSelectable selector)
-  :viewer(viewer),selector(selector){
+SelectCtrl::SelectCtrl(pQGLViewerExt viewer,pSelectable selector,const int minSelRect)
+  :viewer(viewer),selector(selector),minimalSelRect(minSelRect){
  
   assert (viewer != NULL);
   select_rect = pSelfRenderRect( new SelfRenderRect(viewer) );
   select_rect->clean();
   viewer->addSelfRenderEle(select_rect);
 
-  add_mouse_button = Qt::LeftButton;
-  add_modify_key = Qt::ShiftModifier;
+  add_mouse_button = Qt::RightButton;
+  add_modify_key = Qt::NoModifier;
 
   rm_mouse_button = Qt::RightButton;
   rm_modify_key = Qt::ShiftModifier;
@@ -84,6 +84,10 @@ bool SelectCtrl::release (QMouseEvent *e){
 
   bool perferm = false;
   if(begin_select){
+	if(select_rect->width() < minimalSelRect)
+	  select_rect->setWidth(minimalSelRect);
+	if(select_rect->height() < minimalSelRect)
+	  select_rect->setHeight(minimalSelRect);
 
 	select_rect->normalized();
 	emit select(*select_rect);
@@ -98,7 +102,6 @@ bool SelectCtrl::move (QMouseEvent *e){
 
   bool perferm = false;
   if(begin_select){
-
 	select_rect->setBottomRight(e->pos());
 	emit rectChanged();
   }

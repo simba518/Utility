@@ -28,7 +28,7 @@ namespace QGLVEXT{
 	Q_OBJECT
 	
   public:
-	SelectCtrl(pQGLViewerExt viewer,pSelectable selector);
+	SelectCtrl(pQGLViewerExt viewer,pSelectable selector,const int minSelRect=0);
 	void setAddKeyMouse(Qt::KeyboardModifiers key,Qt::MouseButton button){
 	  add_modify_key = key;
 	  add_mouse_button = button;
@@ -82,6 +82,8 @@ namespace QGLVEXT{
 
 	pSelfRenderRect select_rect;
 	bool begin_select;
+	int minimalSelRect; // the minimal width and height for the select rect,
+						// even the mouse is not move.
 
 	/**
 	 * the mouse button and modify key that trigs the selection operation
