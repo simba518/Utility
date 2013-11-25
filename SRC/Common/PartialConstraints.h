@@ -75,7 +75,7 @@ namespace UTILITY{
 	  return getConNodesSet().size();
 	}
 	bool isEmpty()const{
-	  _con_groups.isEmpty();
+	  return _con_groups.isEmpty();
 	}
 	const int getFrameId()const{
 	  return _frameid;

@@ -8,3 +8,4 @@
 !utility/*.vcproj
 !UI/*.vcproj
 !Common/*.vcproj
+!AnimationEditor/*.vcproj

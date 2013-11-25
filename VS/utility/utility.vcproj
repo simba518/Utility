@@ -111,7 +111,7 @@
 				AdditionalIncludeDirectories="&quot;D:\lsw\ExtLibs\libQGLViewer-2.3.4&quot;;.;&quot;$(QTDIR)\include&quot;;&quot;.\GeneratedFiles\$(ConfigurationName)&quot;;&quot;$(QTDIR)\include\QtCore&quot;;&quot;$(QTDIR)\include\QtGui&quot;;D:\lsw\Utility\SRC\Common;D:\lsw\Utility\SRC\UI\Animation;D:\lsw\Utility\SRC\UI\Manipulation;D:\lsw\Utility\SRC\UI\RecordAndPlay;D:\lsw\Utility\SRC\UI\Render;D:\lsw\Utility\SRC\UI\Shader;&quot;D:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot;;&quot;D:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot;"
 				PreprocessorDefinitions=",UNICODE,WIN32;QT_DLL;QT_CORE_LIB;QT_GUI_LIB"
 				RuntimeLibrary="3"
-				TreatWChar_tAsBuiltInType="false"
+				TreatWChar_tAsBuiltInType="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
