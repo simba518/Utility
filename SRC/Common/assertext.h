@@ -10,19 +10,17 @@
 #include <iostream>
 #include <assert.h>
 
-/**
- * If NDEBUG is defined, do nothing.
- */
-#ifdef	NDEBUG
-# define assert_eq(value_a,value_b)		(__ASSERT_VOID_CAST (0))
-# define assert_ne(value_a,value_b)		(__ASSERT_VOID_CAST (0))
-# define assert_ge(value_a,value_b)		(__ASSERT_VOID_CAST (0))
-# define assert_gt(value_a,value_b)		(__ASSERT_VOID_CAST (0))
-# define assert_le(value_a,value_b)		(__ASSERT_VOID_CAST (0))
-# define assert_lt(value_a,value_b)		(__ASSERT_VOID_CAST (0))
-# define assert_in(value_a,min,max)		(__ASSERT_VOID_CAST (0))
+#if defined(WIN32) || defined(NDEBUG)/* Not NDEBUG.  */
 
-#else /* Not NDEBUG.  */
+# define assert_eq(value_a,value_b)		
+# define assert_ne(value_a,value_b)		
+# define assert_ge(value_a,value_b)		
+# define assert_gt(value_a,value_b)		
+# define assert_le(value_a,value_b)		
+# define assert_lt(value_a,value_b)		
+# define assert_in(value_a,min,max)
+
+#else
 
 // define a new assert micro to throw expections instead of abort
 #define new_assert(e) ((void) ((e) ? 0 : my_assert (#e, __FILE__, __LINE__)))

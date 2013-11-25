@@ -1,3 +1,4 @@
+#include <WindowsHeaders.h>
 #include <boost/foreach.hpp>
 #include "VolNodeGroupRender.h"
 #include <PhongShader.h>

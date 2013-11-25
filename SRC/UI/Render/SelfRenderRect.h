@@ -1,18 +1,17 @@
 #ifndef _SELFRENDERRECT_H_
 #define _SELFRENDERRECT_H_
 
+#include <QGLViewerHeaders.h>
 #include <QRect>
-#include <QGLViewer/qglviewer.h>
-using namespace qglviewer;
-
 #include <SelfRenderEle.h>
+using namespace qglviewer;
 
 namespace QGLVEXT{
   
   class SelfRenderRect: public QRect,public SelfRenderEle{
 
   public:
-	SelfRenderRect(const QGLViewer *p):p_qglviewer(p){
+	  SelfRenderRect(const QGLViewer *p):p_qglviewer(p){
 	  setRenderPriority(FOURTH_RENDER);
 	}
 	void draw()const;

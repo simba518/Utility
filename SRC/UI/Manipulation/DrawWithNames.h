@@ -6,6 +6,9 @@ using namespace std;
 #include <vector>
 #include <eigen3/Eigen/Dense>
 using namespace Eigen;
+#ifdef WIN32
+#include "windows.h"
+#endif
 #include <GL/gl.h>
 
 namespace QGLVEXT{

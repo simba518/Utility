@@ -8,6 +8,10 @@ using namespace QGLVEXT;
 using namespace UTILITY;
 using namespace Eigen;
 
+#ifdef WIN32
+#define TEST_DATA_DIR "D:\\lsw\\Utility\\TestCase\\TestData\\"
+#endif
+
 int main(int argc, char** argv){
 
   QApplication application(argc,argv);

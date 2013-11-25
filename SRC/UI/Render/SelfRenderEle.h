@@ -1,7 +1,15 @@
 #ifndef _SELFRENDERELE_H_
 #define _SELFRENDERELE_H_
 
+#ifdef WIN32
+#define _interlockedbittestandset fk_m$_set
+#define _interlockedbittestandreset fk_m$_reset
 #include <boost/shared_ptr.hpp>
+#undef _interlockedbittestandset
+#undef _interlockedbittestandreset
+#else
+#include <boost/shared_ptr.hpp>
+#endif
 
 namespace QGLVEXT{
 

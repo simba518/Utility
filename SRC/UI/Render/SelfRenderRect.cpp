@@ -1,6 +1,6 @@
 #include <iostream>
 using namespace std;
-
+#include <WindowsHeaders.h>
 #include <GL/gl.h>
 #include "SelfRenderRect.h"
 

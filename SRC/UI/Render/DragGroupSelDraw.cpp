@@ -1,4 +1,6 @@
+#include <boost/foreach.hpp>
 #include "DragGroupSelDraw.h"
+
 #include <GL/glew.h>
 #include <GL/gl.h>
 using namespace UTILITY;

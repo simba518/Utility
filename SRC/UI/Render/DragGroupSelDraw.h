@@ -2,7 +2,6 @@
 #define _DRAGGROUPSELDRAW_H_
 
 #include <assertext.h>
-#include <boost/foreach.hpp>
 #include <TetMesh.h>
 #include <vector>
 #include <set>
