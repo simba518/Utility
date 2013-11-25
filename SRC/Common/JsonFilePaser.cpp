@@ -80,10 +80,12 @@ bool JsonFilePaser::fileIsExist(const std::string eleName,const std::string file
   return exist;
 }
 bool JsonFilePaser::dirIsExist(const std::string eleName,const std::string dirPath,bool check)const{
+
   bool exist = true;
   if(check){
-	exist = boost::filesystem::is_directory(dirPath);
-	WARN_LOG_COND("dir '"<< dirPath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
-  }
+		boost::filesystem::path mypath(dirPath.c_str());
+		exist = boost::filesystem::is_directory(mypath);
+		WARN_LOG_COND("dir '"<< dirPath <<"' is not existed! (in node '" << eleName <<"' )" ,exist);
+	}
   return exist;
 }

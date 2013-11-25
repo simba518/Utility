@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="AnimationEditor"
-	ProjectGUID="{751CA98B-25EF-4A98-93EE-E11F2A0EB6DB}"
+	ProjectGUID="{A2287AFD-F0D9-4DE4-A4E8-F0048DDE6CDB}"
 	Keyword="Qt4VSv1.0"
 	TargetFrameworkVersion="0"
 	>
@@ -124,9 +124,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="qtmaind.lib QtCored4.lib QtGuid4.lib QtOpenGLd4.lib Common.lib QGLViewer2.lib UI.lib libboost_filesystem-vc90-mt-1_55.lib glew32.lib"
+				AdditionalDependencies="qtmaind.lib QtCored4.lib QtGuid4.lib QtOpenGLd4.lib Common.lib QGLViewer2.lib UI.lib glew32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				AdditionalLibraryDirectories="D:\lsw\Utility\VS\Debug;&quot;D:\lsw\ExtLibs\libQGLViewer-2.3.4\QGLViewer\debug&quot;;&quot;$(QTDIR)\lib&quot;;D:\lsw\Utility\VS\Win32\Debug;D:\boost\lib"
+				AdditionalLibraryDirectories="D:\lsw\Utility\VS\Debug;&quot;D:\lsw\ExtLibs\libQGLViewer-2.3.4\QGLViewer\debug&quot;;&quot;$(QTDIR)\lib&quot;;D:\lsw\Utility\VS\Win32\Debug"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 			/>
@@ -166,19 +166,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMConNodeDrag.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMRender.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditMainWin.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\main_UITest.cpp"
+				RelativePath="..\..\..\AnimationEditor\SRC\Editor\InterpolatorFactory.cpp"
 				>
 			</File>
 		</Filter>
@@ -218,6 +206,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMConNodeDrag.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMConNodeDrag.h"
 				>
 				<FileConfiguration
@@ -237,11 +229,15 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing AniEditDMConNodeDrag.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB  &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMRender.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMRender.h"
@@ -263,7 +259,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing AniEditDMRender.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB  &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
@@ -289,11 +285,15 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing AniEditDMSelection.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditMainWin.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditMainWin.h"
@@ -315,11 +315,27 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing AniEditMainWin.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB  &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\Editor\BaseInterpolator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\Editor\FakeInterpForUITest.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\Editor\InterpolatorFactory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\main_UITest.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\UI\PreviewAniDM.h"
@@ -345,7 +361,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing PreviewAniDMRender.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\AnimationEditor\SRC\UI&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\Math&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\AnimationEditor\SRC\Editor&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
@@ -587,26 +603,6 @@
 					</FileConfiguration>
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Interpolator"
-			>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\Editor\BaseInterpolator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\Editor\FakeInterpForUITest.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\Editor\InterpolatorFactory.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\Editor\InterpolatorFactory.h"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
