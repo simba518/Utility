@@ -24,13 +24,13 @@ void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
 			ERROR_LOG("the input pSelfRenderEle is null!");
 		}
 	}
-	// update();
+	update();
 }
 
 void QGLViewerExt::removeSelfRenderEle (pSelfRenderEle ele){
 
 	self_render_ele.removeAll(ele);
-	// update();
+	update();
 }
 
 void QGLViewerExt::addTextForRender (pTextForRender ele){
@@ -41,12 +41,12 @@ void QGLViewerExt::addTextForRender (pTextForRender ele){
 			ERROR_LOG("the input pTextForRender is null!");
 		}
 	}
-	//update();
+	update();
 }
 
 void QGLViewerExt::removeTextForRender (pTextForRender ele){
 	_textForRender.removeAll(ele);
-	//update();
+	update();
 }
 
 bool QGLViewerExt::toggleRemoveAddSelfRenderEle (pSelfRenderEle ele){
@@ -234,6 +234,17 @@ void QGLViewerExt::init(){
 	glBlendFunc(GL_ONE, GL_ONE);
 
 	resetSceneBoundBox(-20,-20,-20,20,20,20);
+
+	// set mouse binding
+	setMouseBinding(Qt::MiddleButton, CAMERA, NO_MOUSE_ACTION);
+	setMouseBinding(Qt::LeftButton, CAMERA, NO_MOUSE_ACTION);
+	setMouseBinding(Qt::RightButton, CAMERA, NO_MOUSE_ACTION);
+	setWheelBinding(Qt::NoModifier, CAMERA, NO_MOUSE_ACTION);
+   
+	setMouseBinding(Qt::MiddleButton+Qt::CTRL, CAMERA, ZOOM);
+	setMouseBinding(Qt::LeftButton+Qt::CTRL, CAMERA, ROTATE);
+	setMouseBinding(Qt::RightButton+Qt::CTRL, CAMERA, TRANSLATE);
+	setWheelBinding(Qt::ControlModifier, CAMERA, MOVE_FORWARD);
 }
 
 void QGLViewerExt::select(const QMouseEvent *event){
@@ -276,7 +287,7 @@ void QGLViewerExt::endSelection(const QPoint&p){
 		emit selectedIds(sel_ids);
 
 		// update the scence
-		//update();
+		update();
 	}
 }
 
@@ -312,7 +323,7 @@ void QGLViewerExt::restoreStatus(){
 
 		GLdouble *m = MV_status.top();
 		QGLViewer::camera()->setFromModelViewMatrix(m);
-		//this->update();
+		this->update();
 	}
 }
 
@@ -322,7 +333,7 @@ void QGLViewerExt::popStatus(){
 
 		GLdouble *m = MV_status.top();
 		QGLViewer::camera()->setFromModelViewMatrix(m);
-		//this->update();
+		this->update();
 		MV_status.pop();
 	}
 }
