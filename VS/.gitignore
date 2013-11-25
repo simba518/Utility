@@ -1,0 +1,10 @@
+# Ignore everything
+*/*
+*.ncb
+*.suo
+
+# But not these files...
+!*.sln
+!utility/*.vcproj
+!UI/*.vcproj
+!Common/*.vcproj
