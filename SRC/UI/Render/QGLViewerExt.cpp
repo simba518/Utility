@@ -99,6 +99,7 @@ void QGLViewerExt::draw(){
 
 	selfRender();
 	displayText();
+	drawMouse();
 
 	// debug lights
 	if (draw_lights){
@@ -356,4 +357,13 @@ void QGLViewerExt::saveStateFile(){
 		this->setStateFileName( fname );
 		this->saveStateToFile();
 	}
+}
+
+void QGLViewerExt::drawMouse()const{
+  
+  ///@todo the position of the mouse is not correct.
+  glPointSize(10);
+  glBegin(GL_POINTS);
+  glVertex2f(mouse_pos.x(), mouse_pos.y());
+  glEnd();
 }
