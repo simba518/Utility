@@ -59,7 +59,7 @@ bool QGLViewerExt::toggleRemoveAddSelfRenderEle (pSelfRenderEle ele){
 	}else if (ele != NULL){
 		addSelfRenderEle (ele);
 	}else{
-		cout << "ERROR: QGLViewerExt::toggleRemoveAddSelfRenderEle(..), the input pSelfRenderEle is null!" << endl;
+	    ERROR_LOG("the input pSelfRenderEle is null.");
 	}
 	return added;
 }
@@ -140,7 +140,6 @@ void QGLViewerExt::mouseMoveEvent (QMouseEvent *e){
 	QGLViewer::mouseMoveEvent(e);
 	emit mouseMoveSignal(e);
 	if (buttonPressed == Qt::NoButton){
-		cout << "nobutton" << e->pos().x() << endl;
 		updateGL();
 	}
 }
