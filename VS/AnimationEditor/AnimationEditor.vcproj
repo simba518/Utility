@@ -166,7 +166,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMConNodeDrag.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMRender.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditMainWin.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\Editor\InterpolatorFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\AnimationEditor\SRC\UI\main_UITest.cpp"
 				>
 			</File>
 		</Filter>
@@ -206,10 +222,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMConNodeDrag.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMConNodeDrag.h"
 				>
 				<FileConfiguration
@@ -234,10 +246,6 @@
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMRender.cpp"
-				>
 			</File>
 			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditDMRender.h"
@@ -292,10 +300,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditMainWin.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\UI\AniEditMainWin.h"
 				>
 				<FileConfiguration
@@ -331,10 +335,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\AnimationEditor\SRC\Editor\InterpolatorFactory.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\AnimationEditor\SRC\UI\main_UITest.cpp"
 				>
 			</File>
 			<File

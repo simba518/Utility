@@ -19,14 +19,6 @@ int main(int argc, char** argv){
   QGLViewerExt viewer(&window);
   QInputEventRecorderCmd recorder(&window);
 
-  { // parse record command
-	if (2 == argc)
-	  recorder.setCmd(argv[argc-1]);
-	else if(3 == argc)
-	  recorder.setCmd(argv[argc-2],argv[argc-1]);
-  }
-
-
   { // load meshses
   	const string fn = string(TEST_DATA_DIR)+"beam.obj";
   	Objmesh obj;
@@ -41,6 +33,14 @@ int main(int argc, char** argv){
   	viewer.addSelfRenderEle(pSelfRenderEle(new TetRender(tet)));
   }
 
+  { // parse record command
+	  if (2 == argc)
+		  recorder.setCmd(argv[argc-1]);
+	  else if(3 == argc)
+		  recorder.setCmd(argv[argc-2],argv[argc-1]);
+  }
+
+  viewer.resize(600,600);
   viewer.setWindowTitle("simpleViewer");
   window.show();
   return application.exec();

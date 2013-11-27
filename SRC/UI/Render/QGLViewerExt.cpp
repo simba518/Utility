@@ -97,9 +97,13 @@ void QGLViewerExt::selfRender(){
 
 void QGLViewerExt::draw(){
 
+	glPushMatrix();
 	selfRender();
 	displayText();
+	glPopMatrix();
+
 	drawMouse();
+	
 
 	// debug lights
 	if (draw_lights){
@@ -163,45 +167,45 @@ QString QGLViewerExt::helpString() const{
 void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 									  double x1,double y1,double z1){
 
-										  Vec v_min(x0,y0,z0);
-										  Vec v_max(x1,y1,z1);
+	Vec v_min(x0,y0,z0);
+	Vec v_max(x1,y1,z1);
 
-										  const double scence_radius = (v_max-v_min).norm()/2.0f;
-										  if( scence_radius > 0.0f ){
+	const double scence_radius = (v_max-v_min).norm()/2.0f;
+	if( scence_radius > 0.0f ){
 
-											  // load identity
-											  glMatrixMode(GL_PROJECTION);
-											  glLoadIdentity();
-											  glMatrixMode(GL_MODELVIEW);
-											  glLoadIdentity();
+	  // load identity
+	  glMatrixMode(GL_PROJECTION);
+	  glLoadIdentity();
+	  glMatrixMode(GL_MODELVIEW);
+	  glLoadIdentity();
 
-											  GLdouble mvm[16];
-											  glGetDoublev(GL_MODELVIEW_MATRIX, mvm);
-											  QGLViewer::camera()->setFromModelViewMatrix(mvm);
+	  GLdouble mvm[16];
+	  glGetDoublev(GL_MODELVIEW_MATRIX, mvm);
+	  QGLViewer::camera()->setFromModelViewMatrix(mvm);
 
-											  GLdouble prj[16];
-											  glGetDoublev(GL_PROJECTION_MATRIX, prj);
-											  QGLViewer::camera()->setFromModelViewMatrix(prj);
+	  GLdouble prj[16];
+	  glGetDoublev(GL_PROJECTION_MATRIX, prj);
+	  QGLViewer::camera()->setFromModelViewMatrix(prj);
 
-											  // scale scene
-											  QGLViewer::setSceneCenter((v_min+v_max)/2.0f);
-											  QGLViewer::setSceneRadius(scence_radius);
-											  QGLViewer::showEntireScene();
+	  // scale scene
+	  QGLViewer::setSceneCenter((v_min+v_max)/2.0f);
+	  QGLViewer::setSceneRadius(scence_radius);
+	  QGLViewer::showEntireScene();
 
-											  // set lights
-											  const Vec vd = camera()->viewDirection();
-											  float pos[4] = {0.0, 0.0, 0.0, 0.0};
-											  pos[0] = -vd[0]; 	pos[1] = -vd[1]; 	pos[2] = -vd[2]*scence_radius;
-											  glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	  // set lights
+	  const Vec vd = camera()->viewDirection();
+	  float pos[4] = {0.0, 0.0, 0.0, 0.0};
+	  pos[0] = -vd[0]; 	pos[1] = -vd[1]; 	pos[2] = -vd[2]*scence_radius;
+	  glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
-											  pos[0] = -vd[0] - v_max[0];  
-											  pos[1] = -vd[1] - v_max[1]; 
-											  pos[2] = -vd[2] - v_max[2];
-											  glLightfv(GL_LIGHT1, GL_POSITION, pos);
+	  pos[0] = -vd[0] - v_max[0];  
+	  pos[1] = -vd[1] - v_max[1]; 
+	  pos[2] = -vd[2] - v_max[2];
+	  glLightfv(GL_LIGHT1, GL_POSITION, pos);
 
-											  pos[0] = -pos[0];
-											  glLightfv(GL_LIGHT2, GL_POSITION, pos);
-										  }
+	  pos[0] = -pos[0];
+	  glLightfv(GL_LIGHT2, GL_POSITION, pos);
+	}
 }
 
 void QGLViewerExt::init(){
@@ -359,11 +363,16 @@ void QGLViewerExt::saveStateFile(){
 	}
 }
 
-void QGLViewerExt::drawMouse()const{
+void QGLViewerExt::drawMouse(){
   
   ///@todo the position of the mouse is not correct.
-  glPointSize(10);
-  glBegin(GL_POINTS);
-  glVertex2f(mouse_pos.x(), mouse_pos.y());
-  glEnd();
+	std::cout << mouse_pos.x() << " " << mouse_pos.y() << std::endl;
+	startScreenCoordinatesSystem();
+	glColor3f(0.0, 0.0, 0.0);
+	glLineWidth(5.0);
+	glBegin(GL_LINES);
+	glVertex2d(mouse_pos.x(), mouse_pos.y());
+	glVertex2d(mouse_pos.x()+10, mouse_pos.y()+10);
+	glEnd();
+	stopScreenCoordinatesSystem();
 }

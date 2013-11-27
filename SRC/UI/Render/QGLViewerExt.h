@@ -119,7 +119,7 @@ signals:
 		virtual void draw ();
 		virtual void selfRender ();
 		virtual void displayText();
-        virtual void drawMouse()const;
+        virtual void drawMouse();
 
 		// other
 		virtual QString helpString ()const;

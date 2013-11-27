@@ -166,42 +166,42 @@
 				RelativePath="..\..\TestCase\RenderTest\main.cpp"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath="..\..\TestCase\RenderTest\QtEventRecorder.h"
+			<Filter
+				Name="Header Files"
+				Filter="h"
+				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
+				<File
+					RelativePath="..\..\TestCase\RenderTest\QtEventRecorder.h"
 					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing QtEventRecorder.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
-						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Moc&apos;ing QtEventRecorder.h..."
+							CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
+							AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+							Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Moc&apos;ing QtEventRecorder.h..."
+							CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-ID:\lsw\libQGLViewer-2.3.4&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\Common&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Shader&quot;&#x0D;&#x0A;"
+							AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+							Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\TestCase\RenderTest\SimpleMeshRender.h"
 					>
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Moc&apos;ing QtEventRecorder.h..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-ID:\lsw\libQGLViewer-2.3.4&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\Common&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Animation&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility-master\Utility-master\SRC\UI\Shader&quot;&#x0D;&#x0A;"
-						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
-						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\TestCase\RenderTest\SimpleMeshRender.h"
-				>
-			</File>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Generated Files"
