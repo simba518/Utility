@@ -367,12 +367,34 @@ void QGLViewerExt::drawMouse(){
   
   ///@todo the position of the mouse is not correct.
 	std::cout << mouse_pos.x() << " " << mouse_pos.y() << std::endl;
+	int x = mouse_pos.x(), y = mouse_pos.y();
 	startScreenCoordinatesSystem();
-	glColor3f(0.0, 0.0, 0.0);
-	glLineWidth(5.0);
-	glBegin(GL_LINES);
-	glVertex2d(mouse_pos.x(), mouse_pos.y());
-	glVertex2d(mouse_pos.x()+10, mouse_pos.y()+10);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glDisable(GL_LIGHTING);
+	glColor3f(1.0f,1.0f,1.0f);
+	glBegin(GL_POLYGON);
+	glVertex2f(x, y);
+	glVertex2f(x, y+ 15);
+	glVertex2f(x+3, y+11);
+	glVertex2f(x+6, y+18);
+	glVertex2f(x+8, y+18);
+	glVertex2f(x+8, y+17);
+	glVertex2f(x+5, y+10);
+	glVertex2f(x+10, y+10);
 	glEnd();
+	glColor3f(0.0f,0.0f,0.0f);
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(x, y);
+	glVertex2f(x, y+ 15);
+	glVertex2f(x+3, y+11);
+	glVertex2f(x+6, y+18);
+	glVertex2f(x+8, y+18);
+	glVertex2f(x+8, y+17);
+	glVertex2f(x+5, y+10);
+	glVertex2f(x+10, y+10);
+	glEnd();
+	glPopAttrib();
 	stopScreenCoordinatesSystem();
 }
