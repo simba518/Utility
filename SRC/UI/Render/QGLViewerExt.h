@@ -134,6 +134,7 @@ signals:
 		pSelectable selector;
 		bool step_by_step; // control animation
 		QPoint mouse_pos; // mouse position: (screen_x, screen_y).
+		Qt::MouseButton buttonPressed;
 		bool draw_lights; // draw the lights's positions, for debuging.
 		std::stack<GLdouble *> MV_status; // record the modelview matrix.
 	};

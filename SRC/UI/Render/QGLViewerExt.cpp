@@ -13,6 +13,7 @@ QGLViewerExt::QGLViewerExt (QWidget *parent):QGLViewer(parent){
 
 	step_by_step = false;
 	draw_lights = false;
+	buttonPressed = Qt::NoButton;
 }
 
 void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
@@ -127,6 +128,7 @@ void QGLViewerExt::displayText(){
 
 void QGLViewerExt::mousePressEvent (QMouseEvent *e){
 
+	buttonPressed = e->button();
 	this->mouse_pos = e->pos();
 	QGLViewer::mousePressEvent(e);
 	emit mousePressSignal(e);
@@ -137,10 +139,15 @@ void QGLViewerExt::mouseMoveEvent (QMouseEvent *e){
 	this->mouse_pos = e->pos();
 	QGLViewer::mouseMoveEvent(e);
 	emit mouseMoveSignal(e);
+	if (buttonPressed == Qt::NoButton){
+		cout << "nobutton" << e->pos().x() << endl;
+		updateGL();
+	}
 }
 
 void QGLViewerExt::mouseReleaseEvent (QMouseEvent *e){
 
+	buttonPressed = Qt::NoButton;
 	this->mouse_pos = e->pos();
 	QGLViewer::mouseReleaseEvent(e);
 	emit mouseReleaseSignal(e);
@@ -240,6 +247,8 @@ void QGLViewerExt::init(){
 
 	resetSceneBoundBox(-20,-20,-20,20,20,20);
 
+	
+	setMouseTracking(true);
 	// set mouse binding
 	setMouseBinding(Qt::MiddleButton, CAMERA, NO_MOUSE_ACTION);
 	setMouseBinding(Qt::LeftButton, CAMERA, NO_MOUSE_ACTION);
@@ -366,7 +375,6 @@ void QGLViewerExt::saveStateFile(){
 void QGLViewerExt::drawMouse(){
   
   ///@todo the position of the mouse is not correct.
-	std::cout << mouse_pos.x() << " " << mouse_pos.y() << std::endl;
 	int x = mouse_pos.x(), y = mouse_pos.y();
 	startScreenCoordinatesSystem();
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
