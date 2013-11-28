@@ -42,14 +42,14 @@ namespace QGLVEXT{
 		public slots:
 			// rendering
 			void update (){  
-				//QGLViewer::updateGL();
+				QGLViewer::updateGL();
 			}
 			void resetSceneBoundBox(double x0,double y0,double z0,
 				double x1,double y1,double z1);
 			void toggleDrawLights(){
 				// draw the lights's positions, for debuging.
 				draw_lights = draw_lights ? false : true;
-				//this->update();
+				this->update();
 			}
 
 			// selection

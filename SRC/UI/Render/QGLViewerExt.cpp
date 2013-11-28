@@ -379,6 +379,7 @@ void QGLViewerExt::drawMouse(){
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	glDisable(GL_LIGHTING);
 	glColor3f(1.0f,1.0f,1.0f);
+    glLineWidth(1.0);
 	glBegin(GL_POLYGON);
 	glVertex2f(x, y);
 	glVertex2f(x, y+ 15);
