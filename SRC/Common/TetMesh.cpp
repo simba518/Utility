@@ -232,7 +232,22 @@ bool TetMesh::load(const std::string& filename){
 
 bool TetMesh::write(const std::string& filename)const{
 
-  return false;
+  // load nodes
+  OUTFILE(outf,filename.c_str());
+  if(!outf.is_open()){
+	ERROR_LOG("failed to open file " << filename << " for write!");
+	return false;
+  }
+  outf << "*NODE\n";
+  for (size_t i = 0; i < _nodes.size(); ++i)
+    outf<<i+1<<", "<<_nodes[i][0]<<", "<<_nodes[i][1]<<", "<< _nodes[i][2] << endl;
+  outf << "*ELEMENT, TYPE=C3D4\n";
+  for (size_t i = 0; i < _tets.size(); ++i){
+    outf<<i+1<<", "<<_tets[i][0]<<", "<<_tets[i][1]<<", "<<_tets[i][2]<<", "<<_tets[i][3]<<"\n";
+  }
+  outf << "*ELSET,ELSET=EALL,GENERATE\n";
+  outf <<"1," << _tets.size() << endl;
+  return outf.good();
 }
 
 BBoxD TetMesh::getBBox()const{

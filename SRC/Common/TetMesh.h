@@ -132,6 +132,25 @@ namespace UTILITY{
 	  reset(nodes,tets);
 	}
 	void reset(const VVec3d& nodes, const VVec4i& tets);
+	template<class VECTOR_DOUBLE,class VECTOR_INT>
+	void reset(const VECTOR_DOUBLE& nodes, const VECTOR_INT& tets){
+	  assert_eq(nodes.size()%3,0);
+	  assert_eq(tets.size()%4,0);
+	  VVec3d nodesV(nodes.size()/3);
+	  VVec4i tetsV(tets.size()/4);
+	  for (size_t i = 0; i < nodesV.size(); ++i){
+		nodesV[i][0] = nodes[i*3+0];
+		nodesV[i][1] = nodes[i*3+1];
+		nodesV[i][2] = nodes[i*3+2];
+	  }
+	  for (size_t i = 0; i < tetsV.size(); ++i){
+		tetsV[i][0] = tets[i*4+0];
+		tetsV[i][1] = tets[i*4+1];
+		tetsV[i][2] = tets[i*4+2];
+		tetsV[i][3] = tets[i*4+3];
+	  }
+	  reset(nodesV,tetsV);
+	}
 	template<class VECTOR>
 	void applyDeformation(const VECTOR &u){
 	  assert_eq(u.size(),_nodes.size()*3);
@@ -159,8 +178,27 @@ namespace UTILITY{
 	  }
 	}
 	const VVec4i& tets() const{return _tets;}
+	template<class VECTOR>
+	void tets(VECTOR &x) const{
+	  x.resize(_tets.size()*4);
+	  for (size_t i = 0; i < _tets.size(); ++i){
+		x[i*4+0] = _tets[i][0];
+		x[i*4+1] = _tets[i][1];
+		x[i*4+2] = _tets[i][2];
+		x[i*4+3] = _tets[i][3];
+	  }
+	}
 	const FaceId& faceId() const{return _faceId;}
 	const VVec3i& surface() const{return _surface;}
+	template<class VECTOR>
+	void surface(VECTOR &x) const{
+	  x.resize(_surface.size()*3);
+	  for (size_t i = 0; i < _surface.size(); ++i){
+		x[i*3+0] = _surface[i][0];
+		x[i*3+1] = _surface[i][1];
+		x[i*3+2] = _surface[i][2];
+	  }
+	}
 	const VVec3d& normal() const{return _normal;}
 	const ElasticMaterial<double>& material() const{return _mtl;}
 	ElasticMaterial<double>& material() {return _mtl;}
