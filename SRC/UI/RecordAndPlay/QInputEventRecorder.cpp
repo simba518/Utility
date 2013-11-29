@@ -34,7 +34,6 @@ or implied, of Stanislaw Adaszewski. */
 #include <QApplication>
 
 #include "EventSerialization.h"
-#include "event.h"
 #include <iostream>
 #include <fstream>
 //
