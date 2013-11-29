@@ -28,14 +28,18 @@ bool PartialConstraints::write(ofstream &outf)const{
 	}
   }
 
-  // BOOST_FOREACH(const map<int,int>::value_type &ele, sortedNodes){
-  // 	const int nodeId = ele.first;
-  // 	const int index = ele.second;
-  // }
+  Matrix<double,3,-1> pc = _pc;
+  map<int,int>::iterator it = sortedNodes.begin();
+  int col = 0;
+  for (; it != sortedNodes.end(); ++it){
+	const int nodeId = it->first;
+  	const int index = it->second;
+	outf << nodeId <<" ";
+	pc.col(col) = _pc.col(index);
+	col ++;
+  }
 
-  // outf << i << " ";
-  outf << "TargetPositions "<< _pc << endl;
-
+  outf << "TargetPositions "<< pc << endl;
   return outf.good();
 }
 
@@ -50,6 +54,7 @@ bool PartialConstraints::load(const string filename){
 bool PartialConstraints::load(ifstream &inf){
   
   string tempt_str;
+  this->clear();
   inf >> tempt_str >> _frameid;
   assert_ge(_frameid,0);
   
@@ -59,8 +64,8 @@ bool PartialConstraints::load(ifstream &inf){
   vector<int> nodes(num_con_nodes);
   for (int i = 0; i < num_con_nodes; ++i){
     inf >> nodes[i];
+	if(i > 1) assert_lt(nodes[i-1],nodes[i]); // the nodes should be sorted.
   }
-  this->clear();
   addConNodes(nodes);
   
   inf >> tempt_str;
