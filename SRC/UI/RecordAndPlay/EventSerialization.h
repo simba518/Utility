@@ -28,7 +28,16 @@ or implied, of Stanislaw Adaszewski. */
 #define EVENTSERIALIZATION_H
 
 #include <QDataStream>
+#include <QTextStream>
 #include <QContextMenuEvent>
+#include <qsize.h>
+#include <qpoint.h>
+#include <qrect.h>
+#include <qregion.h>
+#include <qstring.h>
+#include <qkeysequence.h>
+#include <qchar.h>
+#include <qvariant.h>
 
 struct EventClass
 {

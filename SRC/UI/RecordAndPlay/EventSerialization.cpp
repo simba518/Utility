@@ -24,7 +24,7 @@ The views and conclusions contained in the software and documentation are those 
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Stanislaw Adaszewski. */
 
-#include "EventSerialization.h"
+#include "eventserialization.h"
 
 QDataStream& operator<<(QDataStream &ds, const QTouchEvent::TouchPoint &pt)
 {
@@ -304,3 +304,5 @@ QDataStream& operator>>(QDataStream &ds, QInputEvent*& ev)
 
 	return ds;
 }
+
+

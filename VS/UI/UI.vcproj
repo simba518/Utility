@@ -308,6 +308,18 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\GeneratedFiles\Release\moc_RecordAndReplayWrapper.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\GeneratedFiles\Release\moc_SelectCtrl.cpp"
 					>
 					<FileConfiguration
@@ -387,6 +399,18 @@
 				</File>
 				<File
 					RelativePath=".\GeneratedFiles\Debug\moc_QInputEventRecorder.cpp"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\GeneratedFiles\Debug\moc_RecordAndReplayWrapper.cpp"
 					>
 					<FileConfiguration
 						Name="Release|Win32"
@@ -637,6 +661,36 @@
 			<File
 				RelativePath="..\..\SRC\UI\RecordAndPlay\QInputEventRecorderCmd.h"
 				>
+			</File>
+			<File
+				RelativePath="..\..\SRC\UI\RecordAndPlay\RecordAndReplayWrapper.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\SRC\UI\RecordAndPlay\RecordAndReplayWrapper.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing RecordAndReplayWrapper.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Moc&apos;ing RecordAndReplayWrapper.h..."
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;  -DUNICODE -DWIN32 -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB &quot;-ID:\lsw\Utility\SRC\UI\Manipulation&quot; &quot;-ID:\lsw\Utility\SRC\UI\Shader&quot; &quot;-ID:\lsw\Utility\SRC\UI\Render&quot; &quot;-ID:\lsw\Utility\SRC\UI\RecordAndPlay&quot; &quot;-ID:\lsw\Utility\SRC\Common&quot; &quot;-ID:\lsw\Utility\SRC\UI\Animation&quot; &quot;-I.\GeneratedFiles&quot; &quot;-I.&quot; &quot;-I$(QTDIR)\include&quot; &quot;-I.\GeneratedFiles\$(ConfigurationName)\.&quot; &quot;-I$(QTDIR)\include\QtCore&quot; &quot;-I$(QTDIR)\include\QtGui&quot; &quot;-I$(QTDIR)\include\QtXml&quot; &quot;-I$(QTDIR)\include\QtOpenGL&quot; &quot;-ID:\lsw\ExtLibs\libQGLViewer-2.3.4&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570\eigen3&quot; &quot;-ID:\lsw\ExtLibs\eigen-eigen-ffa86ffb5570&quot;&#x0D;&#x0A;"
+						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
+						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
