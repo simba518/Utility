@@ -51,7 +51,19 @@ void TetMesh::reset(const VVec3d& nodes, const VVec4i& tets){
   _surface.clear();
   for(iter=_faceId.begin();iter!=_faceId.end();iter++){
     if (iter->second.second < 0){
-  	  _surface.push_back(Vector3i( iter->first._id[0], iter->first._id[1], iter->first._id[2] ));
+	  Vector3i face(iter->first._id[0],iter->first._id[1],iter->first._id[2] );
+	  const Vector3d v1 = _nodes[face[1]]-_nodes[face[0]];
+	  const Vector3d v2 = _nodes[face[2]]-_nodes[face[0]];
+	  const Vector3d n = v1.cross(v2);
+	  const Vector4i &t = _tets[iter->second.first];
+	  tetrahedronTpl<double> oneTet(_nodes[t[0]],_nodes[t[1]],_nodes[t[2]],_nodes[t[3]]);
+	  const Vector3d vc = oneTet.center()-_nodes[face[0]];
+	  if(n.dot(vc) > 0){
+		const int f = face[0];
+		face[0] = face[1];
+		face[1] = f;
+	  }
+  	  _surface.push_back(face);
   	}
   }
 
@@ -293,6 +305,6 @@ void TetMesh::computeSurfaceNormal(){
 	const Vector3d &v0 = p[f[i][0]];
 	const Vector3d &v1 = p[f[i][1]];
 	const Vector3d &v2 = p[f[i][2]];
-    _normal[i] = (v0-v1).cross(v0-v2).normalized();
+    _normal[i] = (v1-v0).cross(v2-v0).normalized();
   }
 }
