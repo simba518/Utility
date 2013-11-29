@@ -254,9 +254,8 @@ bool TetMesh::write(const std::string& filename)const{
   for (size_t i = 0; i < _nodes.size(); ++i)
     outf<<i+1<<", "<<_nodes[i][0]<<", "<<_nodes[i][1]<<", "<< _nodes[i][2] << endl;
   outf << "*ELEMENT, TYPE=C3D4\n";
-  for (size_t i = 0; i < _tets.size(); ++i){
-    outf<<i+1<<", "<<_tets[i][0]<<", "<<_tets[i][1]<<", "<<_tets[i][2]<<", "<<_tets[i][3]<<"\n";
-  }
+  for (size_t i = 0; i < _tets.size(); ++i)
+    outf<<i+1<<", "<<_tets[i][0]+1<<", "<<_tets[i][1]+1<<", "<<_tets[i][2]+1<<", "<<_tets[i][3]+1<<"\n";
   outf << "*ELSET,ELSET=EALL,GENERATE\n";
   outf <<"1," << _tets.size() << endl;
   return outf.good();
