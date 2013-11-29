@@ -5,8 +5,10 @@
 #include <eigen3/Eigen/Dense>
 #include <SelectionGroup.h>
 #include <algorithm> 
+#include <fstream>
 #include <boost/foreach.hpp>
 #include <assertext.h>
+using namespace std;
 using namespace Eigen;
 
 namespace UTILITY{
@@ -90,6 +92,11 @@ namespace UTILITY{
 	bool operator< (const PartialConstraints &other)const{
 	  return this->getFrameId() < other.getFrameId();
 	}
+
+	bool write(const string filename)const;
+	bool write(ofstream &outf)const;
+	bool load(const string filename);
+	bool load(ifstream &outf);
 
   private:
 	int _frameid;
@@ -178,7 +185,7 @@ namespace UTILITY{
 	}
 	
 	bool load(const string filename);
-	bool save(const string filename)const;
+	bool write(const string filename)const;
 
   private:
 	set<pPartialConstraints> _partialCons;
