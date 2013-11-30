@@ -43,50 +43,53 @@ void UTILITY::draw(const TetMesh &tetmesh,const ObjMtl&mtl,const double *u){
   
   GL_SET_MTL;
 
+  glPushAttrib(GL_POLYGON_BIT);
+  glDisable(GL_LIGHTING);
+  glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
   glBegin(GL_TRIANGLES);
 
   if (u == NULL){
-	for (size_t f = 0; f < faces.size(); ++f){
+	  for (size_t f = 0; f < faces.size(); ++f){
 
-	  const Vector3i &v = faces[f];
-	  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
-	  glVertex3d(verts[v[0]][0],verts[v[0]][1],verts[v[0]][2]);
+		  const Vector3i &v = faces[f];
+		  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
+		  glVertex3d(verts[v[0]][0],verts[v[0]][1],verts[v[0]][2]);
 
-	  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
-	  glVertex3d(verts[v[1]][0],verts[v[1]][1],verts[v[1]][2]);
+		  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
+		  glVertex3d(verts[v[1]][0],verts[v[1]][1],verts[v[1]][2]);
 
-	  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
-	  glVertex3d(verts[v[2]][0],verts[v[2]][1],verts[v[2]][2]);
-	}
+		  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
+		  glVertex3d(verts[v[2]][0],verts[v[2]][1],verts[v[2]][2]);
+	  }
   }else {
-	for (size_t f = 0; f < faces.size(); ++f){
+	  for (size_t f = 0; f < faces.size(); ++f){
 
-	  const Vector3i &v = faces[f];
+		  const Vector3i &v = faces[f];
 
-	  const double x0 = verts[v[0]][0]+u[v[0]*3+0];
-	  const double y0 = verts[v[0]][1]+u[v[0]*3+1];
-	  const double z0 = verts[v[0]][2]+u[v[0]*3+2];
+		  const double x0 = verts[v[0]][0]+u[v[0]*3+0];
+		  const double y0 = verts[v[0]][1]+u[v[0]*3+1];
+		  const double z0 = verts[v[0]][2]+u[v[0]*3+2];
 
-	  const double x1 = verts[v[1]][0]+u[v[1]*3+0];
-	  const double y1 = verts[v[1]][1]+u[v[1]*3+1];
-	  const double z1 = verts[v[1]][2]+u[v[1]*3+2];
+		  const double x1 = verts[v[1]][0]+u[v[1]*3+0];
+		  const double y1 = verts[v[1]][1]+u[v[1]*3+1];
+		  const double z1 = verts[v[1]][2]+u[v[1]*3+2];
 
-	  const double x2 = verts[v[2]][0]+u[v[2]*3+0];
-	  const double y2 = verts[v[2]][1]+u[v[2]*3+1];
-	  const double z2 = verts[v[2]][2]+u[v[2]*3+2];
+		  const double x2 = verts[v[2]][0]+u[v[2]*3+0];
+		  const double y2 = verts[v[2]][1]+u[v[2]*3+1];
+		  const double z2 = verts[v[2]][2]+u[v[2]*3+2];
 
-	  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
-	  glVertex3d(x0,y0,z0);
+		  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
+		  glVertex3d(x0,y0,z0);
 
-	  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
-	  glVertex3d(x1,y1,z1);
+		  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
+		  glVertex3d(x1,y1,z1);
 
-	  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
-	  glVertex3d(x2,y2,z2);
-	}
+		  glNormal3d(norms[f][0],norms[f][1],norms[f][2]);
+		  glVertex3d(x2,y2,z2);
+	  }
   }
 
   glEnd();
-  glDisable(GL_LIGHTING);
+  glPopAttrib();
   
 }
