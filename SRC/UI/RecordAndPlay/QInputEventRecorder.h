@@ -103,7 +103,6 @@ private:
 	QDateTime m_RecordingStartTime;
 	float m_ReplaySpeedFactor;
 	bool is_saving;
-	std::ofstream outfile;
 };
 
 #endif // QINPUTEVENTRECORDER_H

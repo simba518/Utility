@@ -105,12 +105,10 @@ QInputEventRecorder::QInputEventRecorder(QObject *obj):
 {
 	m_Timer->setSingleShot(true);
 	QObject::connect(m_Timer, SIGNAL(timeout()), this, SLOT(replay()));
-	outfile.open("2.txt");
 }
 
 QInputEventRecorder::~QInputEventRecorder()
 {
-	outfile.close();
 	delete m_Timer;
 }
 
