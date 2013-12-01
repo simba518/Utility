@@ -2,24 +2,27 @@
 #include "SelectionGroup.h"
 using namespace UTILITY;
 
-void SelectionGroup::addGroup( const set<int>& g){
+set<int> SelectionGroup::addGroup( const set<int>& g){
 
+  set<int> removed_groups;
   if(!g.empty()){
-	removeGroup(g);
+	removed_groups = removeGroup(g);
 	groups.push_back(g);
   }
+  return removed_groups;
 }
 
-void SelectionGroup::addGroup( const vector<int>& g){
+set<int> SelectionGroup::addGroup( const vector<int>& g){
 
-  addGroup(vec2set(g));
+  return addGroup(vec2set(g));
 }
 
-void SelectionGroup::removeGroup( const set<int>& remove_node_ids){
+set<int> SelectionGroup::removeGroup( const set<int>& remove_node_ids){
 
+  set<int> removed_groups;
   vector<set<int> > tempt_con_group;
-
   vector<set<int> >::iterator g = groups.begin();
+  int index = 0;
   for(; g!=groups.end(); g++ ){
 
 	set<int>::const_iterator r = remove_node_ids.begin();
@@ -28,14 +31,18 @@ void SelectionGroup::removeGroup( const set<int>& remove_node_ids){
 	}
 	if(!g->empty()){
 	  tempt_con_group.push_back(*g);
+	}else{
+	  removed_groups.insert(index);
 	}
+	index ++;
   }
   this->groups = tempt_con_group; 
+  return removed_groups;
 }
 
-void SelectionGroup::removeGroup( const vector<int>& g){
+set<int> SelectionGroup::removeGroup( const vector<int>& g){
 
-  removeGroup(vec2set(g));
+  return removeGroup(vec2set(g));
 }
 
 void SelectionGroup::setGroup(const vector<set<int> > &groups){
