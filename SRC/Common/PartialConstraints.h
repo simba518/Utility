@@ -70,6 +70,23 @@ namespace UTILITY{
 		c0 += getConNodesSet()[i].size();
 	  return _pc.block(0,c0,3,nodes);
 	}
+	template<class VECTOR_INT, class VECTOR_DOUBLE>
+	void getPartialCon(VECTOR_INT &conNodes, VECTOR_DOUBLE &conPos){
+	  const int conNodesNum = _pc.cols();
+	  if (conNodesNum > 0){
+		_con_groups.getVector(conNodes);
+		conPos.resize(conNodesNum*3);
+		for (int c = 0; c < _pc.cols(); ++c){
+		  conPos[c*3+0] = _pc.col(c)[0];
+		  conPos[c*3+1] = _pc.col(c)[1];
+		  conPos[c*3+2] = _pc.col(c)[2];
+		}
+	  }else{
+		conNodes.clear();
+		conPos.resize(0);
+	  }
+	}
+
 	int numConNodes()const{
 	  return _con_groups.numNodes();
 	}
