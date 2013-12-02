@@ -21,11 +21,11 @@ namespace UTILITY{
   public:
 	void setGroup(const vector<set<int> > &groups);
 	void setGroup(const vector<vector<int> > &groups);
-	void addGroup( const set<int>& );
-	void addGroup( const vector<int>& );
+	set<int> addGroup( const set<int>& );
+	set<int> addGroup( const vector<int>& );
 
-	void removeGroup( const set<int>& );
-	void removeGroup( const vector<int>& );
+	set<int> removeGroup( const set<int>& );
+	set<int> removeGroup( const vector<int>& );
 
 	bool contain(const int ele_id)const;
 	bool isEmpty()const{
