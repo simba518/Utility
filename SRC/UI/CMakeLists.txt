@@ -10,6 +10,7 @@ SET(NONE_QT_CPP
   Render/MeshRender.cpp
   Render/VolNodeGroupRender.cpp
   Render/DragGroupSelDraw.cpp
+  Render/AxisTorus.cpp
   ${shader_src}
 )
 
@@ -20,6 +21,7 @@ SET(UI_SOURCES
   Manipulation/SelectCtrl.cpp
   Manipulation/DragCtrl.cpp
   Animation/AniCtrl.cpp
+  Render/ConTrackBall.cpp
   Render/QGLViewerExt.cpp
 )
 
@@ -33,6 +35,7 @@ SET(UI_HEADERS
   Animation/AniCtrl.h
   Animation/AniSliderBar.h
   Render/QGLViewerExt.h
+  Render/ConTrackBall.h
 )
 
 SET(UI_FORMS 
