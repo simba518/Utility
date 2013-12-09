@@ -90,7 +90,8 @@ bool Objmesh::load(const string fname){
 	if(t >=0 && t < 4){
 	  numType[t]++;
 	}else if(line.find("mtllib") != std::string::npos){
-	  const string dir = string((char*)(path(fname).parent_path().c_str()))+"//";
+	  const string temp = path(fname).parent_path().string();
+	  const string dir = temp+"//";
 	  mtlfile = dir + line.substr(7,line.size()-7);
 	}
   }

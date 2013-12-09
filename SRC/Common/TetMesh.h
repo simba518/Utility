@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <eigen3/Eigen/Dense>
+#include <Eigen/StdVector>
 #include <eigen3/Eigen/Sparse>
 #include <algorithm>
 #include <HashedId.h>

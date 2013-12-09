@@ -98,12 +98,14 @@ void QGLViewerExt::selfRender(){
 
 void QGLViewerExt::draw(){
 
+	drawMouse();
+
 	glPushMatrix();
 	selfRender();
 	displayText();
 	glPopMatrix();
 
-	drawMouse();
+	
 	
 
 	// debug lights

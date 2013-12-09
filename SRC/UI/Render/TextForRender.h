@@ -15,11 +15,11 @@ namespace QGLVEXT{
   class TextWithPosition{
 	
   public:
-	TextWithPosition(const std::string text="",int x=1,int y=1,const QFont font = QFont("Times", 30,QFont::Bold)){
+	TextWithPosition(const std::string text="",int x=1,int y=1,const QFont font = QFont("Consolas", 12)){
 	  setContent(text);
 	  setX(x);
 	  setY(y);
-	  _font = font;
+	  setFont(font);
 	}
 	TextWithPosition(const TextWithPosition &other){
 	  *this = other;
@@ -29,6 +29,7 @@ namespace QGLVEXT{
 	  _content = other.getContent();
 	  _x = other.getX();
 	  _y = other.getY();
+	  _font = other.getFont();
 	  return (*this);
 	}
 
