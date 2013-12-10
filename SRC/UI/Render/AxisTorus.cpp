@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <math.h>
 #include "AxisTorus.h"
+#include <QGLViewer/config.h>
 using namespace QGLVEXT;
 
 void AxisTorus::draw()const{

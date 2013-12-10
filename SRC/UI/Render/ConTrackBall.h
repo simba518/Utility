@@ -21,32 +21,25 @@ namespace QGLVEXT{
   	ConTrackBall(pQGLViewerExt viewer);
   	void checkIfGrabsMouse(int x, int y, const Camera* const camera);
 
-  	void setActive(bool ac);
-  	bool isActive()const{
-	  return (constraint->rotationConstraintType() != AxisPlaneConstraint::FREE);
-	}
-  	bool isFixed()const{
-	  return (AxisPlaneConstraint::FORBIDDEN==constraint->rotationConstraintType());
-	}
-
   public slots:
   	void selectAxises(const vector<int> sel_group_ids);
   	void press(QMouseEvent* e);
   	void release(QMouseEvent* e);
-  	void toggleActive(){
-	  setActive( !isActive() );
-  	}
+  	void ShowConTrackBall();
 
   private:
   	pQGLViewerExt viewer;
   	pAxisTorus p_AxisTorus;
   	AxisPlaneConstraint* constraint;
+
+#endif /*_CONTRACKBALL_H_*/
+
   	AxisPlaneConstraint::Type grabbed_type;
   	short constrained_axi; // 0: x, 1: y, 2: z, -1:none.
+	bool m_show;
+	bool m_hit;
   };
   
   typedef boost::shared_ptr<ConTrackBall> pConTrackBall;
   
 }//end of namespace
-
-#endif /*_CONTRACKBALL_H_*/

@@ -7,7 +7,9 @@
 #include <SelfRenderEle.h>
 #include <TextForRender.h>
 #include <Selectable.h>
+#include <fstream>
 using namespace qglviewer;
+using namespace std;
 
 namespace QGLVEXT{
 
@@ -55,7 +57,7 @@ namespace QGLVEXT{
 			// selection
 			void select (QRect select_rect);
 			void select	(const QMouseEvent *event);
-
+ 
 			// animation
 			void startAnimation (){ QGLViewer::startAnimation(); emit resetAnimation();	}
 			void stopAnimation (){ QGLViewer::stopAnimation();  emit resetAnimation();	}
@@ -137,6 +139,9 @@ signals:
 		Qt::MouseButton buttonPressed;
 		bool draw_lights; // draw the lights's positions, for debuging.
 		std::stack<GLdouble *> MV_status; // record the modelview matrix.
+
+		//add by qnn
+		ofstream outfile;
 	};
 
 	// typedef boost::shared_ptr< QGLViewerExt > pQGLViewerExt; 
