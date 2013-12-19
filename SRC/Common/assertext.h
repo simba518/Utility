@@ -31,7 +31,7 @@
 #else
 
 // define a new assert micro to throw expections instead of abort
-#define my_assert( e, file, line ) ( throw std::runtime_error(std::string(file)+":"+boost::lexical_cast<std::string>(line)+": failed assertion "+e))
+#define my_assert( e, file, line ) ( throw std::runtime_error(std::string("file:")+std::string(file)+"::"+boost::lexical_cast<std::string>(line)+" : failed assertion "+e))
 
 #define new_assert(e) ((void) ((e) ? 0 : my_assert (#e, __FILE__, __LINE__)))
 

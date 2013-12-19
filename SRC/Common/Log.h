@@ -12,7 +12,7 @@ inline void PRINT_MSG(const std::string &title,const T&event,bool cond=false,con
   }
   std::cout<<"*"<<title<<"\t: "<<event;
   if(file.size() > 1){
-	std::cout<<"\t at\t: "<<file<<":"<<line<<std::endl;
+	std::cout<<"\t at\t: file:"<<file<<"::"<<line<<std::endl;
   }else{
 	std::cout<<std::endl;
   }
@@ -26,7 +26,7 @@ inline void PRINT_MSG(const std::string &title,const T&event,bool cond=false,con
 #define PRINT_MSG_MICRO_EXT(title,event,cond,file,line)	\
   if(!cond){											\
 	std::cout<<"*"<<title<<"\t: "<<event;				\
-	std::cout<<"\t at\t: "<<file<<":"<<line<<std::endl;	\
+	std::cout<<"\t at\t: file:"<<file<<"::"<<line<<std::endl;	\
   }
 
 /************************ERROR******************************/
@@ -76,8 +76,10 @@ private:
 
 /************************DEBUG******************************/
 #ifdef LOG_DEBUG
-#define DEBUG_LOG(event) {PRINT_MSG_MICRO_EXT("DEBUG",event,false,__FILE__,__LINE__);}
+#define DEBUG_LOG_EXT(event) {PRINT_MSG_MICRO_EXT("DEBUG",event,false,__FILE__,__LINE__);}
+#define DEBUG_LOG(event) {PRINT_MSG_MICRO("DEBUG",event,false);}
 #else
+#define DEBUG_LOG_EXT(event)
 #define DEBUG_LOG(event)
 #endif
 

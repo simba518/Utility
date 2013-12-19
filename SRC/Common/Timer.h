@@ -135,4 +135,23 @@ namespace UTILITY{
   
 }//end of namespace
 
+/*************************timer for function*****************************/
+#ifdef USE_FUNC_TIMER
+class FUNC_TIMER_CLASS{
+public:
+  FUNC_TIMER_CLASS(std::string info):information(info){
+	timer.start();
+  }
+  ~FUNC_TIMER_CLASS(){
+	timer.stop(std::string("time for function ")+information+": ");
+  }
+private:
+  const std::string information;
+  UTILITY::Timer timer;
+};
+#define FUNC_TIMER() FUNC_TIMER_CLASS _m_fun_timer_class(__PRETTY_FUNCTION__);
+#else
+#define FUNC_TIMER()
+#endif
+
 #endif /*_TIMER_H_*/
