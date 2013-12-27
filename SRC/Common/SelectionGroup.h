@@ -27,6 +27,9 @@ namespace UTILITY{
 	set<int> removeGroup( const set<int>& );
 	set<int> removeGroup( const vector<int>& );
 
+	int removeGroup( set<int>& group)const;
+	int removeGroup( vector<int>& group)const;
+
 	bool contain(const int ele_id)const;
 	bool isEmpty()const{
 	  return groups.size() <= 0;

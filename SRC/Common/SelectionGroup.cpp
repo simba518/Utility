@@ -45,6 +45,25 @@ set<int> SelectionGroup::removeGroup( const vector<int>& g){
   return removeGroup(vec2set(g));
 }
 
+int SelectionGroup::removeGroup( set<int>& group)const{
+
+  int erased_num = 0;  
+  BOOST_FOREACH(const set<int>& g, groups){
+	BOOST_FOREACH(const int ele, g){
+	  erased_num += group.erase(ele);
+	}
+  }
+  return erased_num;
+}
+
+int SelectionGroup::removeGroup( vector<int>& group)const{
+
+  set<int> s = vec2set(group);
+  const int erased_num = removeGroup(s);
+  group = set2vec(s);
+  return erased_num;
+}
+
 void SelectionGroup::setGroup(const vector<set<int> > &groups){
 
   BOOST_FOREACH(const set<int> &ele, groups){

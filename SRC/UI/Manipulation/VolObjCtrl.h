@@ -94,13 +94,13 @@ namespace UTILITY{
 	  bool succ = false;
 	  if ( inf.open(init_filename) ){
 		string filename;
-		if ( inf.readFilePath("obj_mesh_file",filename,true)){
+		if ( inf.readFilePath("obj_file",filename,true)){
 		  succ = volobjmesh->loadObjMesh(filename);
 		}
-		if ( inf.readFilePath("vol_filename",filename,true) ){
+		if ( inf.readFilePath("vol_file",filename,true) ){
 		  succ &= volobjmesh->loadTetMesh(filename);
 		}
-		if ( inf.readFilePath("vol2obj_weights_filename",filename,true)){
+		if ( inf.readFilePath("vol2obj_weights",filename,true)){
 		  succ &= volobjmesh->loadWeights(filename);
 		}
 	  }
