@@ -14,6 +14,7 @@ QGLViewerExt::QGLViewerExt (QWidget *parent):QGLViewer(parent){
 	step_by_step = false;
 	draw_lights = false;
 	buttonPressed = Qt::NoButton;
+	m_show3DGrid = false;
 }
 
 void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
@@ -99,7 +100,11 @@ void QGLViewerExt::selfRender(){
 void QGLViewerExt::draw(){
 
 	drawMouse();
-
+	if (m_show3DGrid)
+	{
+		draw3DGrid();
+	}
+	
 	glPushMatrix();
 	selfRender();
 	displayText();
@@ -174,7 +179,7 @@ QString QGLViewerExt::helpString() const{
 
 void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 									  double x1,double y1,double z1){
-
+	
 	Vec v_min(x0,y0,z0);
 	Vec v_max(x1,y1,z1);
 
@@ -407,4 +412,49 @@ void QGLViewerExt::drawMouse(){
 	glEnd();
 	glPopAttrib();
 	stopScreenCoordinatesSystem();
+}
+
+void QGLViewerExt::show3DGrid()
+{
+	m_show3DGrid = !m_show3DGrid;
+}
+
+void QGLViewerExt::draw3DGrid()
+{
+	int slice = 5;
+	glBegin(GL_LINES);
+	for (int zi = 0; zi <= slice; zi++)
+	{
+		float z = -20.0*zi/slice + 20.0*(slice-zi)/slice;
+		for (int yi = 0; yi <= slice; yi++)
+		{
+			float y = -20.0*yi/slice + 20.0*(slice-yi)/slice;
+			glVertex3f(-20.0, y, z);
+			glVertex3f(20.0, y,z);
+		}
+		for (int xi = 0; xi <= slice; xi++)
+		{
+			float x = -20.0*xi/slice + 20.0*(slice-xi)/slice;
+			glVertex3f(x, -20.0, z);
+			glVertex3f(x, 20.0, z);
+		}
+	}
+	for (int yi = 0; yi <= slice; yi++)
+	{
+		float y = -20.0*yi/slice + 20.0*(slice-yi)/slice;
+		for (int zi = 0; zi <= slice; zi++)
+		{
+			float z = -20.0*zi/slice + 20.0*(slice-zi)/slice;
+			glVertex3f(-20.0, y, z);
+			glVertex3f(20.0, y, z);
+		}
+		for (int xi = 0; xi <= slice; xi++)
+		{
+			float x = -20.0*xi/slice + 20.0*(slice-xi)/slice;
+			glVertex3f(x, y, -20.0);
+			glVertex3f(x, y, 20.0);
+		}
+	}
+	glEnd();
+	
 }

@@ -99,6 +99,9 @@ namespace QGLVEXT{
 			void loadStateFile();
 			void saveStateFile();
 
+			//3DGrid
+			void show3DGrid();
+
 signals:
 			void resetAnimation();
 			void updateAnimation();
@@ -122,6 +125,8 @@ signals:
 		virtual void selfRender ();
 		virtual void displayText();
         virtual void drawMouse();
+		virtual void draw3DGrid();
+		
 
 		// other
 		virtual QString helpString ()const;
@@ -142,6 +147,7 @@ signals:
 
 		//add by qnn
 		ofstream outfile;
+		bool m_show3DGrid;
 	};
 
 	// typedef boost::shared_ptr< QGLViewerExt > pQGLViewerExt; 

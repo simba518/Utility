@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="AnimationEditor"
 	ProjectGUID="{A2287AFD-F0D9-4DE4-A4E8-F0048DDE6CDB}"
+	RootNamespace="AnimationEditor"
 	Keyword="Qt4VSv1.0"
 	TargetFrameworkVersion="0"
 	>

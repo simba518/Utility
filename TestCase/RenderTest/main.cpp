@@ -22,15 +22,15 @@ int main(int argc, char** argv){
   { // load meshses
   	const string fn = string(TEST_DATA_DIR)+"beam.obj";
   	Objmesh obj;
-  	obj.load(fn);
+	obj.load("D:\\lsw\\mesh1.obj");
   	viewer.addSelfRenderEle(pSelfRenderEle(new ObjRender(obj)));
 
-  	const string fn2 = string(TEST_DATA_DIR)+"dino.abq";
-  	TetMesh tet;
-  	tet.load(fn2);
-  	const VectorXd u = VectorXd::Ones(tet.nodes().size()*3)*5.0f;
-  	viewer.addSelfRenderEle(pSelfRenderEle(new TetRender(tet,u)));
-  	viewer.addSelfRenderEle(pSelfRenderEle(new TetRender(tet)));
+  	//const string fn2 = string(TEST_DATA_DIR)+"dino.abq";
+  	//TetMesh tet;
+  	//tet.load(fn2);
+  	//const VectorXd u = VectorXd::Ones(tet.nodes().size()*3)*5.0f;
+  	//viewer.addSelfRenderEle(pSelfRenderEle(new TetRender(tet,u)));
+  	//viewer.addSelfRenderEle(pSelfRenderEle(new TetRender(tet)));
   }
 
   { // parse record command
