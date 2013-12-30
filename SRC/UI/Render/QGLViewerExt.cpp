@@ -211,8 +211,7 @@ void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 	  const Vec vd = camera()->viewDirection();
 	  float pos[4] = {0.0, 0.0, 0.0, 0.0};
 	  pos[0] = -vd[0]; 	pos[1] = -vd[1]; pos[2] = -vd[2]*scence_radius;
-	  float pos_behind[4] = {-0.0, -vd[2]*scence_radius, vd[2]*scence_radius, 0};
-	  outfile << pos_behind[0] << " " << pos_behind[1] << " " << pos_behind[2] << std::endl;
+	  float pos_behind[4] = {0, pos[2], -pos[2], 0};
 	  glLightfv(GL_LIGHT0, GL_POSITION, pos_behind);
 
 	  pos[0] = -vd[0] - v_max[0];  
