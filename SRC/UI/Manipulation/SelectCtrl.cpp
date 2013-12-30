@@ -45,6 +45,10 @@ void SelectCtrl::createConnections(){
 
 void SelectCtrl::endSelection(const vector<int> sel_ids){
 
+  if (!isActive()){
+	return;
+  }
+
   if(sel_status == ADD_ELE){
 	if(_observer)
 	  _observer->addSelection(sel_ids);
@@ -59,6 +63,10 @@ void SelectCtrl::endSelection(const vector<int> sel_ids){
 }
 
 bool SelectCtrl::press (QMouseEvent *e){
+
+  if (!isActive()){
+	return false;
+  }
 
   begin_select = false;
   if (e->modifiers() == add_modify_key&&e->button()==add_mouse_button){
@@ -82,6 +90,10 @@ bool SelectCtrl::press (QMouseEvent *e){
 
 bool SelectCtrl::release (QMouseEvent *e){
 
+  if (!isActive()){
+	return false;
+  }
+
   bool perferm = false;
   if(begin_select){
 	if(select_rect->width() < minimalSelRect)
@@ -100,6 +112,10 @@ bool SelectCtrl::release (QMouseEvent *e){
 
 bool SelectCtrl::move (QMouseEvent *e){
 
+  if (!isActive()){
+	return false;
+  }
+
   bool perferm = false;
   if(begin_select){
 	select_rect->setBottomRight(e->pos());
@@ -109,6 +125,10 @@ bool SelectCtrl::move (QMouseEvent *e){
 }
 
 void SelectCtrl::printSelection(const vector<int> &selIds, bool print)const{
+
+  if (!isActive()){
+	return;
+  }
   
   if (print) {
 

@@ -120,6 +120,7 @@ void QGLViewerExt::draw(){
 		drawLight(GL_LIGHT0);
 		drawLight(GL_LIGHT1);
 		drawLight(GL_LIGHT2);
+		drawLight(GL_LIGHT3);
 	}
 }
 
@@ -221,6 +222,9 @@ void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 
 	  pos[0] = -pos[0];
 	  glLightfv(GL_LIGHT2, GL_POSITION, pos);
+
+	  float pos_up[4] = {0, pos[2], 0, 0};
+	  glLightfv(GL_LIGHT3, GL_POSITION, pos_up);
 	}
 }
 
@@ -244,9 +248,14 @@ void QGLViewerExt::init(){
 	glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE,  light_diffuse);
 
+	glLightfv(GL_LIGHT3, GL_AMBIENT,  light_ambient);
+	glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE,  light_diffuse);
+
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHT2);
+	glEnable(GL_LIGHT3);
 	glEnable(GL_LIGHTING);
 
 	// other

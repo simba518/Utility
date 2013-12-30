@@ -131,6 +131,12 @@ namespace UTILITY{
   class PartialConstraintsSet{
 	
   public:
+	void addPartialCon(const PartialConstraintsSet &parcons){
+	  const set<pPartialConstraints> &cons = parcons.getPartialConSet();
+	  BOOST_FOREACH(pPartialConstraints ele, cons){
+		addPartialCon(ele);
+	  }
+	}
 	void addPartialCon(const pPartialConstraints node_group){
 	  removePartialCon(node_group->getFrameId());
 	  _partialCons.insert(node_group);
