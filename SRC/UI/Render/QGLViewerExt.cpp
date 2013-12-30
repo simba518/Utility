@@ -15,6 +15,8 @@ QGLViewerExt::QGLViewerExt (QWidget *parent):QGLViewer(parent){
 	draw_lights = false;
 	buttonPressed = Qt::NoButton;
 	m_show3DGrid = false;
+	outfile.open("1.txt");
+	
 }
 
 void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
@@ -208,8 +210,10 @@ void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 	  // set lights
 	  const Vec vd = camera()->viewDirection();
 	  float pos[4] = {0.0, 0.0, 0.0, 0.0};
-	  pos[0] = -vd[0]; 	pos[1] = -vd[1]; 	pos[2] = -vd[2]*scence_radius;
-	  glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	  pos[0] = -vd[0]; 	pos[1] = -vd[1]; pos[2] = -vd[2]*scence_radius;
+	  float pos_behind[4] = {-0.0, -vd[2]*scence_radius, vd[2]*scence_radius, 0};
+	  outfile << pos_behind[0] << " " << pos_behind[1] << " " << pos_behind[2] << std::endl;
+	  glLightfv(GL_LIGHT0, GL_POSITION, pos_behind);
 
 	  pos[0] = -vd[0] - v_max[0];  
 	  pos[1] = -vd[1] - v_max[1]; 
@@ -421,38 +425,41 @@ void QGLViewerExt::show3DGrid()
 
 void QGLViewerExt::draw3DGrid()
 {
+	const int scence_radius = QGLViewer::sceneRadius();
+	const Vec center = QGLViewer::sceneCenter();
+	
 	int slice = 5;
 	glBegin(GL_LINES);
 	for (int zi = 0; zi <= slice; zi++)
 	{
-		float z = -20.0*zi/slice + 20.0*(slice-zi)/slice;
+		float z = (center.z-scence_radius)*zi/slice + (center.z+scence_radius)*(slice-zi)/slice;
 		for (int yi = 0; yi <= slice; yi++)
 		{
-			float y = -20.0*yi/slice + 20.0*(slice-yi)/slice;
-			glVertex3f(-20.0, y, z);
-			glVertex3f(20.0, y,z);
+			float y = (center.y-scence_radius)*yi/slice + (center.y+scence_radius)*(slice-yi)/slice;
+			glVertex3f((center.x-scence_radius), y, z);
+			glVertex3f((center.x+scence_radius), y,z);
 		}
 		for (int xi = 0; xi <= slice; xi++)
 		{
-			float x = -20.0*xi/slice + 20.0*(slice-xi)/slice;
-			glVertex3f(x, -20.0, z);
-			glVertex3f(x, 20.0, z);
+			float x = (center.x-scence_radius)*xi/slice + (center.x+scence_radius)*(slice-xi)/slice;
+			glVertex3f(x, (center.y-scence_radius), z);
+			glVertex3f(x, (center.y+scence_radius), z);
 		}
 	}
 	for (int yi = 0; yi <= slice; yi++)
 	{
-		float y = -20.0*yi/slice + 20.0*(slice-yi)/slice;
+		float y = (center.y-scence_radius)*yi/slice + (center.y+scence_radius)*(slice-yi)/slice;
 		for (int zi = 0; zi <= slice; zi++)
 		{
-			float z = -20.0*zi/slice + 20.0*(slice-zi)/slice;
-			glVertex3f(-20.0, y, z);
-			glVertex3f(20.0, y, z);
+			float z = (center.z-scence_radius)*zi/slice + (center.z+scence_radius)*(slice-zi)/slice;
+			glVertex3f((center.x-scence_radius), y, z);
+			glVertex3f((center.x+scence_radius), y, z);
 		}
 		for (int xi = 0; xi <= slice; xi++)
 		{
-			float x = -20.0*xi/slice + 20.0*(slice-xi)/slice;
-			glVertex3f(x, y, -20.0);
-			glVertex3f(x, y, 20.0);
+			float x = (center.x-scence_radius)*xi/slice + (center.x+scence_radius)*(slice-xi)/slice;
+			glVertex3f(x, y, (center.z-scence_radius));
+			glVertex3f(x, y, (center.z+scence_radius));
 		}
 	}
 	glEnd();
