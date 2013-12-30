@@ -15,8 +15,6 @@ QGLViewerExt::QGLViewerExt (QWidget *parent):QGLViewer(parent){
 	draw_lights = false;
 	buttonPressed = Qt::NoButton;
 	m_show3DGrid = false;
-	outfile.open("1.txt");
-	
 }
 
 void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
