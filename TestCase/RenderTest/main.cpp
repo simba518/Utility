@@ -22,7 +22,7 @@ int main(int argc, char** argv){
   { // load meshses
   	const string fn = string(TEST_DATA_DIR)+"beam.obj";
   	// Objmesh obj;
-	// obj.load("D:\\lsw\\mesh1.obj");
+  	// obj.load("D:\\lsw\\mesh1.obj");
   	// viewer.addSelfRenderEle(pSelfRenderEle(new ObjRender(obj)));
 
   	const string fn2 = string(TEST_DATA_DIR)+"dino.abq";
@@ -34,10 +34,10 @@ int main(int argc, char** argv){
   }
 
   { // parse record command
-	if (2 == argc)
-	  recorder.setCmd(argv[argc-1]);
-	else if(3 == argc)
-	  recorder.setCmd(argv[argc-2],argv[argc-1]);
+  	if (2 == argc)
+  	  recorder.setCmd(argv[argc-1]);
+  	else if(3 == argc)
+  	  recorder.setCmd(argv[argc-2],argv[argc-1]);
   }
 
   viewer.show3DGrid();
