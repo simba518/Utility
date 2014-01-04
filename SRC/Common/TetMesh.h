@@ -10,6 +10,7 @@
 #include <assertext.h>
 #include <BBox.h>
 #include <VTKWriter.h>
+#include <AuxTools.h>
 using namespace std;
 using namespace Eigen;
 
@@ -240,7 +241,25 @@ namespace UTILITY{
 
 	// io
 	bool load(const std::string& filename);
+	bool loadElasticMtl(const std::string& filename);
+
 	bool write(const std::string& filename)const;
+	template<class VECTOR>
+	bool write(const std::string& filename,const VECTOR &u)const{
+	  const VVec3d nodes = _nodes;
+	  const_cast<TetMesh*>(this)->applyDeformation(u);
+	  bool succ = write(filename);
+	  const_cast<TetMesh*>(this)->_nodes = nodes;
+	  return succ;
+	}
+	bool write(const std::string& filename,const MatrixXd &U)const;
+	template<class VECTOR>
+	bool write(const std::string& filename,const vector<VECTOR> &U)const{
+	  bool succ = true;
+	  for (int i = 0; i < U.size() && succ; ++i)
+		succ = write(filename+TOSTR(i)+".vtk",U[i]);
+	  return succ;
+	}
 	bool writeVTK(const std::string& filename,const bool binary=true)const;
 	template<class VECTOR>
 	bool writeVTK(const std::string& filename,const VECTOR &u,
@@ -253,6 +272,14 @@ namespace UTILITY{
 	}
 	bool writeVTK(const std::string& filename,const MatrixXd &U,
 				  const bool binary=true)const;
+	template<class VECTOR>
+	bool writeVTK(const std::string& filename,const vector<VECTOR> &U,
+				  const bool binary=true)const{
+	  bool succ = true;
+	  for (int i = 0; i < U.size() && succ; ++i)
+		succ = writeVTK(filename+TOSTR(i)+".vtk",U[i],binary);
+	  return succ;
+	}
 
   protected:
 	void computeSurfaceNormal();

@@ -7,6 +7,7 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Sparse>
 #include <BaseFullModel.h>
+#include <JsonFilePaser.h>
 using namespace std;
 using namespace Eigen;
 
@@ -31,24 +32,20 @@ namespace SIMULATOR{
 	}
 
 	virtual bool init(const string init_filename){
-	  /// @todo
-	  assert(false);
 
-	  // assert (def_model != NULL);
-	  // BasePBDefInf inf;
-	  // correct_initialized = inf.read(init_filename);
-	  // if(correct_initialized){
-
-	  // 	BaseFullSim::setTimeStep(inf.get_h());
-	  // 	BaseFullSim::setDampings(inf.get_alpha_k(),inf.get_alpha_m());
-	  // }
-	  // if (correct_initialized){
-	  // 	correct_initialized = def_model->init(init_filename);
-	  // }
-	  // if (correct_initialized){
-	  // 	BaseFullSim::setInitValue();
-	  // }
-	  // return correct_initialized;
+	  UTILITY::JsonFilePaser jsonf;
+	  if (!jsonf.open(init_filename)){
+		ERROR_LOG("failed to open" << init_filename);
+		return false;
+	  }
+	  
+	  correct_initialized = jsonf.read("h",h);               assert_gt(h,0);
+	  correct_initialized &= jsonf.read("alpha_m",alpha_m);  assert_ge(alpha_m,0);
+	  correct_initialized &= jsonf.read("alpha_k",alpha_k);  assert_ge(alpha_k,0);
+	  correct_initialized &= def_model->init(init_filename);
+	  if (correct_initialized) BaseFullSim::setInitValue();
+	  ERROR_LOG_COND("failed to initialze. ", correct_initialized);
+	  return correct_initialized;
 	}
 	bool initialized()const{
 	  return correct_initialized;

@@ -121,7 +121,10 @@ namespace UTILITY{
 	if( openInputFile(in,fname,io_type) ){
 	  int len = 0;
 	  if(load(in,&len,1,io_type,fname)){
-		assert_gt(len,0);
+		if (len <= 0){
+		  ERROR_LOG("data length is zero in file: "<<fname);
+		  return false;
+		}
 		data.resize(len);
 		succ = load(in,&data[0],len,io_type,fname);
 	  }
@@ -149,7 +152,10 @@ namespace UTILITY{
 	if( openOutputFile(out,fname,io_type) ){
 	  const int len = (int)data.size();
 	  if(write(out,&len,1,io_type,fname,space)){
-		assert_gt(len,0);
+		if (len <= 0){
+		  ERROR_LOG("data length is zero for writing file: "<<fname);
+		  return false;
+		}
 		succ = write(out,&data[0],len,io_type,space,fname);
 	  }
 	}
@@ -164,8 +170,10 @@ namespace UTILITY{
 	if( openInputFile(in,fname,io_type) ){
 	  int rows,cols;
 	  if(load(in,&rows,1,io_type,fname) && load(in,&cols,1,io_type,fname) ){
-		assert_gt(rows,0);
-		assert_gt(cols,0);
+		if (rows <=0 || cols <= 0){
+		  ERROR_LOG("data dimension in file: "<<fname << " is less than zero "<<"rows="<<rows<<",cols="<<cols);
+		  return false;
+		}
 		data.resize(rows,cols);
 		succ = load(in,&data(0,0),rows*cols,io_type,fname);
 	  }
@@ -183,8 +191,10 @@ namespace UTILITY{
 	  const int rows = (int)data.rows();
 	  const int cols = (int)data.cols();
 	  if(write(out,&rows,1,io_type,fname,space) && write(out,&cols,1,io_type,fname,space)){
-		assert_gt(rows,0);
-		assert_gt(cols,0);
+		if (rows <=0 || cols <= 0){
+		  ERROR_LOG("data dimension is less than zero "<<"rows="<<rows<<",cols="<<cols);
+		  return false;
+		}
 		succ = write(out,&data(0,0),rows*cols,io_type,space,fname);
 	  }
 	}

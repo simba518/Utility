@@ -17,34 +17,54 @@ namespace SIMULATOR{
   class FullStVKSimModel:public BaseFullModel{
 	
   public:
+	FullStVKSimModel(){
+	  tetMesh = pTetMesh(new TetMesh);
+	}
 	FullStVKSimModel(pTetMesh tet):tetMesh(tet){}
 	bool init(const std::string init_filename){
-	  return false;
+	  
+	  if (!tetMesh){
+		tetMesh = pTetMesh(new TetMesh);
+	  }
+
+	  bool succ = false;
+	  JsonFilePaser jsonf;
+	  if (jsonf.open(init_filename)){
+		string vol_file, elastic_mtl;
+		succ = jsonf.readFilePath("vol_file", vol_file);
+		succ &= jsonf.readFilePath("elastic_mtl", elastic_mtl);
+		succ &= tetMesh->load(vol_file);
+		succ &= tetMesh->loadElasticMtl(elastic_mtl);
+	  }
+	  if (succ){
+		fullStvk = pElasticForceTetFullStVK (new ElasticForceTetFullStVK(tetMesh));
+	  }
+
+	  tetMesh->nodes(rest_x);
+	  x = rest_x;
+	  ERROR_LOG_COND("failed to initialze. ", succ);
+	  return succ;
 	}
 	bool setGravity(const bool addGravity){
 	  /// @todo
+	  assert(false);
 	  return false;
 	}
 	bool evaluateF(const Eigen::VectorXd &u, Eigen::VectorXd &f){
-	  if(fullStvk){
-		assert_eq(u.size(),rest_x.size());
-		x = rest_x + u;
-		fullStvk->force(x,f);
-		// f *= -1.0 ???
-		return true;
-	  }else{
-		return false;
-	  }
+	  assert(fullStvk);
+	  assert_eq(u.size(),rest_x.size());
+	  x = rest_x + u;
+	  fullStvk->force(x,f);
+	  f = -f; /// @todo
+	  return true;
 	}
 	bool evaluateK(const Eigen::VectorXd &u, SparseMatrix<double> &K_full){
-	  if (fullStvk){
-		assert_eq(u.size(),rest_x.size());
-		x = rest_x + u;
-		K_full = fullStvk->K(x);
-		return true;
-	  }else{
-		return false;
-	  }
+	  assert(fullStvk);
+	  assert_eq(u.size(),rest_x.size());
+	  x = rest_x + u;
+	  K_full = fullStvk->K(x);
+	  K_full *= -1.0f;
+	  return true;
 	}
 	bool evaluateK_triplet(const Eigen::VectorXd &u, VecT &K_full_t){
 	  static SparseMatrix<double> K;
@@ -53,12 +73,9 @@ namespace SIMULATOR{
 	  return succ;
 	}
 	bool evaluateM(SparseMatrix<double> &M_full){
-	  if (tetMesh){
-		mass.compute(M_full,*tetMesh);
-		return true;
-	  }else{
-		return false;
-	  }
+	  assert(tetMesh);
+	  mass.compute(M_full,*tetMesh);
+	  return true;
 	}
 	bool evaluateM_triplet(VecT &M_full_t){
 	  static SparseMatrix<double> M;
@@ -68,6 +85,9 @@ namespace SIMULATOR{
 	}
 	int dimension()const{
 	  return rest_x.size();
+	}
+	pTetMesh_const getTetMesh()const{
+	  return tetMesh;
 	}
 
   protected:

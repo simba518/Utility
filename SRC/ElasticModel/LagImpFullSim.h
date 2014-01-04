@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <BaseFullSim.h>
+#include <JsonFilePaser.h>
 
 namespace SIMULATOR{
 

@@ -261,6 +261,16 @@ bool TetMesh::write(const std::string& filename)const{
   return outf.good();
 }
 
+bool TetMesh::write(const std::string& filename,const MatrixXd &U)const{
+  
+  bool succ = true;
+  for (int i = 0; i < U.cols() && succ; ++i){
+    const VectorXd &u = U.col(i);
+	succ = write(filename+TOSTR(i)+".abq",u);
+  }
+  return succ;
+}
+
 BBoxD TetMesh::getBBox()const{
 
   BBoxD box;
@@ -290,6 +300,64 @@ bool TetMesh::writeVTK(const std::string&filename,const MatrixXd &U,const bool b
 	succ = writeVTK(filename+TOSTR(i)+".vtk",u,binary);
   }
   return succ;
+}
+
+bool TetMesh::loadElasticMtl(const std::string& filename){
+
+  const int elements_num = tets().size();
+  if (elements_num <= 0){
+	ERROR_LOG("the elements number of the mesh is "<<elements_num);
+	return false;
+  }
+
+  ifstream in(filename.c_str());
+  if (!in.is_open()){
+	ERROR_LOG("failed to open file " << filename);
+	return false;
+  }
+
+  string tempt;
+  int groups_num = 0;
+  in >> tempt >> groups_num;
+  assert_ge(groups_num,0);
+
+  if (0 == groups_num ){
+	double rho, E,v;
+  	in>>tempt>>tempt>>tempt>>E >>tempt>>v >>tempt>>rho;
+	_mtl.reset(elements_num, rho, E, v);
+  	INFO_LOG("E,v,rho: "<<E<<","<<v<<","<<rho);
+  }else{
+
+	_mtl.reset(elements_num);
+	vector<double> rho(groups_num), E(groups_num), v(groups_num);
+  	vector<int> numtets(groups_num);
+  	for (int i = 0; i < groups_num; ++i){
+  	  in>>tempt>>tempt>>tempt>>E[i]>>tempt>>v[i];
+  	  in>>tempt>>rho[i]>>tempt>>numtets[i];
+  	  INFO_LOG("E,v,rho: "<<E[i]<<","<<v[i]<<","<<rho[i]);
+  	}
+
+	for (int i = 0; i < numtets.size(); ++i){
+
+	  vector<int> tet_set(numtets[i]);
+	  in >> tempt >> tempt;
+	  for (int j = 0;  j < numtets[i]; ++j){
+		in >> tet_set[j];
+		if(j != numtets[i]-1)
+		  in >> tempt;
+	  }
+
+	  const Matrix<double,2,1> G_L = ElasticMaterial<double>::toLameConstant(E[i],v[i]);
+	  for (size_t t = 0; t < tet_set.size(); ++t){
+		_mtl._rho[tet_set[t]] = rho[i];
+		_mtl._G[tet_set[t]] = G_L[0];
+		_mtl._lambda[tet_set[t]] = G_L[1];
+	  }
+
+	}
+  }
+
+  return true;
 }
 
 void TetMesh::computeSurfaceNormal(){

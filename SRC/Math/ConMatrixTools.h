@@ -47,6 +47,18 @@ namespace UTILITY{
 	  insertI3x3(C, con_nodes_vec[i], i);
   }
 
+  // Compute con matrix fixed all of the provided nodes, not only barycenter.
+  template<class VECTOR_I>
+  inline void computeConM(const VECTOR_I &con_nodes, VecT &trip_C, const int total_node_num){
+	SparseMatrix<double> mat;
+	computeConM(con_nodes, mat, total_node_num);
+	trip_C.clear();
+	trip_C.reserve(mat.nonZeros());
+	for (int k=0; k <mat.outerSize(); ++k)
+	  for (SparseMatrix<double>::InnerIterator it(mat,k); it; ++it)
+		trip_C.push_back(Triplet<double>(it.row(),it.col(),it.value()));
+  }
+
   // compute the constraint matrix of the barycenter constraints.
   void computeBaryCenterConM(const set<int> &con_nodes,int total_node_num,SparseMatrix<double> &con_m);
 

@@ -14,7 +14,7 @@ QGLViewerExt::QGLViewerExt (QWidget *parent):QGLViewer(parent){
   step_by_step = false;
   draw_lights = false;
   buttonPressed = Qt::NoButton;
-  m_show3DGrid = false;
+  m_show3DGrid = true;
 }
 
 void QGLViewerExt::addSelfRenderEle(pSelfRenderEle ele){
@@ -99,8 +99,7 @@ void QGLViewerExt::selfRender(){
 
 void QGLViewerExt::draw(){
 
-  // drawMouse();
-  // if (m_show3DGrid)	draw3DGrid();
+  drawMouse();
 	
   drawBackground();
   glPushMatrix();
@@ -108,12 +107,16 @@ void QGLViewerExt::draw(){
   displayText();
   glPopMatrix();	
 	
+  if (m_show3DGrid){
+	draw3DGrid();	
+  }
+
   // debug lights
   if (draw_lights){
-	drawLight(GL_LIGHT0);
-	drawLight(GL_LIGHT1);
-	drawLight(GL_LIGHT2);
-	drawLight(GL_LIGHT3);
+  	drawLight(GL_LIGHT0);
+  	drawLight(GL_LIGHT1);
+  	drawLight(GL_LIGHT2);
+  	drawLight(GL_LIGHT3);
   }
 }
 
@@ -203,21 +206,13 @@ void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 
 	// set lights
 	const Vec vd = camera()->viewDirection();
+
 	float pos[4] = {0.0, 0.0, 0.0, 0.0};
-	pos[0] = -vd[0]; 	pos[1] = -vd[1]; pos[2] = -vd[2]*scence_radius;
-	float pos_behind[4] = {0, pos[2], -pos[2], 0};
-	glLightfv(GL_LIGHT0, GL_POSITION, pos_behind);
+	pos[0] = -vd[0]*scence_radius; 	
+	pos[1] = -vd[1]*scence_radius; 
+	pos[2] = -vd[2]*scence_radius;
 
-	pos[0] = -vd[0] - v_max[0];  
-	pos[1] = -vd[1] - v_max[1]; 
-	pos[2] = -vd[2] - v_max[2];
-	glLightfv(GL_LIGHT1, GL_POSITION, pos);
-
-	pos[0] = -pos[0];
-	glLightfv(GL_LIGHT2, GL_POSITION, pos);
-
-	float pos_up[4] = {0, pos[2], 0, 0};
-	glLightfv(GL_LIGHT3, GL_POSITION, pos_up);
+	glLightfv(GL_LIGHT0, GL_POSITION, pos);
   }
 }
 
@@ -232,23 +227,7 @@ void QGLViewerExt::init(){
   glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
   glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-
-  glLightfv(GL_LIGHT1, GL_AMBIENT,  light_ambient);
-  glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular);
-  glLightfv(GL_LIGHT1, GL_DIFFUSE,  light_diffuse);
-
-  glLightfv(GL_LIGHT2, GL_AMBIENT,  light_ambient);
-  glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular);
-  glLightfv(GL_LIGHT2, GL_DIFFUSE,  light_diffuse);
-
-  glLightfv(GL_LIGHT3, GL_AMBIENT,  light_ambient);
-  glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular);
-  glLightfv(GL_LIGHT3, GL_DIFFUSE,  light_diffuse);
-
   glEnable(GL_LIGHT0);
-  glEnable(GL_LIGHT1);
-  glEnable(GL_LIGHT2);
-  glEnable(GL_LIGHT3);
   glEnable(GL_LIGHTING);
 
   // other
@@ -420,49 +399,21 @@ void QGLViewerExt::drawMouse(){
 }
 
 void QGLViewerExt::show3DGrid(){
+  
   m_show3DGrid = !m_show3DGrid;
 }
 
 void QGLViewerExt::draw3DGrid()const{
 
-  const int scence_radius = QGLViewer::sceneRadius();
-  const Vec center = QGLViewer::sceneCenter();
-	
-  int slice = 5;
-  glBegin(GL_LINES);
-  for (int zi = 0; zi <= slice; zi++)
-	{
-	  float z = (center.z-scence_radius)*zi/slice + (center.z+scence_radius)*(slice-zi)/slice;
-	  for (int yi = 0; yi <= slice; yi++)
-		{
-		  float y = (center.y-scence_radius)*yi/slice + (center.y+scence_radius)*(slice-yi)/slice;
-		  glVertex3f((center.x-scence_radius), y, z);
-		  glVertex3f((center.x+scence_radius), y,z);
-		}
-	  for (int xi = 0; xi <= slice; xi++)
-		{
-		  float x = (center.x-scence_radius)*xi/slice + (center.x+scence_radius)*(slice-xi)/slice;
-		  glVertex3f(x, (center.y-scence_radius), z);
-		  glVertex3f(x, (center.y+scence_radius), z);
-		}
-	}
-  for (int yi = 0; yi <= slice; yi++)
-	{
-	  float y = (center.y-scence_radius)*yi/slice + (center.y+scence_radius)*(slice-yi)/slice;
-	  for (int zi = 0; zi <= slice; zi++)
-		{
-		  float z = (center.z-scence_radius)*zi/slice + (center.z+scence_radius)*(slice-zi)/slice;
-		  glVertex3f((center.x-scence_radius), y, z);
-		  glVertex3f((center.x+scence_radius), y, z);
-		}
-	  for (int xi = 0; xi <= slice; xi++)
-		{
-		  float x = (center.x-scence_radius)*xi/slice + (center.x+scence_radius)*(slice-xi)/slice;
-		  glVertex3f(x, y, (center.z-scence_radius));
-		  glVertex3f(x, y, (center.z+scence_radius));
-		}
-	}
-  glEnd();
+  glLineWidth(1.0f);
+  glColor3f(1.0f,1.0f,1.0f);
+  glRotated(90.0f,1.0f,0.0f,0.0f);
+  drawGrid(QGLViewer::sceneRadius());
+  glRotated(-90.0f,1.0f,0.0f,0.0f);
+
+  glRotated(90.0f,0.0f,1.0f,0.0f);
+  drawGrid(QGLViewer::sceneRadius());
+  glRotated(-90.0f,0.0f,1.0f,0.0f);
 	
 }
 

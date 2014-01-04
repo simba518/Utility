@@ -45,7 +45,7 @@ void UTILITY::draw(const TetMesh &tetmesh,const ObjMtl&mtl,const double *u){
 
   glPushAttrib(GL_POLYGON_BIT);
   glDisable(GL_LIGHTING);
-  glColor3f(0,0,0);
+  glColor3f(1,1,1);
   glLineWidth(1.0f);
   glPolygonMode(GL_FRONT_AND_BACK ,GL_LINE);
   glBegin(GL_TRIANGLES);

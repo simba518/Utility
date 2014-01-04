@@ -2,7 +2,9 @@
 #include <string.h>
 #include <assertext.h>
 #include <Log.h>
-#include <eigen3/Eigen/UmfPackSupport>
+#include <Eigen/SparseLU>
+#include <Eigen/SparseQR>
+#include <Eigen/UmfPackSupport>
 #include "LagImpFullSim.h"
 using namespace SIMULATOR;
 
@@ -17,6 +19,7 @@ bool LagImpFullSim::init(const string init_filename){
 	C_Ct_triplet.clear();
 	resetM_triplet();
   }
+  ERROR_LOG_COND("LagImpFullSim::init(.) failed", succ);
   return succ;
 }
 
@@ -48,12 +51,23 @@ bool LagImpFullSim::forward(){
   // assemble A and b
   bool succ = assembleA();
   succ &= assembleB();
+  assert_eq(A.rows(),A.cols());
+  assert_eq(A.rows(),b.size());
 
   // solve equation
   if (succ){
-	assert(false);
-	///@todo
-	// succ = LSW_MATH::SparseLinearEqSolver::LUsolve(A,b,v);
+
+	UmfPackLU<SparseMatrix<double> > solver;
+	solver.compute(A);
+	if(solver.info()!=Success) {
+	  ERROR_LOG("decomposition failed");
+	  return false;
+	}
+	v = solver.solve(b);
+	if(solver.info()!=Success) {
+	  ERROR_LOG("solving failed");
+	  return false;
+	}
   }
   if (succ){
 	u = u + h*v.head(getDim());
@@ -71,6 +85,7 @@ bool LagImpFullSim::assembleA(){
 	A.reserve(A_triplet.size());
 	A.setFromTriplets( A_triplet.begin(), A_triplet.end() );
   }
+  A.makeCompressed();
   return succ;
 }
 
@@ -90,6 +105,9 @@ bool LagImpFullSim::assembleB(){
 	assert_eq (M.rows(), n3);
   	b.head(n3) = M*v.head(n3) + h*(fext-f);
   }
+
+  cout<< "fext.norm() = " << fext.norm() << endl;
+
   return succ;
 }
 

@@ -9,4 +9,5 @@ TARGET_LINK_LIBRARIES( ${APPNAME}
   ${LIBDIR}/libutility_math.a
   ${LIBDIR}/libutility_elastic.a
   ${Boost_LIBRARIES}
+  ${SUITESPARSE_LIBRARIES}
   )
