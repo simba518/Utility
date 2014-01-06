@@ -151,7 +151,7 @@ namespace UTILITY{
 	std::ofstream out;
 	if( openOutputFile(out,fname,io_type) ){
 	  const int len = (int)data.size();
-	  if(write(out,&len,1,io_type,fname,space)){
+	  if(write(out,&len,1,io_type,space,fname)){
 		if (len <= 0){
 		  ERROR_LOG("data length is zero for writing file: "<<fname);
 		  return false;
