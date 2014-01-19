@@ -97,6 +97,19 @@ namespace UTILITY{
 	}
 
 	template <typename VECTOR>
+	HarmonicOscillatorSet(const VECTOR&lambda,const VECTOR d,const VECTOR&z0,const VECTOR&v0){
+
+	  assert_eq(lambda.size(),z0.size());
+	  assert_eq(lambda.size(),v0.size());
+	  assert_eq(lambda.size(),d.size());
+	  _oscillators.clear();
+	  for (size_t i = 0; i < lambda.size(); ++i){
+		_oscillators.push_back(HarmonicOscillator<T>(lambda[i],d[i],z0[i],v0[i]));
+		_oscillators[i].precompute();
+	  }
+	}
+
+	template <typename VECTOR>
 	HarmonicOscillatorSet(const VECTOR &lambda,const T alpha_k,const T alpha_m,const VECTOR &z0,const VECTOR &v0){
 	  assert_eq(lambda.size(),z0.size());
 	  assert_eq(lambda.size(),v0.size());

@@ -27,7 +27,7 @@ namespace UTILITY{
 	}
 
 	// compute unlumped matrix
-	void compute(Eigen::SparseMatrix<double>&M,const TetMesh&mesh){
+	void compute(Eigen::SparseMatrix<double>&M,const TetMesh&mesh, const bool lower=false){
 
 	  computeCompactM(_M,mesh);
 
@@ -39,9 +39,12 @@ namespace UTILITY{
 		  const int r3 = it.row()*3;
 		  const int c3 = it.col()*3;
 		  const double v = it.value();
-		  tri.push_back(E_Triplet(r3+0,c3+0,v));
-		  tri.push_back(E_Triplet(r3+1,c3+1,v));
-		  tri.push_back(E_Triplet(r3+2,c3+2,v));
+		  assert_gt(v,0.0);
+		  if (!lower || r3 >= c3){
+			tri.push_back(E_Triplet(r3+0,c3+0,v));
+			tri.push_back(E_Triplet(r3+1,c3+1,v));
+			tri.push_back(E_Triplet(r3+2,c3+2,v));
+		  }
 		}
 	  }
 
