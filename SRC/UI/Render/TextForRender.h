@@ -15,7 +15,7 @@ namespace QGLVEXT{
   class TextWithPosition{
 	
   public:
-	TextWithPosition(const std::string text="",int x=1,int y=1,const QFont font = QFont("Consolas", 12)){
+	TextWithPosition(const std::string text="",int x=1,int y=1,const QFont font = QFont("Times", 30, QFont::Bold)){
 	  setContent(text);
 	  setX(x);
 	  setY(y);

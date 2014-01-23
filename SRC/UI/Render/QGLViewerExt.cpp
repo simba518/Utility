@@ -101,7 +101,7 @@ void QGLViewerExt::draw(){
 
   drawMouse();
 	
-  drawBackground();
+  // drawBackground();
   glPushMatrix();
   selfRender();
   displayText();
@@ -208,19 +208,26 @@ void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 	const Vec vd = camera()->viewDirection();
 
 	float pos[4] = {0.0, 0.0, 0.0, 0.0};
-	pos[0] = -vd[0]*scence_radius; 	
-	pos[1] = -vd[1]*scence_radius; 
-	pos[2] = -vd[2]*scence_radius;
-
+	// pos[0] = -vd[0]*scence_radius; 	
+	// pos[1] = -vd[1]*scence_radius; 
+	// pos[2] = -vd[2]*scence_radius;
+	pos[0] = -2; 	
+	pos[1] = 2; 
+	pos[2] = 2;
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+
+	pos[0] = 2; 	
+	pos[1] = 2; 
+	pos[2] = 2;
+	glLightfv(GL_LIGHT1, GL_POSITION, pos);
   }
 }
 
 void QGLViewerExt::init(){
 
   // set lighting
-  const double scalor = 0.42f;
-  const GLfloat light_ambient[4]  = {0.2f*scalor, 0.2f*scalor, 0.2f*scalor, 1.0f*scalor};
+  const double scalor = 0.8f;
+  const GLfloat light_ambient[4]  = {0.8f*scalor, 0.8f*scalor, 0.8f*scalor, 1.0f*scalor};
   const GLfloat light_diffuse[4]  = {0.8f*scalor, 0.8f*scalor, 0.8f*scalor, 1.0f*scalor};
   const GLfloat light_specular[4] = {1.0f*scalor, 1.0f*scalor, 1.0f*scalor, 1.0f*scalor};
 
@@ -228,6 +235,12 @@ void QGLViewerExt::init(){
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
   glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
   glEnable(GL_LIGHT0);
+
+  glLightfv(GL_LIGHT1, GL_AMBIENT,  light_ambient);
+  glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular);
+  glLightfv(GL_LIGHT1, GL_DIFFUSE,  light_diffuse);
+  glEnable(GL_LIGHT1);
+
   glEnable(GL_LIGHTING);
 
   // other
@@ -235,7 +248,7 @@ void QGLViewerExt::init(){
   setBackgroundColor(QColor(255,255,255));
   glBlendFunc(GL_ONE, GL_ONE);
 
-  resetSceneBoundBox(-20,-20,-20,20,20,20);
+  resetSceneBoundBox(-3,-3,-3,3,3,3);
 
 	
   setMouseTracking(true);
