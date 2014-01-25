@@ -1,6 +1,7 @@
 #include <ccdAPI.h>
 #include "CCD_DPF.h"
-using namespace DEF_COLLISION;
+#include <boost/foreach.hpp>
+using namespace UTILITY;
 
 pCCD_DPF CCD_DPF::p_instance;
 
@@ -19,7 +20,7 @@ void VFCallback(unsigned int vid, unsigned int fid, float t) {
   vfs.insert ( VFCollision (vid,fid,t) );
 }
 
-int CCD_DPF::addObject(const void *object_id, const VectorV3& nodes, const VectorV3i &faces){
+int CCD_DPF::addObject(const void *object_id,const VectorV3&nodes,const VectorV3i&faces){
 
   Collision::addObject(object_id, nodes, faces);
 
@@ -70,12 +71,38 @@ bool CCD_DPF::update(const void *object_id, const VectorV3& nodes){
 
 void CCD_DPF::computeForce(){
 
-  EECollisionSet &ees = CCD_DPF::getInstance()->getEECollisionSet();
-  VFCollisionSet &vfs = CCD_DPF::getInstance()->getVFCollisionSet();
-  cout << "ees: " << ees.size() << endl;
-  cout << "vfs: " << vfs.size() << endl;
-  
-  /// @todo compute collision forces
+  const EECollisionSet &ees = CCD_DPF::getInstance()->getEECollisionSet();
+  const VFCollisionSet &vfs = CCD_DPF::getInstance()->getVFCollisionSet();
+  // DEBUG_LOG("ees: " << ees.size());
+  // DEBUG_LOG("vfs: " << vfs.size());
+
+  for (size_t i = 0; i < forces.size(); ++i){
+    forces[i]->vertex.clear();
+    forces[i]->forces.clear();
+  }
+
+  BOOST_FOREACH(const VFCollision &vf, vfs){
+
+	const int v0 = _faces[vf.fid()].id0();
+	const int v1 = _faces[vf.fid()].id1();
+	const int v2 = _faces[vf.fid()].id2();
+	const SELF_CCD::vec3f &fv0 =_verts[v0];
+	const SELF_CCD::vec3f &fv1 =_verts[v1];
+	const SELF_CCD::vec3f &fv2 =_verts[v2];
+	SELF_CCD::vec3f n = (fv1-fv0).cross(fv2-fv0);
+	n.normalize();
+	
+	const int v = vf.vid();
+	int obj_v, obj_id;
+	convertToObejctId(v, obj_v, obj_id);
+	forces[obj_id]->vertex.push_back(obj_v);
+	Vector3d f;
+	f[0] = n[0];
+	f[1] = n[1];
+	f[2] = n[2];
+	f *= response_scalor;
+	forces[obj_id]->forces.push_back(f);
+  }
 }
 
 void CCD_DPF::removeAllCollisionObjects(){
@@ -91,5 +118,31 @@ void CCD_DPF::removeAllCollisionObjects(){
 
 void CCD_DPF::checkCollision(){
 
+  _EECollisionSet.clear();
+  _VFCollisionSet.clear();
   ccdChecking(true);
+}
+
+void CCD_DPF::convertToObejctId(const int v, int &obj_v, int &obj_id)const{
+
+  assert_gt(_start_index.size(),0);
+  if (_start_index.size() <= 1){
+	obj_v = v;
+	obj_id = 0;
+	return ;
+  }
+
+  if (v >= _start_index[_start_index.size()-1]){
+	obj_v = v-_start_index[_start_index.size()-1];
+	obj_id = _start_index.size()-1;
+	return ;
+  }
+
+  for (int i = 0; i < _start_index.size()-1; ++i){
+	if (_start_index[i] <= v &&  v < _start_index[i+1]){
+	  obj_v = v-_start_index[i];
+	  obj_id = i;
+	  break;
+	}
+  }
 }

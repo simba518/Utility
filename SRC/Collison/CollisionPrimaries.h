@@ -9,7 +9,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace DEF_COLLISION{
+namespace UTILITY{
 
   typedef std::vector<Vector3d,Eigen::aligned_allocator<Vector3d> > VectorV3;
   typedef Eigen::Matrix<double,-1, 1> VectorX;

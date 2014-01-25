@@ -5,7 +5,7 @@
 #include <Collision.h>
 #include <ccdAPI.h>
 
-namespace DEF_COLLISION{
+namespace UTILITY{
 
   class CCD_DPF;
   typedef boost::shared_ptr<CCD_DPF> pCCD_DPF;
@@ -23,6 +23,10 @@ namespace DEF_COLLISION{
 		p_instance = pCCD_DPF(new CCD_DPF());
 	  }
 	  return p_instance;
+	}
+	void setReponseScalor(const double rs){
+	  assert_gt(rs,0.0f);
+	  response_scalor = rs;
 	}
 	int addObject(const void *object_id, const VectorV3& nodes, const VectorV3i &faces);
 	bool prepare();
@@ -58,10 +62,12 @@ namespace DEF_COLLISION{
 
   protected:
 	CCD_DPF(){
-	  
+	  response_scalor = 1.0f;
 	}
+	void convertToObejctId(const int v, int &obj_v, int &obj_id)const;
 
   private:
+	double response_scalor;
 	vector<int> _start_index;
 	SELF_CCD::vec3f_list _verts;
 	SELF_CCD::tri_list _faces;

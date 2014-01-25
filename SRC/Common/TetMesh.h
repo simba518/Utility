@@ -192,13 +192,13 @@ namespace UTILITY{
 	}
 	const FaceId& faceId() const{return _faceId;}
 	const VVec3i& surface() const{return _surface;}
-	template<class VECTOR>
-	void surface(VECTOR &x) const{
-	  x.resize(_surface.size()*3);
+	template<class VECTOR_I>
+	void surface(VECTOR_I &f) const{
+	  f.resize(_surface.size()*3);
 	  for (size_t i = 0; i < _surface.size(); ++i){
-		x[i*3+0] = _surface[i][0];
-		x[i*3+1] = _surface[i][1];
-		x[i*3+2] = _surface[i][2];
+		f[i*3+0] = _surface[i][0];
+		f[i*3+1] = _surface[i][1];
+		f[i*3+2] = _surface[i][2];
 	  }
 	}
 	const VVec3d& normal() const{return _normal;}

@@ -107,6 +107,7 @@ INCLUDE_FOR_PROJECT(${PROJECT_NAME}
   SRC/Cuda
   SRC/ElasticModel
   SRC/Collison
+  SRC/Collison/self-ccd
   )
 
 SET(LIBDIR ${PROJECT_SOURCE_DIR}/Lib/${CMAKE_BUILD_TYPE_DIR})

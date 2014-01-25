@@ -25,6 +25,11 @@ bool LagImpFullSim::init(const string init_filename){
 
 void LagImpFullSim::setConM(const VecT &C_triplet){
 
+  if (C_triplet.size() <= 0){
+	assert_eq(uc.size(),0);
+	return ;
+  }
+
   // initialize C
   C.resize(uc.size(), u.size());
   C.reserve(C_triplet.size());

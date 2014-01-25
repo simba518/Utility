@@ -73,7 +73,7 @@ namespace SIMULATOR{
 	  this->uc = uc;
 	}
 	virtual void removeAllCon(){
-	  uc.resize(0,0);	  
+	  uc.resize(0);
 	}
 	const VectorXd &getPosCon()const{
 	  return uc;
