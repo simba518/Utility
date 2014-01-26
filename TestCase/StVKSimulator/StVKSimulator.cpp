@@ -163,7 +163,7 @@ void StVKSimulator::updateExtForces(VectorXd &f_ext)const{
 
 void StVKSimulator::buildFloor(){
   
-  const double y = -2.0;
+  const double y = -1.0;
   const int w_2 = 3.0f;
   VectorXd nodes(12);
   nodes << w_2,y,w_2,  -w_2,y,w_2,  -w_2,y,-w_2,  w_2,y,-w_2;

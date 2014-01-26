@@ -73,36 +73,85 @@ void CCD_DPF::computeForce(){
 
   const EECollisionSet &ees = CCD_DPF::getInstance()->getEECollisionSet();
   const VFCollisionSet &vfs = CCD_DPF::getInstance()->getVFCollisionSet();
-  // DEBUG_LOG("ees: " << ees.size());
-  // DEBUG_LOG("vfs: " << vfs.size());
+  // cout << "ees.size() = "<<ees.size() << endl;
+  // cout << "vfs.size() = "<<vfs.size() << endl;
 
   for (size_t i = 0; i < forces.size(); ++i){
     forces[i]->vertex.clear();
     forces[i]->forces.clear();
   }
 
+  // vertex-frace
+  int vv[3] = {0};
   BOOST_FOREACH(const VFCollision &vf, vfs){
 
-	const int v0 = _faces[vf.fid()].id0();
-	const int v1 = _faces[vf.fid()].id1();
-	const int v2 = _faces[vf.fid()].id2();
-	const SELF_CCD::vec3f &fv0 =_verts[v0];
-	const SELF_CCD::vec3f &fv1 =_verts[v1];
-	const SELF_CCD::vec3f &fv2 =_verts[v2];
+	vv[0] = _faces[vf.fid()].id0();
+	vv[1] = _faces[vf.fid()].id1();
+	vv[2] = _faces[vf.fid()].id2();
+	const SELF_CCD::vec3f &fv0 =_verts[vv[0]];
+	const SELF_CCD::vec3f &fv1 =_verts[vv[1]];
+	const SELF_CCD::vec3f &fv2 =_verts[vv[2]];
 	SELF_CCD::vec3f n = (fv1-fv0).cross(fv2-fv0);
+	assert_gt(n.length(),0);
 	n.normalize();
 	
 	const int v = vf.vid();
-	int obj_v, obj_id;
-	convertToObejctId(v, obj_v, obj_id);
-	forces[obj_id]->vertex.push_back(obj_v);
+	const double deepth  = sqrt(abs((_verts[v]-_verts[vv[0]]).dot(n)));
+
 	Vector3d f;
 	f[0] = n[0];
 	f[1] = n[1];
 	f[2] = n[2];
-	f *= response_scalor;
+	f *= (response_scalor*deepth);
+
+	// vretex
+	int obj_v, obj_id;
+	convertToObejctId(v, obj_v, obj_id);
+	forces[obj_id]->vertex.push_back(obj_v);
 	forces[obj_id]->forces.push_back(f);
+
+	// faces
+	f = f*(-1.0f/3);
+	for (int i = 0; i < 3; ++i){
+	  convertToObejctId(vv[i], obj_v, obj_id);
+	  forces[obj_id]->vertex.push_back(obj_v);
+	  forces[obj_id]->forces.push_back(f);
+	}
   }
+
+  // // edge-edge @bug
+  // int ev[4] = {0};
+  // BOOST_FOREACH(const EECollision &ee, ees){
+
+  // 	ev[0] = ee.e1v1();
+  // 	ev[1] = ee.e1v2();
+  // 	ev[2] = ee.e2v1();
+  // 	ev[3] = ee.e2v2();
+
+  // 	const SELF_CCD::vec3f &e1v1 =_verts[ev[0]];
+  // 	const SELF_CCD::vec3f &e1v2 =_verts[ev[1]];
+  // 	const SELF_CCD::vec3f &e2v1 =_verts[ev[2]];
+  // 	const SELF_CCD::vec3f &e2v2 =_verts[ev[3]];
+
+  // 	const SELF_CCD::vec3f n = ((e1v2-e1v1) - (e2v2-e2v1))*0.5f;
+  // 	Vector3d f;
+  // 	f[0] = n[0];
+  // 	f[1] = n[1];
+  // 	f[2] = n[2];
+  // 	f *= (response_scalor*0.5f);
+
+  // 	int obj_v, obj_id;
+  // 	for (int i = 0; i < 2; ++i){
+  // 	  convertToObejctId(ev[i], obj_v, obj_id);
+  // 	  forces[obj_id]->vertex.push_back(obj_v);
+  // 	  forces[obj_id]->forces.push_back(f);
+  // 	}
+  // 	for (int i = 2; i < 4; ++i){
+  // 	  convertToObejctId(ev[i], obj_v, obj_id);
+  // 	  forces[obj_id]->vertex.push_back(obj_v);
+  // 	  forces[obj_id]->forces.push_back(-f);
+  // 	}
+  // }
 }
 
 void CCD_DPF::removeAllCollisionObjects(){
