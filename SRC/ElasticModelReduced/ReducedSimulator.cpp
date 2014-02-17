@@ -25,14 +25,9 @@ void ReducedImpLogConSimulator::setConGroups(const vector<set<int> > &groups){
   
 }
 
-void ReducedImpLogConSimulator::setUc(const VectorXd &uc){
-
-  
-}
-
 void ReducedImpLogConSimulator::removeAllCon(){
   
-
+  uc.resize(0);
 }
 
 bool ReducedImpLogConSimulator::forward(){

@@ -35,10 +35,7 @@ namespace SIMULATOR{
 	  this->alpha_m = alpha_m;  
 	}
 	virtual void reset(){
-	  if (!model){
-		return ;
-	  }
-	  const int r = model->reducedDim();
+	  const int r = reducedDim();
 	  v.resize(r);
 	  v.setZero();
 	  q.resize(r);
@@ -75,6 +72,12 @@ namespace SIMULATOR{
 	double getAlphaM()const{
 	  return alpha_m;
 	}
+	int reducedDim()const{
+	  return NULL==model ? model->reducedDim():0;
+	}
+	int fullDim()const{
+	  return NULL==model ? model->fullDim():0;
+	}
 
   protected:
 	pReducedElasticModel model;
@@ -97,10 +100,17 @@ namespace SIMULATOR{
   public:
 	ReducedImpLogConSimulator(pReducedElasticModel m):ReducedSimulator(m){}
 	void setConGroups(const vector<set<int> > &groups);
-	void setUc(const VectorXd &uc);
+	void setUc(const VectorXd &uc){
+	  this->uc = uc;
+	}
 	void removeAllCon();
 	bool forward();
 
+  private:
+	MatrixXd A;
+	VectorXd b;
+	MatrixXd C;
+	VectorXd uc;
   };
   
 }//end of namespace
