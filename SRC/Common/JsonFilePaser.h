@@ -32,7 +32,7 @@ namespace UTILITY{
 	std::string getFileName()const;
 
 	template<class T>
-	bool read(const std::string eleName, T &value, const bool checkValidation = true){
+	bool read(const std::string eleName, T &value){
 	  if( !_file.is_open() ){
 		ERROR_LOG("json file is not open");
 		return false;
@@ -43,6 +43,15 @@ namespace UTILITY{
 	  }catch(std::exception& ex){
 		succ = false;
 		ERROR_LOG(ex.what());
+	  }
+	  return succ;
+	}
+	template<class T>
+	bool read(const std::string eleName, T &value,const T default_value){
+	  const bool succ = read(eleName, value);
+	  if(!succ){
+		value = default_value;
+		WARN_LOG("use default value for "<<eleName<<": "<<default_value);
 	  }
 	  return succ;
 	}

@@ -107,6 +107,7 @@ INCLUDE_FOR_PROJECT(${PROJECT_NAME}
   SRC/Cuda
   SRC/ElasticModel
   SRC/Collison
+  SRC/ElasticModelReduced
   SRC/Collison/self-ccd
   )
 
