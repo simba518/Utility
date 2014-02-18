@@ -51,12 +51,13 @@ bool CubaturedElasticModel::evaluateF(const VectorXd &reduced_u,VectorXd &f){
   f.resize(reducedDim());
   f.setZero();
 
-  mat3x4 f_tet;
+  static mat3x4 f_tet;
   for (size_t i = 0; i < sampledTets.size(); ++i){
-    force_tet(f_tet, sampledTets[i], x);
+	const int tet_id = sampledTets[i];
+    force_tet(f_tet, tet_id, x);
 	for (int j = 0;  j < 4; ++j){
-	  const int vi = _vol_mesh->tets()[i][j];
-	  f += (-1.0f*weights[i])*B.block(3*vi,0,3,B.cols()).transpose()*f_tet.col(j);
+	  const int vi = _vol_mesh->tets()[tet_id][j];
+	  f += B.block(3*vi,0,3,B.cols()).transpose()*((-1.0f*weights[i])*f_tet.col(j));
 	}
   }
   return true;

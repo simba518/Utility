@@ -35,6 +35,11 @@ namespace UTILITY{
 	  forceHessian(op,X,V);
 	}
 
+  public:
+	void force_tet(mat3x4& f,const int& i,const VectorXd& X);
+	void forceDerivX_tet(TetDF &df, const int& i, const VectorXd& X);
+	void forceDerivXdX_tet(mat3x4& dfdX,const int& i,const VectorXd& dx,const VectorXd& X);
+
   protected:
 	void computeTetForces(VecMat3x4 &tet_forces, const VectorXd &X){
 	  tet_forces.resize(_vol_mesh->tets().size()); 
@@ -56,9 +61,6 @@ namespace UTILITY{
 	}
 
   protected: 
-	void force_tet(mat3x4& f,const int& i,const VectorXd& X);
-	void forceDerivX_tet(TetDF &df, const int& i, const VectorXd& X);
-	void forceDerivXdX_tet(mat3x4& dfdX,const int& i,const VectorXd& dx,const VectorXd& X);
 	void W(double& W,const Matrix3d& F,const double& G,const double& lambda,const double& V) const;
 	void PF(Matrix3d& P,const Matrix3d& F,const double& G,const double& lambda) const;
 	void dPF(Matrix3d& deriv,const Matrix3d& dF,const Matrix3d& F,const double& G,const double& lambda) const;
