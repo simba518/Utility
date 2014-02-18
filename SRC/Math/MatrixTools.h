@@ -147,7 +147,7 @@ namespace EIGEN3EXT{
   // comput the pseudoinverse of a dense matrix using SVD.
   // https://inst.eecs.berkeley.edu/~ee127a/book/login/def_pseudo_inv.html
   template <class T>
-  inline void PseudoInverse(const Eigen::Matrix<T,-1,-1> &A, Eigen::Matrix<T,-1,-1> &invA){
+  inline void PseudoInverse(const Eigen::Matrix<T,-1,-1> &A,Eigen::Matrix<T,-1,-1> &invA){
 	Eigen::JacobiSVD <Eigen::Matrix<T,-1,-1> > svd(A,Eigen::ComputeThinU|Eigen::ComputeThinV);
 	const Eigen::Matrix<T,-1,-1> &U = svd.matrixU();
 	const Eigen::Matrix<T,-1,-1> &V = svd.matrixV();
@@ -177,10 +177,27 @@ namespace EIGEN3EXT{
 	  for(int j=0;j<i;j++){
 		const T a = (U.col(j).dot(M*U.col(j)));
 		assert_ne(a,0.0f);
+		assert_eq(a,a);
 		const T alpha=(U.col(i).dot(M*U.col(j)))/a;
 		U.col(i)-=alpha*U.col(j);
 	  }
 	  U.col(i)/=sqrt((U.col(i).dot(M*U.col(i))));
+	}
+  }
+
+  template<class T>
+  inline void GramSchmidt(Eigen::Matrix<T,-1,-1> &U){
+
+	const int n = U.cols();
+	for(int i=0;i<n;i++){
+	  for(int j=0;j<i;j++){
+		const T a = (U.col(j).dot(U.col(j)));
+		assert_ne(a,0.0f);
+		assert_eq(a,a);
+		const T alpha=(U.col(i).dot(U.col(j)))/a;
+		U.col(i)-=alpha*U.col(j);
+	  }
+	  U.col(i)/=sqrt((U.col(i).dot(U.col(i))));
 	}
   }
   

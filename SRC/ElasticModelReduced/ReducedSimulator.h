@@ -45,7 +45,7 @@ namespace SIMULATOR{
 	}
 
 	// set constraints
-	virtual void setConGroups(const vector<set<int> > &groups) = 0;
+	virtual void setConGroups(const vector<int> &con_nodes) = 0;
 	virtual void setUc(const VectorXd &uc) = 0;
 	virtual void removeAllCon() = 0;
 
@@ -73,10 +73,10 @@ namespace SIMULATOR{
 	  return alpha_m;
 	}
 	int reducedDim()const{
-	  return NULL==model ? model->reducedDim():0;
+	  return (NULL==model) ? 0:model->reducedDim();
 	}
 	int fullDim()const{
-	  return NULL==model ? model->fullDim():0;
+	  return (NULL==model) ? 0:model->fullDim();
 	}
 
   protected:
@@ -99,7 +99,7 @@ namespace SIMULATOR{
 	
   public:
 	ReducedImpLogConSimulator(pReducedElasticModel m):ReducedSimulator(m){}
-	void setConGroups(const vector<set<int> > &groups);
+	void setConGroups(const vector<int> &con_nodes);
 	void setUc(const VectorXd &uc){
 	  this->uc = uc;
 	}

@@ -3,11 +3,10 @@
 
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <eigen3/Eigen/Dense>
 #include <assertext.h>
+#include <ElasticForceTetFullStVK.h>
 using namespace std;
-using namespace Eigen;
+using namespace UTILITY;
 
 namespace SIMULATOR{
   
@@ -19,7 +18,7 @@ namespace SIMULATOR{
 	
   public:
 	// initialize from the ini file
-	virtual bool init(const string init_filename) = 0;
+	virtual bool init(const string init_filename);
 
 	// compute the internal forces in subspace
 	virtual bool evaluateF(const VectorXd &reduced_u,VectorXd &f) = 0;
@@ -66,21 +65,29 @@ namespace SIMULATOR{
    * @class CubaturedElasticModel base class for reduced elastic data model.
    * 
    */
-  class CubaturedElasticModel: public ReducedElasticModel{
+  class CubaturedElasticModel:public ReducedElasticModel,public ElasticForceTetFullStVK{
 	
   public:
+	CubaturedElasticModel(pTetMesh_const tet):ElasticForceTetFullStVK(tet){
+	  assert(tet);
+	  tet->nodes(rest_shape);
+	  assert_gt(rest_shape.size(),0);
+	}
 	void setCubature(const vector<double> &w, const vector<int> &S){
 	  assert_eq(w.size(), S.size());
 	  weights = w;
 	  sampledTets = S;
 	}
 	bool init(const string init_filename);
+	// f = sum wi*Bi^t*fi(q), for i in S.
 	bool evaluateF(const VectorXd &reduced_u,VectorXd &f);
+	// K = sum wi*Bi^t*Ki(q)*Bi, for i in S.
 	bool evaluateK(const VectorXd &reduced_u,MatrixXd &K);
 
   private:
 	vector<double> weights;
 	vector<int> sampledTets;
+	VectorXd rest_shape;
   };
   typedef boost::shared_ptr<CubaturedElasticModel> pCubaturedElasticModel;
   

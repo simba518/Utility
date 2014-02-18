@@ -6,7 +6,8 @@
 namespace SIMULATOR{
   
   /**
-   * @class ReducedSimCubature the cubature operator for the reduced simulation.
+   * @class ReducedSimCubature the cubature operator for the reduced simulation,
+   * which compute the weights and sampled tetrahedrons.
    * 
    */
   class ReducedSimCubature{

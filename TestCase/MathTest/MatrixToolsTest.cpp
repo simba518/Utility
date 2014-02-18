@@ -108,4 +108,16 @@ BOOST_AUTO_TEST_CASE(MGramSchmidtTest){
   ASSERT_EQ_SMALL_MAT_TOL(UtMU,I,1e-12);
 }
 
+BOOST_AUTO_TEST_CASE(GramSchmidtTest){
+
+  const int n = 10;
+  const int r = 3;
+  MatrixXd U = MatrixXd::Random(n,r);
+  
+  EIGEN3EXT::GramSchmidt(U);
+  const MatrixXd UtU = U.transpose()*U;
+  const MatrixXd I = MatrixXd::Identity(r,r);
+  ASSERT_EQ_SMALL_MAT_TOL(UtU,I,1e-12);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

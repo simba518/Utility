@@ -27,7 +27,7 @@ namespace UTILITY{
 	}
 
 	// compute unlumped matrix
-	void compute(Eigen::SparseMatrix<double>&M,const TetMesh&mesh, const bool lower=false){
+	void compute(Eigen::SparseMatrix<double>&M,const TetMesh&mesh,const bool lower=false){
 
 	  computeCompactM(_M,mesh);
 
