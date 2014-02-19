@@ -58,7 +58,7 @@ void ElasticForceTetFull::Kdx(const VectorXd&dx,const VectorXd&X,VectorXd&out){
   }
 }
 
-void ElasticForceTetFull::prepare(){
+bool ElasticForceTetFull::prepare(){
 
   // compute inv(Dm), and dF.
   _def_grad.prepare(_vol_mesh);
@@ -69,6 +69,7 @@ void ElasticForceTetFull::prepare(){
 	_volume[i]=_vol_mesh->volume(i);
   }
   initKEntry(_Kx, _entries);
+  return true;
 }
 
 void ElasticForceTetFull::initKEntry(SparseMatrix<double> &Kx,std::vector<int> &entries)const{

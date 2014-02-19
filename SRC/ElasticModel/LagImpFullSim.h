@@ -18,7 +18,15 @@ namespace SIMULATOR{
 	
   public:
 	LagImpFullSim(pBaseFullModel def_model);
-	bool init(const string init_filename);
+	bool prepare(){
+	  bool succ = false;
+	  if (BaseFullSim::prepare()){
+		succ = def_model->evaluateM(M);
+	  }
+	  C_Ct_triplet.clear();
+	  resetM_triplet();
+	  return succ;
+	}
 	void setTimeStep(const double h){
 	  BaseFullSim::setTimeStep(h);
 	  resetM_triplet();

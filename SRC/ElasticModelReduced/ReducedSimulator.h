@@ -19,9 +19,12 @@ namespace SIMULATOR{
 	  h = 1.0f;
 	  alpha_k = 0.0f;
 	  alpha_m = 0.0f;
-	  reset();
 	}
 	virtual bool init(const string init_filename);
+	virtual bool prepare(){
+	  if(model) return model->prepare();
+	  return false;
+	}
 	void setQ0(const VectorXd &q0){q = q0;}
 	void setV0(const VectorXd &v0){v = v0;}
 	void setTimeStep(const double h){

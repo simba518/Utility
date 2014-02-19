@@ -25,8 +25,8 @@ namespace UTILITY{
   class ElasticForceTetFullStVK: public ElasticForceTetFull{
 	
   public:
-	ElasticForceTetFullStVK(pTetMesh_const vol_mesh):
-	  ElasticForceTetFull(vol_mesh){}
+	ElasticForceTetFullStVK():ElasticForceTetFull(){}
+	ElasticForceTetFullStVK(pTetMesh_const vol_mesh):ElasticForceTetFull(vol_mesh){}
 
 	double energy(const VectorXd &X);
 	void forceHessian(HessianOpHcIJ& oper,const VectorXd& X,const VectorXd& V);

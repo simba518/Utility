@@ -18,36 +18,17 @@ namespace SIMULATOR{
 	
   public:
 	FullStVKSimModel(){
-	  tetMesh = pTetMesh(new TetMesh);
+	  fullStvk = pElasticForceTetFullStVK (new ElasticForceTetFullStVK());
 	}
-	FullStVKSimModel(pTetMesh tet):tetMesh(tet){}
-	bool init(const std::string init_filename){
+	bool init(const std::string filename){return true;}
+	bool prepare(){
 	  
-	  if (!tetMesh){
-		tetMesh = pTetMesh(new TetMesh);
+	  if (tetMesh){
+		tetMesh->nodes(rest_x);
+		x = rest_x;
+		fullStvk->prepare();
+		return true;
 	  }
-
-	  bool succ = false;
-	  JsonFilePaser jsonf;
-	  if (jsonf.open(init_filename)){
-		string vol_file, elastic_mtl;
-		succ = jsonf.readFilePath("vol_file", vol_file);
-		succ &= jsonf.readFilePath("elastic_mtl", elastic_mtl);
-		succ &= tetMesh->load(vol_file);
-		succ &= tetMesh->loadElasticMtl(elastic_mtl);
-	  }
-	  if (succ){
-		fullStvk = pElasticForceTetFullStVK (new ElasticForceTetFullStVK(tetMesh));
-	  }
-
-	  tetMesh->nodes(rest_x);
-	  x = rest_x;
-	  ERROR_LOG_COND("failed to initialze. ", succ);
-	  return succ;
-	}
-	bool setGravity(const bool addGravity){
-	  /// @todo
-	  assert(false);
 	  return false;
 	}
 	bool evaluateF(const Eigen::VectorXd &u, Eigen::VectorXd &f){
@@ -86,6 +67,11 @@ namespace SIMULATOR{
 	int dimension()const{
 	  return rest_x.size();
 	}
+
+	void setTetMesh(pTetMesh_const tet){
+	  tetMesh = tet;
+	  fullStvk->setVolMesh(tetMesh);
+	}
 	pTetMesh_const getTetMesh()const{
 	  return tetMesh;
 	}
@@ -100,7 +86,7 @@ namespace SIMULATOR{
 	}
 	
   private:
-	pTetMesh tetMesh;
+	pTetMesh_const tetMesh;
 	pElasticForceTetFullStVK fullStvk;
 	MassMatrix mass;
 	VectorXd rest_x;

@@ -11,18 +11,6 @@ using namespace SIMULATOR;
 LagImpFullSim::LagImpFullSim(pBaseFullModel def_model):
   BaseFullSim(def_model){}
 
-bool LagImpFullSim::init(const string init_filename){
-
-  bool succ = false;
-  if( BaseFullSim::init(init_filename) ){
-	succ = def_model->evaluateM(M);
-	C_Ct_triplet.clear();
-	resetM_triplet();
-  }
-  ERROR_LOG_COND("LagImpFullSim::init(.) failed", succ);
-  return succ;
-}
-
 void LagImpFullSim::setConM(const VecT &C_triplet){
 
   if (C_triplet.size() <= 0){

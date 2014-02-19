@@ -22,9 +22,7 @@ namespace SIMULATOR{
   public:
 	// initialize from file.
 	virtual bool init(const std::string init_filename) = 0;
-
-	// add or remove gravity from the model. 
-	virtual bool setGravity(const bool addGravity) = 0;
+	virtual bool prepare() = 0;
 
 	// compute the internal forces.
 	virtual bool evaluateF(const Eigen::VectorXd &u, Eigen::VectorXd &f) = 0;

@@ -21,16 +21,20 @@ namespace UTILITY{
   class ElasticForceTetFull{
 	
   public:
-	ElasticForceTetFull(pTetMesh_const vol_mesh):_vol_mesh(vol_mesh){
-	  this->prepare();
+	ElasticForceTetFull(){
+	  
 	}
+	ElasticForceTetFull(pTetMesh_const vol_mesh):_vol_mesh(vol_mesh){}
+	void setVolMesh(pTetMesh_const vol_mesh){
+	  _vol_mesh = vol_mesh;
+	}
+	virtual bool prepare();
 	virtual double energy(const VectorXd &X) = 0;
 	virtual void force(const VectorXd &X, VectorXd &out);
 	virtual const SparseMatrix<double> &K(const VectorXd &X);
 	virtual void Kdx(const VectorXd &dx, const VectorXd &X, VectorXd &out);
 
   protected:
-	virtual void prepare();
 	virtual void computeTetForces(VecMat3x4 &tet_forces, const VectorXd &X)=0;
 	virtual void computeTetForceDerivX(std::vector<TetDF>&df,const VectorXd &X)=0;
 	virtual void computeTetForceDerivXdX(VecMat3x4 &tet_kdx,const VectorXd &dx,const VectorXd &X)=0;

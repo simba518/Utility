@@ -23,8 +23,6 @@ namespace SIMULATOR{
 	  totalFrames = 200;
 	  clearGravity();
 	  saveRlstTo = "tempt/simulated_results";
-	  gravity_start = -1;
-	  gravity_stop = -1;
 	  steps = 1;
 	}
 	void loadInitFile(const string filename);
@@ -58,8 +56,6 @@ namespace SIMULATOR{
 	double gravity[3];
 	VectorXd f_ext;
 	VectorXd u0;
-	int gravity_start;
-	int gravity_stop;
 	pObjmesh scene;
   };
   

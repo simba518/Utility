@@ -20,6 +20,8 @@ namespace SIMULATOR{
 	// initialize from the ini file
 	virtual bool init(const string init_filename);
 
+	virtual bool prepare(){}
+
 	// compute the internal forces in subspace
 	virtual bool evaluateF(const VectorXd &reduced_u,VectorXd &f) = 0;
 
@@ -68,10 +70,18 @@ namespace SIMULATOR{
   class CubaturedElasticModel:public ReducedElasticModel,public ElasticForceTetFullStVK{
 	
   public:
-	CubaturedElasticModel(pTetMesh_const tet):ElasticForceTetFullStVK(tet){
-	  assert(tet);
-	  tet->nodes(rest_shape);
-	  assert_gt(rest_shape.size(),0);
+	CubaturedElasticModel():ElasticForceTetFullStVK(){}
+	CubaturedElasticModel(pTetMesh_const tet):ElasticForceTetFullStVK(tet){}
+	bool prepare(){
+
+	  bool succ = false;
+	  ElasticForceTetFullStVK::prepare();
+	  if (_vol_mesh){
+		succ = true;
+		_vol_mesh->nodes(rest_shape);
+		assert_gt(rest_shape.size(),0);
+	  }
+	  return succ;
 	}
 	void setCubature(const vector<double> &w, const vector<int> &S){
 	  assert_eq(w.size(), S.size());

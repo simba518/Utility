@@ -47,6 +47,9 @@ namespace SIMULATOR{
 	  ERROR_LOG_COND("failed to initialze. ", correct_initialized);
 	  return correct_initialized;
 	}
+	virtual bool prepare(){
+	  return def_model->prepare();
+	}
 	bool initialized()const{
 	  return correct_initialized;
 	}
@@ -61,6 +64,15 @@ namespace SIMULATOR{
 	  assert_ge (alpha_m , 0.0f);
 	  this->alpha_k = alpha_k;
 	  this->alpha_m = alpha_m;  
+	}
+	virtual void reset(){
+	  const int r = getDim();
+	  v.resize(r);
+	  v.setZero();
+	  u.resize(r);
+	  u.setZero();
+	  fext.resize(r);
+	  fext.setZero();
 	}
 
 	/**

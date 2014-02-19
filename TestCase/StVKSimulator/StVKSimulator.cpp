@@ -19,7 +19,7 @@ void StVKSimulator::loadInitFile(const string filename){
 	if(jsonf.readFilePath("fixed_nodes",fixed_nodes_str)){
 	  vector<int> fixed_nodes;
 	  UTILITY::loadVec(fixed_nodes_str, fixed_nodes, UTILITY::TEXT);
-	  cout << "number of fixed nodes: " << fixed_nodes.size() << endl;
+	  INFO_LOG( "number of fixed nodes: " << fixed_nodes.size() );
 	  setFixedNodes(fixed_nodes);
 	}
 
@@ -43,8 +43,6 @@ void StVKSimulator::loadInitFile(const string filename){
 	  clearGravity();
 	}
 
-	jsonf.read("gravity_start", gravity_start);
-	jsonf.read("gravity_stop", gravity_stop);
 	jsonf.readVecFile("u0",u0);
 
 	double response_scalor = 1.0f;
@@ -77,9 +75,7 @@ void StVKSimulator::simulate(){
   bool succ = true;
   recorded_U.clear();
   recorded_U.reserve(totalFrames);
-  cout << "total steps: " << totalFrames << endl;
-  cout << "gravity start: " << gravity_start << endl;
-  cout << "gravity stop: " << gravity_stop << endl;
+  INFO_LOG("total steps: " << totalFrames );
 
   Timer timer;
   timer.start();
@@ -91,14 +87,12 @@ void StVKSimulator::simulate(){
   for (int i = 0; i < totalFrames; ++i){
 
 	cout << "step = " << i << endl;
-
 	bool succ = false;
 	for (int k = 0; k < steps; ++k){
 	  updateExtForces(f_ext);
 	  simulator->setExtForce(f_ext);
 	  succ = simulator->forward();
 	}
-
 	recorded_U.push_back(simulator->getU());
 	ERROR_LOG_COND("simulation failed, step i = " << i, succ);
   }
@@ -111,7 +105,7 @@ void StVKSimulator::save(){
   if(!EIGEN3EXT::write(saveRlstTo+".b",recorded_U)){
 	ERROR_LOG("failed to save the results U to " << saveRlstTo<<".b");
   }else{
-	cout << "success to save the results U to: " << saveRlstTo<<".b" << endl;
+	INFO_LOG( "success to save the results U to: " << saveRlstTo<<".b");
   }
 
   const pTetMesh_const tetmesh = stvkModel->getTetMesh();
@@ -119,7 +113,7 @@ void StVKSimulator::save(){
   if(!tetmesh->writeVTK(saveRlstTo, recorded_U)){
 	ERROR_LOG("failed to save the results mesh to " << saveRlstTo<<"*.vtk");
   }else{
-	cout << "success to save the results mesh to: " << saveRlstTo<<"*.vtk" << endl;
+	INFO_LOG("success to save the results mesh to: " << saveRlstTo<<"*.vtk");
   }
   
 }
@@ -142,7 +136,8 @@ void StVKSimulator::setFixedNodes(const vector<int> &fixednodes){
 }
 
 void StVKSimulator::updateExtForces(VectorXd &f_ext)const{
-  
+
+  // gravity
   pTetMesh_const tetmesh = stvkModel->getTetMesh();
   assert(tetmesh);
   f_ext.resize(tetmesh->nodes().size()*3);
@@ -151,7 +146,8 @@ void StVKSimulator::updateExtForces(VectorXd &f_ext)const{
 	f_ext[k*3+1] = gravity[1];
 	f_ext[k*3+2] = gravity[2];
   }
-  
+
+  // collision response
   VectorXd x;
   tetmesh->nodes(x);
   x += simulator->getU();
