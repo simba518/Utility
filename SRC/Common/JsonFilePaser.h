@@ -66,6 +66,14 @@ namespace UTILITY{
 	  return readFilePath(eleName,matFile,true)?loadMat(matFile,value,io_type):false;
 	}
 	bool readFilePath(const std::string eleName, std::string &filePath,const bool checkFileExist = true);
+	bool readFilePath(const std::string eleName, std::string &filePath,const std::string default_value,const bool checkFileExist = true){
+	  const bool succ = readFilePath(eleName, filePath, checkFileExist);
+	  if (!succ){
+		filePath = default_value;
+		WARN_LOG("use default value for "<<eleName<<": "<<default_value);
+	  }
+	  return succ;
+	}
 	bool readFilePath(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist = true);
 	std::string replaceHomeDir(const std::string &path,const bool checkPathExist = true);
 	

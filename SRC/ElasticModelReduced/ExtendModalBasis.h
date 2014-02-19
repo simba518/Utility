@@ -15,19 +15,22 @@ namespace SIMULATOR{
   class ExtendModalBasis{
 	
   public:
+	// construct basis for constrained object
 	template<class T>
 	static void construct(const Matrix<T,-1,-1> &linearBasis, Matrix<T,-1,-1> &extendedBasis){
 	  extendNonRigidBasis(linearBasis, extendedBasis);
 	  EIGEN3EXT::GramSchmidt(extendedBasis);
 	}
 
+	// construct basis for unconstrained object
 	template<class T>
 	static void construct(const Matrix<T,-1,-1> &linearBasis, const Matrix<T,-1,1> &rest_shape, Matrix<T,-1,-1> &extendedBasis){
 	  
 	  assert_gt(linearBasis.cols(), 6);
 	  Matrix<T,-1,-1> non_rigid_B, rigid_B;
 	  extendRigidBasis(rest_shape, rigid_B);
-	  extendNonRigidBasis(linearBasis.rightCols(linearBasis.cols()-6), non_rigid_B);
+	  const Matrix<T,-1,-1> B1 = linearBasis.rightCols(linearBasis.cols()-6);
+	  extendNonRigidBasis(B1, non_rigid_B);
 	  extendedBasis.resize(non_rigid_B.rows(), non_rigid_B.cols()+rigid_B.cols());
 	  extendedBasis.leftCols(rigid_B.cols()) = rigid_B;
 	  extendedBasis.rightCols(non_rigid_B.cols()) = non_rigid_B;

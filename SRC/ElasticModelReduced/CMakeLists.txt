@@ -8,6 +8,6 @@ ADD_LIBRARY(${LIBRARY_NAME}
 )
 
 # install 
-FILE(GLOB header ${header} *.h ./cubacode/*.h)
+FILE(GLOB header ${header} *.h)
 INSTALL(FILES ${header} DESTINATION ${HEADFILE_DEST})
 INSTALL(TARGETS ${LIBRARY_NAME} DESTINATION ${LIB_DEST})
