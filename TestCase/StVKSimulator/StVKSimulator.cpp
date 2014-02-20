@@ -15,6 +15,17 @@ void StVKSimulator::loadInitFile(const string filename){
   
   UTILITY::JsonFilePaser jsonf;
   if (jsonf.open(filename)){
+
+	string vol_file;
+	if(jsonf.readFilePath("vol_file", vol_file)){
+	  pTetMesh tet_mesh = pTetMesh(new TetMesh());
+	  bool succ = tet_mesh->load(vol_file);
+	  ERROR_LOG_COND("failed to load the vol mesh: "<<vol_file, succ);
+	  stvkModel->setTetMesh(tet_mesh);
+	  succ = simulator->prepare();
+	  ERROR_LOG_COND("failed to prepare for simulation.",succ);
+	}
+
 	string fixed_nodes_str;
 	if(jsonf.readFilePath("fixed_nodes",fixed_nodes_str)){
 	  vector<int> fixed_nodes;
@@ -53,6 +64,7 @@ void StVKSimulator::loadInitFile(const string filename){
   }else{
 	ERROR_LOG("failed to open the initfile: " << filename);
   }
+
   buildFloor();
   initCollision();
 }
@@ -132,7 +144,7 @@ void StVKSimulator::setFixedNodes(const vector<int> &fixednodes){
   VecT trip_C;
   const int n = stvkModel->dimension()/3;
   UTILITY::computeConM(fixednodes, trip_C, n);
-  simulator->setConM(trip_C);
+  simulator->setConM(trip_C,fixednodes.size()*3,n*3);
 }
 
 void StVKSimulator::updateExtForces(VectorXd &f_ext)const{

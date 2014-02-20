@@ -16,6 +16,7 @@ BOOST_AUTO_TEST_CASE(testKTet2){
   // initialize
   pTetMesh_const vol_mesh = TetMeshFactoryForTest::tet2();
   ElasticForceTetFullStVK stvk_fun(vol_mesh);
+  TEST_ASSERT(stvk_fun.prepare());
 
   // forces
   VectorXd X0;
@@ -72,6 +73,7 @@ BOOST_AUTO_TEST_CASE(testK){
   ASSERT_EQ(ref_K.cols(),n*3);
 
   ElasticForceTetFullStVK elas(mesh);
+  TEST_ASSERT(elas.prepare());
   VectorXd x0(n*3);
   mesh->nodes(x0);
   const SparseMatrix<double> &K = elas.K(x0);
@@ -98,10 +100,9 @@ BOOST_AUTO_TEST_CASE(testEnergy){
   x += u;
 
   ElasticForceTetFullStVK elas(mesh);
+  TEST_ASSERT(elas.prepare());
   const double energy = elas.energy(x);
   ASSERT_EQ_TOL(energy,11720539881.8642311,1e-3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-// -87.3405
