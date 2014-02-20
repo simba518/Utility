@@ -68,6 +68,8 @@ namespace UTILITY{
 	  int c0 = 0;
 	  for (int i = 0; i < group_id; ++i)
 		c0 += getConNodesSet()[i].size();
+	  assert_in(c0,0,_pc.cols()-1);
+	  assert_in(c0+nodes,0,_pc.cols());
 	  return _pc.block(0,c0,3,nodes);
 	}
 	template<class VECTOR_INT, class VECTOR_DOUBLE>
