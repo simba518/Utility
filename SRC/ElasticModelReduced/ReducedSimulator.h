@@ -22,8 +22,10 @@ namespace SIMULATOR{
 	}
 	virtual bool init(const string init_filename);
 	virtual bool prepare(){
-	  if(model) return model->prepare();
-	  return false;
+	  bool succ = false;
+	  if (model) succ = model->prepare();
+	  reset();
+	  return succ;
 	}
 	void setQ0(const VectorXd &q0){q = q0;}
 	void setV0(const VectorXd &v0){v = v0;}

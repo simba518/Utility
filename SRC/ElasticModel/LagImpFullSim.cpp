@@ -11,15 +11,12 @@ using namespace SIMULATOR;
 LagImpFullSim::LagImpFullSim(pBaseFullModel def_model):
   BaseFullSim(def_model){}
 
-void LagImpFullSim::setConM(const VecT &C_triplet){
-
-  if (C_triplet.size() <= 0){
-	assert_eq(uc.size(),0);
-	return ;
-  }
+void LagImpFullSim::setConM(const VecT &C_triplet,const int C_rows,const int C_cols){
 
   // initialize C
-  C.resize(uc.size(), u.size());
+  assert_ge(C_rows,0);
+  assert_ge(C_cols,0);
+  C.resize(C_rows, C_cols);
   C.reserve(C_triplet.size());
   if (C_triplet.size() > 0){
 	C.setFromTriplets(C_triplet.begin(), C_triplet.end());
@@ -98,9 +95,6 @@ bool LagImpFullSim::assembleB(){
 	assert_eq (M.rows(), n3);
   	b.head(n3) = M*v.head(n3) + h*(fext-f);
   }
-
-  cout<< "fext.norm() = " << fext.norm() << endl;
-
   return succ;
 }
 

@@ -12,7 +12,6 @@ bool ReducedSimulator::init(const string filename){
   bool succ = false;
   if (jsonf.open(filename)){
 	succ = true;
-	this->reset();
 	jsonf.read("alpha_k",alpha_k,0.0);
 	jsonf.read("alpha_m",alpha_m,0.0);
 	jsonf.read("h",h,1.0);
@@ -23,6 +22,11 @@ bool ReducedSimulator::init(const string filename){
 }
 
 void ReducedImpLogConSimulator::setConGroups(const vector<int> &con_nodes){
+
+  if (con_nodes.size() <= 0){
+	removeAllCon();
+	return ;
+  }
 
   assert_ge(fullDim(), con_nodes.size()*3);
   SparseMatrix<double> sC;
@@ -54,18 +58,18 @@ void ReducedImpLogConSimulator::removeAllCon(){
 
 bool ReducedImpLogConSimulator::forward(){
 
-  FUNC_TIMER();
+  // FUNC_TIMER();
 
   assert(model);
   assert_eq(C.rows(), uc.size());
 
   static MatrixXd L;
-  model->evaluateK(q,L);
+  static VectorXd s;
+  model->evaluateFK(q,s,L);
+
   L *= (h*h+h*alpha_k);
   L += (1.0f+h*alpha_m)*model->getReducedMassM();
 
-  static VectorXd s;
-  model->evaluateF(q,s);
   s *= (-1.0f*h);
   s += h*red_fext;
   s += model->getReducedMassM()*v;

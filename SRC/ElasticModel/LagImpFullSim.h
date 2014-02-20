@@ -35,7 +35,7 @@ namespace SIMULATOR{
 	  BaseFullSim::setDampings(alpha_k, alpha_m);
 	  resetM_triplet();
 	}
-	void setConM(const VecT &C_triplet);
+	void setConM(const VecT &C_triplet,const int C_rows,const int C_cols);
 	void removeAllCon(){
 	  BaseFullSim::removeAllCon();
 	  C_Ct_triplet.clear();

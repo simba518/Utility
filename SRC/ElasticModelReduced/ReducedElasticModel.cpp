@@ -16,6 +16,25 @@ bool ReducedElasticModel::init(const string filename){
   return succ;
 }
 
+bool DirectReductionElasticModel::prepare(){
+
+  bool succ = false;
+  ElasticForceTetFullStVK::prepare();
+  if (_vol_mesh){
+
+	succ = true;
+	_vol_mesh->nodes(rest_shape);
+	assert_gt(rest_shape.size(),0);
+
+	UTILITY::MassMatrix mass;
+	Eigen::DiagonalMatrix<double,-1> diag_M;
+	mass.compute(diag_M, *_vol_mesh);
+	assert_eq(diag_M.rows(),B.rows());
+	M = B.transpose()*diag_M*B;
+  }
+  return succ;
+}
+
 bool CubaturedElasticModel::init(const string filename){
 
   bool succ = ReducedElasticModel::init(filename);
@@ -25,17 +44,44 @@ bool CubaturedElasticModel::init(const string filename){
 
   JsonFilePaser jsonf;
   if (jsonf.open(filename)){
-  	succ = jsonf.readVecFile("cubature_weights",weights);
-  	succ &= jsonf.readVecFile("cubature_points",sampledTets,UTILITY::TEXT);
+  	jsonf.readVecFile("cubature_weights",weights);
+  	jsonf.readVecFile("cubature_points",sampledTets,UTILITY::TEXT);
+	if (weights.size() <=0 || sampledTets.size() <= 0){
+	  weights.clear();
+	  sampledTets.clear();
+	}
+  }else{
+  	ERROR_LOG("failed to open the initfile: " << filename);
+  }
+  return succ;
+}
+
+bool CubaturedElasticModel::prepare(){
+
+  bool succ = false;
+  ElasticForceTetFullStVK::prepare();
+  if (_vol_mesh){
+
+	succ = true;
+	_vol_mesh->nodes(rest_shape);
+	assert_gt(rest_shape.size(),0);
 
   	UTILITY::MassMatrix mass;
   	Eigen::DiagonalMatrix<double,-1> diag_M;
-  	assert(ElasticForceTetFull::_vol_mesh);
-  	mass.compute(diag_M, *ElasticForceTetFull::_vol_mesh);
+  	mass.compute(diag_M, *_vol_mesh);
   	assert_eq(diag_M.rows(),B.rows());
   	M = B.transpose()*diag_M*B;
-  }else{
-  	ERROR_LOG("failed to open the initfile: " << filename);
+
+	if (weights.size() <=0 || sampledTets.size() <= 0){
+
+	  const int n = _vol_mesh->tets().size();
+	  weights.resize(n);
+	  sampledTets.resize(n);
+	  for (int i = 0; i < n; ++i){
+		weights[i] = 1.0f;
+		sampledTets[i] = i;
+	  }
+	}
   }
   return succ;
 }

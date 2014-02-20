@@ -48,7 +48,9 @@ namespace SIMULATOR{
 	  return correct_initialized;
 	}
 	virtual bool prepare(){
-	  return def_model->prepare();
+	  const bool succ = def_model->prepare();
+	  this->reset();
+	  return succ;
 	}
 	bool initialized()const{
 	  return correct_initialized;
@@ -79,8 +81,9 @@ namespace SIMULATOR{
 	 * set constraints,where C_triplet is the triplet format of the constrain
 	 * matrix, uc is displacements of the the constrained nodes (or the
 	 * barycenters of constrained groups), where Cu = uc.
+	 * C_rows, C_cols: the rows and cols of C.
 	 */
-	virtual void setConM(const VecT &C_triplet) = 0;
+	virtual void setConM(const VecT &C_triplet,const int C_rows,const int C_cols) = 0;
 	virtual void setUc(const VectorXd &uc){
 	  this->uc = uc;
 	}
