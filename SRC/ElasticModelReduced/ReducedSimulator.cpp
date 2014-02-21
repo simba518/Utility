@@ -62,6 +62,11 @@ bool ReducedImpLogConSimulator::forward(){
 
   assert(model);
   assert_eq(C.rows(), uc.size());
+  const int r = reducedDim();
+  assert_eq(q.size(), r);
+  assert_eq(v.size(), r);
+  assert_eq(red_fext.size(), r);
+  assert_eq(model->getReducedMassM().rows(), r);
 
   static MatrixXd L;
   static VectorXd s;
@@ -74,9 +79,17 @@ bool ReducedImpLogConSimulator::forward(){
   s += h*red_fext;
   s += model->getReducedMassM()*v;
 
-  const int r = reducedDim();
-  A.topLeftCorner(r,r) = L;
-  b.head(r) = s;
+  if (C.rows() <= 0){
+	A = L;
+	b = s;
+  }else{
+	assert_eq(b.size(), r+C.rows());
+	assert_eq(A.rows(), b.size());
+	assert_eq(A.cols(), b.size());
+	A.topLeftCorner(r,r) = L;
+	b.head(r) = s;
+  }
+
   assert_eq(b.size(), r+C.rows());
   if (C.rows() > 0){
 	b.tail(C.rows()) = uc-C*q;
