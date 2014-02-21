@@ -58,8 +58,6 @@ void ReducedImpLogConSimulator::removeAllCon(){
 
 bool ReducedImpLogConSimulator::forward(){
 
-  // FUNC_TIMER();
-
   assert(model);
   assert_eq(C.rows(), uc.size());
   const int r = reducedDim();

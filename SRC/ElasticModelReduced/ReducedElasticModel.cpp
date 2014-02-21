@@ -125,10 +125,10 @@ bool CubaturedElasticModel::evaluateK(const VectorXd &reduced_u,MatrixXd &K){
     forceDerivX_tet(K_tet, sampledTets[i], x);
 	for (int j = 0; j < 4; ++j){
 	  const int vj = _vol_mesh->tets()[i][j];
-	  const MatrixXd &Bj = B.block(3*vj,0,3,B.cols());
+	  const Matrix<double,3,-1> &Bj = B.block(3*vj,0,3,B.cols());
 	  for (int k = 0; k < 4; ++k){
 		const int vk = _vol_mesh->tets()[i][k];
-		const MatrixXd &Bk = B.block(3*vk,0,3,B.cols());
+		const Matrix<double,3,-1> &Bk = B.block(3*vk,0,3,B.cols());
 		const Matrix3d Ajk = (-1.0f*weights[i])*K_tet.df[j][k];
 		K += Bj.transpose()*Ajk*Bk;
 	  }
