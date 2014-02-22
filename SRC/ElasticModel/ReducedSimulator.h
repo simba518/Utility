@@ -117,6 +117,41 @@ namespace SIMULATOR{
 	MatrixXd C;
 	VectorXd uc;
   };
+
+  /**
+   * @class ReducedStaticPenConSimulator quasi-static simulator with penalty constraints, 
+   * and we solve the nonlinear equation using newton method.
+   * @see Doc/Latex/StaticDeformation.pdf
+   */
+  class ReducedStaticPenConSimulator:public ReducedSimulator{
+	
+  public:
+	ReducedStaticPenConSimulator(pReducedElasticModel m):ReducedSimulator(m){
+	  lambda = 100.0f;
+	  max_it = 5;
+	  tolerance = 0.1f;
+	}
+	bool init(const string init_filename);
+	void setConGroups(const vector<int> &con_nodes);
+	void setUc(const VectorXd &uc);
+	void removeAllCon();
+	bool forward();
+
+  protected:
+	const VectorXd &grad(const VectorXd &u);
+	const MatrixXd &jac(const VectorXd &u);	
+	
+  private:
+	double lambda; // penalty for con.
+	MatrixXd C; // constraint matrix.
+	MatrixXd lambda_CtC; // C^t*C
+	VectorXd lambda_CtUc; // C^t*Uc
+
+	VectorXd g;
+	MatrixXd J;
+	int max_it;
+	double tolerance;
+  };
   
 }//end of namespace
 

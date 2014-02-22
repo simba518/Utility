@@ -24,7 +24,7 @@ namespace SIMULATOR{
 
 	// construct basis for unconstrained object
 	template<class T>
-	static void construct(const Matrix<T,-1,-1> &linearBasis, const Matrix<T,-1,1> &rest_shape, Matrix<T,-1,-1> &extendedBasis){
+	static void construct(const Matrix<T,-1,-1> &linearBasis,const Matrix<T,-1,1> &rest_shape,Matrix<T,-1,-1> &extendedBasis){
 	  
 	  assert_gt(linearBasis.cols(), 6);
 	  Matrix<T,-1,-1> non_rigid_B, rigid_B;

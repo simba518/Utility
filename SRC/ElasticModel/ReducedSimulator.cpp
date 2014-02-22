@@ -98,3 +98,86 @@ bool ReducedImpLogConSimulator::forward(){
 
   return true;
 }
+
+bool ReducedStaticPenConSimulator::init(const string init_filename){
+
+  bool succ = ReducedSimulator::init(init_filename);
+  if (succ){
+	UTILITY::JsonFilePaser jsonf;
+	succ = jsonf.open(init_filename);
+	if (!succ){
+	  ERROR_LOG("failed to open" << init_filename);
+	}else{
+	  jsonf.read("con_penalty", lambda, 100.0);
+	  jsonf.read("max_iter", max_it, 5);
+	  jsonf.read("tolerance", tolerance, 0.1);
+	}
+  }
+  return succ;
+}
+
+void ReducedStaticPenConSimulator::setConGroups(const vector<int> &con_nodes){
+
+  if (con_nodes.size() <= 0){
+	removeAllCon();
+	return ;
+  }
+
+  assert_ge(fullDim(), con_nodes.size()*3);
+  SparseMatrix<double> sC;
+  computeConM(con_nodes, sC, fullDim()/3);
+  assert(model);
+  assert_eq(sC.cols(), model->getModalBasis().rows());
+  C = sC*model->getModalBasis();
+  lambda_CtC = lambda*(C.transpose()*C);
+}
+
+void ReducedStaticPenConSimulator::setUc(const VectorXd &uc){
+
+  lambda_CtUc = lambda*(C.transpose()*uc);
+}
+
+void ReducedStaticPenConSimulator::removeAllCon(){
+
+  C.resize(0,0);
+}
+
+bool ReducedStaticPenConSimulator::forward(){
+
+  // solve the nonlinear equation using newton method.
+  bool succ = true;
+  for (int i = 0; i < max_it; ++i){
+
+	const VectorXd &f = grad(q);
+	const MatrixXd &G = jac(q);
+	const VectorXd p = G.llt().solve(f);
+	q -= p;
+	if(p.norm() <= tolerance){
+	  break;
+	}
+  }
+  return succ;
+}
+
+const VectorXd &ReducedStaticPenConSimulator::grad(const VectorXd &q){
+
+  model->evaluateF(q, g);
+  g -= red_fext;
+  if (C.size() > 0){
+	assert_eq(lambda_CtUc.size(), g.size());
+	assert_eq(lambda_CtC.rows(), g.size());
+	g += lambda_CtC*q - lambda_CtUc;
+  }
+  return g;
+}
+
+const MatrixXd &ReducedStaticPenConSimulator::jac(const VectorXd &q){
+
+  model->evaluateK(q, J);
+  if (C.size() > 0){
+	assert_eq(J.rows(), lambda_CtC.rows());
+	assert_eq(J.cols(), lambda_CtC.cols());
+	J += lambda_CtC;
+  }
+  return J;
+}

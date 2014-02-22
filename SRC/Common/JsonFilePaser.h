@@ -60,6 +60,17 @@ namespace UTILITY{
 	  std::string vectorFile;
 	  return readFilePath(eleName,vectorFile,true)?loadVec(vectorFile,value,io_type):false;
 	}
+	template<class T>
+	bool readVecFile(const std::string eleName, std::set<T> &value,IO_TYPE io_type=BINARY){
+	  std::vector<T> v;
+	  const bool succ = readVecFile(eleName, v, io_type);
+	  if (succ){
+		value.clear();
+		for (size_t i = 0; i < v.size(); ++i)
+		  value.insert(v[i]);
+	  }
+	  return succ;
+	}
 	template<class MATRIX>
 	bool readMatFile(const std::string eleName, MATRIX &value,IO_TYPE io_type=BINARY){
 	  std::string matFile;
