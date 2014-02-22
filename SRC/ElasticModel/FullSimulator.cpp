@@ -5,11 +5,9 @@
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 #include <Eigen/UmfPackSupport>
-#include "LagImpFullSim.h"
+#include <Eigen/CholmodSupport>
+#include "FullSimulator.h"
 using namespace SIMULATOR;
-
-LagImpFullSim::LagImpFullSim(pBaseFullModel def_model):
-  BaseFullSim(def_model){}
 
 void LagImpFullSim::setConM(const VecT &C_triplet,const int C_rows,const int C_cols){
 
@@ -157,4 +155,100 @@ void LagImpFullSim::copyTriplet(VecT &Full_triplet, const VecT &sub_triplet, con
 	void* target = &(Full_triplet[start]);
 	memcpy(target, src, len);
   }
+}
+
+bool PenStaticFullSim::init(const string init_filename){
+
+  bool succ = BaseFullSim::init(init_filename);
+  if (succ){
+	UTILITY::JsonFilePaser jsonf;
+	succ = jsonf.open(init_filename);
+	if (!succ){
+	  ERROR_LOG("failed to open" << init_filename);
+	}else{
+	  jsonf.read("con_penalty", lambda, 100.0);
+	  jsonf.read("max_iter", max_it, 5);
+	  jsonf.read("tolerance", tolerance, 0.1);
+	}
+  }
+  return succ;
+}
+
+void PenStaticFullSim::setConM(const VecT &C_triplet,const int C_rows,const int C_cols){
+
+  // initialize C
+  assert_ge(C_rows,0);
+  assert_ge(C_cols,0);
+  C.resize(C_rows, C_cols);
+  C.reserve(C_triplet.size());
+  if (C_triplet.size() > 0){
+	C.setFromTriplets(C_triplet.begin(), C_triplet.end());
+  }
+  lambda_CtC = lambda*(C.transpose()*C);
+}
+
+void PenStaticFullSim::setUc(const VectorXd &uc){
+
+  BaseFullSim::setUc(uc);
+  assert_eq(C.rows(),uc.size());
+  lambda_CtUc = lambda*(C.transpose()*uc);
+}
+
+void PenStaticFullSim::removeAllCon(){
+  BaseFullSim::removeAllCon();
+  C.resize(0,0);
+}
+
+bool PenStaticFullSim::forward(){
+
+  // solve the nonlinear equation using newton method.
+  bool succ = true;
+  CholmodSupernodalLLT<SparseMatrix<double> > solver;
+  for (int i = 0; i < max_it; ++i){
+
+	const VectorXd &f = grad(u);
+	const SparseMatrix<double> &G = jac(u);
+
+	solver.compute(G);
+	if(solver.info()!=Success) {
+	  ERROR_LOG("decomposition failed");
+	  succ = false;
+	  break;
+	}
+
+	const VectorXd p = solver.solve(f);
+	if(solver.info()!=Success) {
+	  ERROR_LOG("solving failed");
+	  succ = false;
+	  break;
+	}
+
+	u -= p; 
+	if(p.norm() <= tolerance){
+	  break;
+	}
+  }
+  return succ;
+}
+
+const VectorXd &PenStaticFullSim::grad(const VectorXd &u){
+
+  def_model->evaluateF(u, g);
+  g -= fext;
+  if (C.size() > 0){
+	assert_eq(lambda_CtUc.size(), g.size());
+	assert_eq(lambda_CtC.rows(), g.size());
+	g += lambda_CtC*u - lambda_CtUc;
+  }
+  return g;
+}
+
+const SparseMatrix<double> &PenStaticFullSim::jac(const VectorXd &u){
+  def_model->evaluateK(u, J);
+  if (C.size() > 0){
+	assert_eq(J.rows(), lambda_CtC.rows());
+	assert_eq(J.cols(), lambda_CtC.cols());
+	J += lambda_CtC;
+  }
+  return J;
 }

@@ -1,12 +1,12 @@
-#ifndef _BASEFULLSIM_H_
-#define _BASEFULLSIM_H_
+#ifndef _FULLSIMULATOR_H_
+#define _FULLSIMULATOR_H_
 
 #include <string>
 #include <assertext.h>
 #include <boost/shared_ptr.hpp>
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Sparse>
-#include <BaseFullModel.h>
+#include <FullElasticModel.h>
 #include <JsonFilePaser.h>
 using namespace std;
 using namespace Eigen;
@@ -23,12 +23,21 @@ namespace SIMULATOR{
   class BaseFullSim{
 
   public: 
+	BaseFullSim(){
+	  h = 0.01;
+	  alpha_k = 0.01;
+	  alpha_m = 0.01;
+	  correct_initialized = false;
+	}
 	BaseFullSim(pBaseFullModel def_model){
 	  this->def_model = def_model;
 	  h = 0.01;
 	  alpha_k = 0.01;
 	  alpha_m = 0.01;
 	  correct_initialized = false;
+	}
+	virtual void setElasticModel(pBaseFullModel def_model){
+	  this->def_model = def_model;
 	}
 
 	virtual bool init(const string init_filename){
@@ -168,9 +177,121 @@ namespace SIMULATOR{
 				// barycenters of the constrained groups) with respect to the
 				// rest shape.
   };
-  
   typedef boost::shared_ptr<BaseFullSim> pBaseFullSim;
+
+  /**
+   * @class LagImpFullSim simulator in full space using Lagrangian constraints
+   * and implicit integration scheme.
+   * @see Doc/Latex/IntegrationMethods.pdf
+   */
+  class LagImpFullSim: public BaseFullSim{
+	
+  public:
+	LagImpFullSim():BaseFullSim(){}
+	LagImpFullSim(pBaseFullModel def_model):BaseFullSim(def_model){}
+	bool prepare(){
+	  bool succ = false;
+	  if (BaseFullSim::prepare()){
+		succ = def_model->evaluateM(M);
+	  }
+	  C_Ct_triplet.clear();
+	  resetM_triplet();
+	  return succ;
+	}
+	void setTimeStep(const double h){
+	  BaseFullSim::setTimeStep(h);
+	  resetM_triplet();
+	}
+	void setDampings(const double alpha_k,const double alpha_m){
+	  BaseFullSim::setDampings(alpha_k, alpha_m);
+	  resetM_triplet();
+	}
+	void setConM(const VecT &C_triplet,const int C_rows,const int C_cols);
+	void removeAllCon(){
+	  BaseFullSim::removeAllCon();
+	  C_Ct_triplet.clear();
+	  C.resize(0,0);
+	}
+	bool forward();
+
+  protected:
+	bool assembleA();
+	bool assembleB();
+	bool resetM_triplet();
+	bool resetK_triplet();
+	void resetA_triplet();
+	void copyTriplet(VecT &Full_triplet, const VecT &sub_triplet, const int start)const;
+	
+  private:
+	VectorXd f; // internal forces.
+	SparseMatrix<double> M; // mass matrix.
+	SparseMatrix<double> C; // constraint matrix.
+	
+	/**
+	 * right hand side and left hand side for the linear system at each time
+	 * step to sovle for the integration, where
+	 *     |H C^t|
+	 * A = |C  O |, b = M*v + h*(fext-f),
+	 * and H = (1+h*alpha_m)*M + h*(h+alpha_k)*K(u),
+	 * C is the constraint matrix.
+	 */
+	SparseMatrix<double> A; 
+	VectorXd b;  
+
+	/**
+	 * Inorder to fastly assemble sparse matrix A, we record the triplets for
+	 * each submatrix in A_triplet, then generate A from A_triplet each step.
+	 * A_triplet is consisted of three parts: 
+	 * 1. scaled mass matrix: update when intialization or time step is changed.
+	 * 2. constraint matrix and its transpose, update when constraints is changed.
+	 * 3. scaled stiffness matrix, update at each step.
+	 */
+	VecT C_Ct_triplet;     // C and C^t.
+	VecT Scaled_M_triplet; // (1+alpha_m)*M.
+	VecT Scaled_K_triplet; // h*(h+alpha_k)*K(u).
+	VecT A_triplet; // [scaled_M, C, C^T, scaled_K].
+  };
+  
+  /**
+   * @class PenStaticFullSim quasi-static simulator with penalty constraints, 
+   * and we solve the nonlinear equation using newton method.
+   * @see Doc/Latex/StaticDeformation.pdf
+   */
+  class PenStaticFullSim: public BaseFullSim{
+	
+  public:
+	PenStaticFullSim():BaseFullSim(){
+	  lambda = 100.0f;
+	  max_it = 5;
+	  tolerance = 0.1f;
+	}
+	PenStaticFullSim(pBaseFullModel def_model):BaseFullSim(def_model){
+	  lambda = 100.0f;
+	  max_it = 5;
+	  tolerance = 0.1f;
+	}
+	bool init(const string init_filename);
+	void setConM(const VecT &C_triplet,const int C_rows,const int C_cols);
+	void setUc(const VectorXd &uc);
+	void removeAllCon();
+	bool forward();
+
+  protected:
+	const VectorXd &grad(const VectorXd &u);
+	const SparseMatrix<double> &jac(const VectorXd &u);
+	
+  private:
+	double lambda; // penalty for con.
+	SparseMatrix<double> C; // constraint matrix.
+	SparseMatrix<double> lambda_CtC; // C^t*C
+	VectorXd lambda_CtUc; // C^t*Uc
+
+	VectorXd g;
+	SparseMatrix<double> J;
+	int max_it;
+	double tolerance;
+  };
   
 }//end of namespace
 
-#endif /*_BASEFULLSIM_H_*/
+#endif /* _FULLSIMULATOR_H_ */

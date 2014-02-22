@@ -1,8 +1,7 @@
 #ifndef _STVKSIMULATOR_H_
 #define _STVKSIMULATOR_H_
 
-#include <LagImpFullSim.h>
-#include <FullStVKSimModel.h>
+#include <FullSimulator.h>
 #include <Objmesh.h>
 #include <Log.h>
 using namespace UTILITY;
@@ -19,7 +18,7 @@ namespace SIMULATOR{
 	StVKSimulator(){
 
 	  stvkModel = pFullStVKSimModel(new FullStVKSimModel());
-	  simulator = pLagImpFullSim(new LagImpFullSim(stvkModel));
+	  simulator = pBaseFullSim(new LagImpFullSim(stvkModel));
 	  totalFrames = 200;
 	  clearGravity();
 	  saveRlstTo = "tempt/simulated_results";
@@ -48,7 +47,7 @@ namespace SIMULATOR{
   
   private:
 	pFullStVKSimModel stvkModel;
-	pLagImpFullSim simulator;
+	pBaseFullSim simulator;
 	int totalFrames;
 	int steps;
 	vector<VectorXd> recorded_U;
