@@ -150,7 +150,7 @@ bool ReducedStaticPenConSimulator::forward(){
 
 	const VectorXd &f = grad(q);
 	const MatrixXd &G = jac(q);
-	const VectorXd p = G.llt().solve(f);
+	const VectorXd p = G.lu().solve(f);
 	q -= p;
 	if(p.norm() <= tolerance){
 	  break;

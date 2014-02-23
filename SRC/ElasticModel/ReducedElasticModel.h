@@ -20,6 +20,10 @@ namespace SIMULATOR{
 	// initialize from the ini file
 	virtual bool init(const string init_filename);
 
+	virtual void setModalBasis(const MatrixXd &B){
+	  this->B = B;
+	}
+
 	virtual void setVolMesh(pTetMesh_const vol_mesh){}
 
 	virtual bool prepare(){}

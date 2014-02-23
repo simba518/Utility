@@ -203,7 +203,8 @@ bool PenStaticFullSim::forward(){
 
   // solve the nonlinear equation using newton method.
   bool succ = true;
-  CholmodSupernodalLLT<SparseMatrix<double> > solver;
+  // CholmodSupernodalLLT<SparseMatrix<double> > solver;
+  UmfPackLU<SparseMatrix<double> > solver;
   for (int i = 0; i < max_it; ++i){
 
 	const VectorXd &f = grad(u);
