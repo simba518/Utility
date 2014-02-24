@@ -36,24 +36,16 @@ void ConTrackBall::selectAxises(const vector<int> sel_group_ids){
 	  p_AxisTorus->selectAxis(constrained_axi);
 	  viewer->update();
 	}
-	//if (viewer->selectedName() > 0)
-	//{
-	//	m_hit = true;
-	//	int hit = viewer->selectedName();
-	//	constrained_axi = hit %3;
-	//	p_AxisTorus->selectAxis(constrained_axi);
-	//	viewer->update();
-	//}
   }
 }
 
 void ConTrackBall::checkIfGrabsMouse(int x,int y,const Camera*const camera){
-  if (m_show)
-	{
-	  viewer->setSelector(p_AxisTorus);
-	  QRect select_rect(x,y,5,5);
-	  viewer->select (select_rect);
-	}
+
+  if (m_show){
+	viewer->setSelector(p_AxisTorus);
+	QRect select_rect(x,y,5,5);
+	viewer->select (select_rect);
+  }
 }
 
 void ConTrackBall::press(QMouseEvent* e){
@@ -67,12 +59,12 @@ void ConTrackBall::press(QMouseEvent* e){
 }
 
 void ConTrackBall::release(QMouseEvent* e){
-  if (m_show)
-	{
-	  constraint->setRotationConstraintType(AxisPlaneConstraint::FREE);
-	  constrained_axi = -1;
-	  p_AxisTorus->selectAxis(constrained_axi);
-	}
+
+  if (m_show){
+	constraint->setRotationConstraintType(AxisPlaneConstraint::FREE);
+	constrained_axi = -1;
+	p_AxisTorus->selectAxis(constrained_axi);
+  }
 }
 
 void ConTrackBall::ShowConTrackBall(){

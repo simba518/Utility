@@ -29,6 +29,7 @@ SET(UI_HEADERS
 
   RecordAndPlay/QInputEventRecorder.h
   RecordAndPlay/RecordAndReplayWrapper.h
+  Manipulation/Manipulatoion.h
   Manipulation/SelectCtrl.h
   Manipulation/DragCtrl.h
   Manipulation/VolObjCtrl.h

@@ -32,8 +32,6 @@ namespace QGLVEXT{
   	pAxisTorus p_AxisTorus;
   	AxisPlaneConstraint* constraint;
 
-#endif /*_CONTRACKBALL_H_*/
-
   	AxisPlaneConstraint::Type grabbed_type;
   	short constrained_axi; // 0: x, 1: y, 2: z, -1:none.
 	bool m_show;
@@ -43,3 +41,5 @@ namespace QGLVEXT{
   typedef boost::shared_ptr<ConTrackBall> pConTrackBall;
   
 }//end of namespace
+
+#endif /*_CONTRACKBALL_H_*/
