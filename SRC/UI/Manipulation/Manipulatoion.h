@@ -51,6 +51,8 @@ namespace QGLVEXT{
 		currentPosition(pos_xyz);
 		glPushMatrix();
 		glTranslated(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
+		const double s = viewer->sceneRadius()/3.0f;
+		glScaled(s,s,s);
 		QGLViewer::drawAxis();
 		glPopMatrix();
 	  }
@@ -149,22 +151,29 @@ namespace QGLVEXT{
   	  viewer->addSelfRenderEle(manipulate);
   	  connect( viewer, SIGNAL(mousePressSignal(QMouseEvent *)),this, SLOT(press(QMouseEvent *)) );
   	  connect( viewer, SIGNAL(selectedIds(const vector<int> )),this, SLOT(select(const vector<int> )) );
+	  begin_select = false;
   	}
   
   public slots:
   	bool press (QMouseEvent *e){
+	  
   	  if ((e->button()==mouse_button)&&(e->modifiers() == modify_key)){
+		begin_select = true;
   		manipulate->prepareSelection();
   		viewer->setSelector(manipulate);
   		viewer->select(QRect(e->pos().x(),e->pos().y(),10,10));
   	  }
   	}
   	void select(const vector<int> ids){
-	  manipulate->select(ids);
-	  manipulate->setEnable(ids.size() > 0);
+	  if (begin_select){
+		manipulate->select(ids);
+		manipulate->setEnable(ids.size() > 0); 
+		begin_select = false;
+	  }
   	}
 
   private:
+	bool begin_select;
   	pQGLViewerExt viewer;
   	pLocalframeManipulatoion manipulate;
   	Qt::MouseButton mouse_button;
