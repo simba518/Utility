@@ -245,7 +245,7 @@ void QGLViewerExt::init(){
 
   // other
   restoreStateFromFile();
-  setBackgroundColor(QColor(255,255,255));
+  // setBackgroundColor(QColor(255,255,255));
   glBlendFunc(GL_ONE, GL_ONE);
 
   resetSceneBoundBox(-3,-3,-3,3,3,3);

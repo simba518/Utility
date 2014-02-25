@@ -21,7 +21,7 @@ SET(UI_SOURCES
   Manipulation/SelectCtrl.cpp
   Manipulation/DragCtrl.cpp
   Animation/AniCtrl.cpp
-  Render/ConTrackBall.cpp
+  Manipulation/ConTrackBall.cpp
   Render/QGLViewerExt.cpp
 )
 
@@ -36,7 +36,7 @@ SET(UI_HEADERS
   Animation/AniCtrl.h
   Animation/AniSliderBar.h
   Render/QGLViewerExt.h
-  Render/ConTrackBall.h
+  Manipulation/ConTrackBall.h
 )
 
 SET(UI_FORMS 

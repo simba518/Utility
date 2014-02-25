@@ -7,6 +7,7 @@
 #include <eigen3/Eigen/Dense>
 #include <assertext.h>
 #include <Log.h>
+#include <ConTrackBall.h>
 using namespace qglviewer;
 using namespace Eigen;
 
@@ -21,11 +22,13 @@ namespace QGLVEXT{
 	Q_OBJECT
 	
   public:
-	LocalframeManipulatoion(QGLViewer *v):viewer(v){
+	LocalframeManipulatoion(pQGLViewerExt v):viewer(v){
 
-	  frame = new ManipulatedFrame();
 	  enabled = false;
-	  connect( frame, SIGNAL(manipulated()),this, SLOT(manipulate()) );
+	  frame = new ManipulatedFrame();
+	  con_track_ball = pConTrackBall(new ConTrackBall(viewer,frame));
+	  con_track_ball->setShowConTrackBall(false);
+	  connect( frame, SIGNAL(manipulated()), this, SLOT(manipulate()) );
 	}
 	virtual void setEnable(const bool enable){
 
@@ -36,9 +39,17 @@ namespace QGLVEXT{
 		frame->setTranslation(Vec(pos_xyz[0],pos_xyz[1],pos_xyz[2]));
 		frame->setOrientation(qglviewer::Quaternion(Vec(1.0,0.0,0.0), 0.0));
 		viewer->setManipulatedFrame(frame);
+
+		con_track_ball->translate(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
+		const double s = viewer->sceneRadius()/15.0f;
+		con_track_ball->scale(s,s,s);
+
 	  }else{
 		viewer->setManipulatedFrame(viewer->camera()->frame());
 	  }
+
+	  con_track_ball->setEnableConTrackBall(enabled);
+	  con_track_ball->setShowConTrackBall(enabled);
 	}
 	bool isEnable()const{
 	  return enabled;
@@ -46,7 +57,6 @@ namespace QGLVEXT{
 	virtual void draw()const{
 
 	  if(enabled){
-
 		double pos_xyz[3];
 		currentPosition(pos_xyz);
 		glPushMatrix();
@@ -69,20 +79,24 @@ namespace QGLVEXT{
 
   public slots:
 	void manipulate(){
+	  double pos_xyz[3];
+	  currentPosition(pos_xyz);
+	  con_track_ball->translate(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
 	  this->applyTransform();
 	}
 	
   protected:
-	QGLViewer *viewer;
-	ManipulatedFrame* frame;
 	bool enabled;
+	pQGLViewerExt viewer;
+	ManipulatedFrame* frame;
+	pConTrackBall con_track_ball;
   };
   typedef boost::shared_ptr<LocalframeManipulatoion> pLocalframeManipulatoion;
 
   class LocalframeManipulatoionExt:public LocalframeManipulatoion{
 
   public:
-	LocalframeManipulatoionExt(QGLViewer *v):LocalframeManipulatoion(v){}
+	LocalframeManipulatoionExt(pQGLViewerExt v):LocalframeManipulatoion(v){}
 	virtual void setEnable(const bool enable){
 
 	  LocalframeManipulatoion::setEnable(enable);

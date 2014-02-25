@@ -42,7 +42,7 @@ public:
 class DefManipulator:public LocalframeManipulatoion{
 	
 public:
-  DefManipulator(QGLViewer *v):LocalframeManipulatoion(v){
+  DefManipulator(pQGLViewerExt v):LocalframeManipulatoion(v){
 
 	coord[0].new_o = coord[0].o = Vec(0,0,0);
 	coord[0].new_x = coord[0].x = Vec(1,0,0);
@@ -119,7 +119,7 @@ private:
 class DefManipulatorExt:public LocalframeManipulatoionExt{
 	
 public:
-  DefManipulatorExt(QGLViewer *v):LocalframeManipulatoionExt(v){
+  DefManipulatorExt(pQGLViewerExt v):LocalframeManipulatoionExt(v){
 	sel_coord = -1;
 	pos[0] = Matrix<double,3,-1>(3,4);
 	pos[0] << 
