@@ -2,12 +2,14 @@
 #include <GL/glew.h>
 #include <math.h>
 #include "ConTrackBall.h"
+#include <assertext.h>
 using namespace qglviewer;
 using namespace QGLVEXT;
 
 void ConTrackBall::selectAxises(const vector<int> sel_group_ids){
 
-  if (m_enabled){
+  if (m_enabled && viewer->getSelector().get() == p_AxisTorus.get()){
+
 	if (sel_group_ids.size() <= 0 ){
 	  m_hit = false;
 	  constrained_axi = -1;
@@ -32,11 +34,20 @@ void ConTrackBall::checkIfGrabsMouse(int x,int y,const Camera*const camera){
 
 void ConTrackBall::press(QMouseEvent* e){
 
-  if (m_enabled && m_hit){
-	constraint->setRotationConstraintType(AxisPlaneConstraint::AXIS);
+  if (m_enabled && m_hit && constrained_axi >= 0){
+
+	assert_in(constrained_axi,0,5);
 	Vec dir(0.0,0.0,0.0);
-	dir[constrained_axi] = 1.0;
-	constraint->setRotationConstraintDirection(dir);
+	dir[constrained_axi%3] = 1.0;
+	if (constrained_axi < 3){
+	  constraint->setTranslationConstraintType(AxisPlaneConstraint::FORBIDDEN);
+	  constraint->setRotationConstraintType(AxisPlaneConstraint::AXIS);
+	  constraint->setRotationConstraintDirection(dir);
+	}else{
+	  constraint->setRotationConstraintType(AxisPlaneConstraint::FORBIDDEN);
+	  constraint->setTranslationConstraintType(AxisPlaneConstraint::AXIS);
+	  constraint->setTranslationConstraintDirection(dir);
+	}
   }
 }
 
@@ -44,6 +55,7 @@ void ConTrackBall::release(QMouseEvent* e){
 
   if (m_enabled){
 	constraint->setRotationConstraintType(AxisPlaneConstraint::FREE);
+	constraint->setTranslationConstraintType(AxisPlaneConstraint::FREE);
 	constrained_axi = -1;
 	p_AxisTorus->selectAxis(constrained_axi);
   }

@@ -39,7 +39,7 @@ namespace QGLVEXT{
 
 	void draw()const;
 	int totalEleNum ()const{
-	  return 3;
+	  return 6;
 	}
 	void drawWithNames ()const;
 	void selectAxis(int a){
@@ -49,6 +49,8 @@ namespace QGLVEXT{
   protected:
 	void drawTorus(float x, float y, float z,
 				   float r, float g, float b)const;
+	void drawAxis(float x, float y, float z,
+				  float r, float g, float b)const;
 	
   private:
 	int selected_axis;

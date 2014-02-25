@@ -226,7 +226,7 @@ void QGLViewerExt::resetSceneBoundBox(double x0,double y0,double z0,
 void QGLViewerExt::init(){
 
   // // set lighting
-  const double scalor = 0.1f;
+  const double scalor = 0.5f;
   const GLfloat light_ambient[4]  = {0.8f*scalor, 0.8f*scalor, 0.8f*scalor, 1.0f*scalor};
   const GLfloat light_diffuse[4]  = {0.8f*scalor, 0.8f*scalor, 0.8f*scalor, 1.0f*scalor};
   const GLfloat light_specular[4] = {1.0f*scalor, 1.0f*scalor, 1.0f*scalor, 1.0f*scalor};

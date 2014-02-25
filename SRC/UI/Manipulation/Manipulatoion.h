@@ -26,6 +26,7 @@ namespace QGLVEXT{
 
 	  enabled = false;
 	  frame = new ManipulatedFrame();
+	  current_pos.setZero();
 	  con_track_ball = pConTrackBall(new ConTrackBall(viewer,frame));
 	  con_track_ball->setShowConTrackBall(false);
 	  connect( frame, SIGNAL(manipulated()), this, SLOT(manipulate()) );
@@ -34,16 +35,15 @@ namespace QGLVEXT{
 
 	  enabled = enable;
 	  if (enabled){
-		double pos_xyz[3];
-		currentPosition(pos_xyz);
-		frame->setTranslation(Vec(pos_xyz[0],pos_xyz[1],pos_xyz[2]));
+
+		computeCurrentPosition(current_pos);
+		frame->setTranslation(Vec(current_pos[0],current_pos[1],current_pos[2]));
 		frame->setOrientation(qglviewer::Quaternion(Vec(1.0,0.0,0.0), 0.0));
 		viewer->setManipulatedFrame(frame);
 
-		con_track_ball->translate(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
+		con_track_ball->translate(current_pos[0],current_pos[1],current_pos[2]);
 		const double s = viewer->sceneRadius()/15.0f;
 		con_track_ball->scale(s,s,s);
-
 	  }else{
 		viewer->setManipulatedFrame(viewer->camera()->frame());
 	  }
@@ -54,19 +54,7 @@ namespace QGLVEXT{
 	bool isEnable()const{
 	  return enabled;
 	}
-	virtual void draw()const{
-
-	  if(enabled){
-		double pos_xyz[3];
-		currentPosition(pos_xyz);
-		glPushMatrix();
-		glTranslated(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
-		const double s = viewer->sceneRadius()/3.0f;
-		glScaled(s,s,s);
-		QGLViewer::drawAxis();
-		glPopMatrix();
-	  }
-	}
+	virtual void draw()const{}
 	
 	// select
 	virtual int totalEleNum()const = 0;
@@ -74,14 +62,16 @@ namespace QGLVEXT{
 	virtual void select(const vector<int> &sel_ids) = 0;
 
 	// manipulate
-	virtual void currentPosition(double pos_xyz[3])const = 0;
+	virtual void computeCurrentPosition(Vector3d& pos_xyz)const = 0;
+	const Vector3d &currentPosition()const{
+	  return current_pos;
+	}
 	virtual void applyTransform() = 0;
 
   public slots:
 	void manipulate(){
-	  double pos_xyz[3];
-	  currentPosition(pos_xyz);
-	  con_track_ball->translate(pos_xyz[0],pos_xyz[1],pos_xyz[2]);
+	  computeCurrentPosition(current_pos);
+	  con_track_ball->translate(current_pos[0],current_pos[1],current_pos[2]);
 	  this->applyTransform();
 	}
 	
@@ -90,6 +80,7 @@ namespace QGLVEXT{
 	pQGLViewerExt viewer;
 	ManipulatedFrame* frame;
 	pConTrackBall con_track_ball;
+	Vector3d current_pos;
   };
   typedef boost::shared_ptr<LocalframeManipulatoion> pLocalframeManipulatoion;
 
@@ -101,9 +92,8 @@ namespace QGLVEXT{
 
 	  LocalframeManipulatoion::setEnable(enable);
 	  if (enable){
-		double pos_xyz[3];
-		currentPosition(pos_xyz);
-		const Vector3d xc = Map<Vector3d>(&pos_xyz[0]);
+		computeCurrentPosition(current_pos);
+		const Vector3d xc = current_pos;
 		initial_pos = this->getCurrentPositions();
 		for (int i = 0; i < initial_pos.cols(); ++i){
 		  initial_pos.col(i) -= xc;
@@ -117,18 +107,14 @@ namespace QGLVEXT{
 	virtual void select(const vector<int> &sel_ids) = 0;
 	
 	// manipulate
-	virtual void currentPosition(double pos_xyz[3])const{
+	virtual void computeCurrentPosition(Vector3d &current_pos)const{
 
 		const Matrix<double,3,-1> &xc = this->getCurrentPositions();
-		Vector3d xc_one;
-		xc_one.setZero();
+		current_pos.setZero();
 		for (int i = 0; i < xc.cols(); ++i)
-		  xc_one += xc.col(i);
+		  current_pos += xc.col(i);
 		if (xc.cols() > 0)
-		  xc_one *= 1.0f/xc.cols();
-		pos_xyz[0] = xc_one[0];
-		pos_xyz[1] = xc_one[1];
-		pos_xyz[2] = xc_one[2];
+		  current_pos *= 1.0f/xc.cols();
 	}
 	virtual void applyTransform(){
 

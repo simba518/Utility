@@ -30,6 +30,7 @@ namespace QGLVEXT{
 
 	// selection
 	void setSelector(pSelectable selector){ this->selector = selector;}
+	pSelectable_const getSelector()const{ return selector;}
 
 	// draging
 	Vec getWorldCoords(int x,int y,double z)const;
