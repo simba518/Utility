@@ -11,16 +11,16 @@ void ConTrackBall::selectAxises(const vector<int> sel_group_ids){
   if (m_enabled && viewer->getSelector().get() == p_AxisTorus.get()){
 
 	if (sel_group_ids.size() <= 0 ){
-	  m_hit = false;
 	  constrained_axi = -1;
 	  p_AxisTorus->selectAxis(constrained_axi);
 	}else{
-	  m_hit = true;
 	  constrained_axi = sel_group_ids[0];
 	  p_AxisTorus->selectAxis(constrained_axi);
 	  viewer->update();
 	}
   }
+  m_hit = (p_AxisTorus->selectedAxis() >= 0);
+  emit selectObject(p_AxisTorus->selectedAxis());
 }
 
 void ConTrackBall::checkIfGrabsMouse(int x,int y,const Camera*const camera){
@@ -36,17 +36,20 @@ void ConTrackBall::press(QMouseEvent* e){
 
   if (m_enabled && m_hit && constrained_axi >= 0){
 
-	assert_in(constrained_axi,0,5);
+	assert_in(constrained_axi,0,6);
 	Vec dir(0.0,0.0,0.0);
 	dir[constrained_axi%3] = 1.0;
 	if (constrained_axi < 3){
 	  constraint->setTranslationConstraintType(AxisPlaneConstraint::FORBIDDEN);
 	  constraint->setRotationConstraintType(AxisPlaneConstraint::AXIS);
 	  constraint->setRotationConstraintDirection(dir);
-	}else{
+	}else if(constrained_axi < 6){
 	  constraint->setRotationConstraintType(AxisPlaneConstraint::FORBIDDEN);
 	  constraint->setTranslationConstraintType(AxisPlaneConstraint::AXIS);
 	  constraint->setTranslationConstraintDirection(dir);
+	}else{
+	  constraint->setRotationConstraintType(AxisPlaneConstraint::FORBIDDEN);
+	  constraint->setTranslationConstraintType(AxisPlaneConstraint::FREE);
 	}
   }
 }

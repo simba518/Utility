@@ -22,6 +22,7 @@ SET(UI_SOURCES
   Manipulation/DragCtrl.cpp
   Animation/AniCtrl.cpp
   Manipulation/ConTrackBall.cpp
+  Manipulation/Manipulatoion.cpp
   Render/QGLViewerExt.cpp
 )
 

@@ -73,6 +73,7 @@ void DragGroupSelDraw::drawSphere(pTetMesh_const vol_mesh,
 }
 
 void DragGroupSelDraw::DrawSphere(float x, float y, float z, float fRadius, int M, int N){
+
   glPushMatrix();
   glTranslatef(x, y, z);
   gluSphere(gluNewQuadric(), fRadius, M, N);

@@ -33,6 +33,10 @@ void AxisTorus::draw()const{
 	drawAxis(0.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f); // z
   }else{
 	drawAxis(0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f); // z
+  }if (selected_axis == 6){
+	drawOriginal(1.0f,1.0f,0.0f);  // o
+  }else{
+	drawOriginal(1.0f,0.0f,0.0f);  // o
   }
 }
 
@@ -63,13 +67,16 @@ void AxisTorus::drawWithNames ()const{
   glPushName(5);
   drawAxis(0.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f);
   glPopName();
+
+  glPushName(6);
+  drawOriginal(1.0f, 0.0f, 0.0f);
+  glPopName();
 }
 
 void AxisTorus::drawTorus(float x, float y, float z,
 						  float r, float g, float b)const{
 
   glPushAttrib(GL_ALL_ATTRIB_BITS);
-  glEnable(GL_COLOR_MATERIAL);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_LINE_SMOOTH);
@@ -92,7 +99,6 @@ void AxisTorus::drawTorus(float x, float y, float z,
   glEnd();
 
   glPopMatrix();
-  glDisable(GL_COLOR_MATERIAL);
   glPopAttrib();
 }
 
@@ -100,10 +106,6 @@ void AxisTorus::drawAxis(float x, float y, float z,
 						 float r, float g, float b)const{
   
   glPushAttrib(GL_ALL_ATTRIB_BITS);
-  glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_LINE_SMOOTH);
   glDisable(GL_LIGHTING);
   glColor4f(r,g,b,1.0f);
 
@@ -120,6 +122,21 @@ void AxisTorus::drawAxis(float x, float y, float z,
   glEnd();
 
   glPopMatrix();
-  glDisable(GL_COLOR_MATERIAL);
+  glPopAttrib();
+}
+
+void AxisTorus::drawOriginal(float r, float g, float b)const{
+
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glDisable(GL_LIGHTING);
+  glColor4f(r,g,b,1.0f);
+
+  glPushMatrix();
+  glTranslated(translation[0], translation[1], translation[2]);
+  glScaled(scalor[0], scalor[1], scalor[2]);
+
+  gluSphere(gluNewQuadric(), 0.8f, 30,30);
+
+  glPopMatrix();
   glPopAttrib();
 }

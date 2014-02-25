@@ -28,6 +28,28 @@ namespace QGLVEXT{
 	  frame->setConstraint(constraint);
 	}
   	void checkIfGrabsMouse(int x, int y, const Camera* const camera);
+
+  	void setShow(const bool show){
+	  m_show = show;
+	  if (m_show){
+		viewer->addSelfRenderEle(p_AxisTorus);
+	  }else{
+		viewer->removeSelfRenderEle(p_AxisTorus);
+	  }
+	}
+  	void setEnable(const bool enable){
+	  m_enabled = enable;
+	}
+	bool isShown()const{
+	  return m_show;
+	}
+	bool isEnabled()const{
+	  return m_enabled;
+	}
+	bool isHitted()const{
+	  return m_hit;
+	}
+
 	void translate(const double x,const double y, const double z){
 	  p_AxisTorus->translate(x,y,z);
 	}
@@ -44,23 +66,15 @@ namespace QGLVEXT{
   	void press(QMouseEvent* e);
   	void release(QMouseEvent* e);
 
-  	void toggleShowConTrackBall(){
-	  setShowConTrackBall((m_show ? false:true));
+  	void toggleShow(){
+	  setShow((m_show ? false:true));
 	}
-  	void setShowConTrackBall(const bool show){
-	  m_show = show;
-	  if (m_show){
-		viewer->addSelfRenderEle(p_AxisTorus);
-	  }else{
-		viewer->removeSelfRenderEle(p_AxisTorus);
-	  }
+	void toggleEnable(){
+	  setEnable((m_enabled ? false:true));
 	}
-	void toggleEnableConTrackBall(){
-	  setEnableConTrackBall((m_enabled ? false:true));
-	}
-  	void setEnableConTrackBall(const bool enable){
-	  m_enabled = enable;
-	}
+
+  signals:
+	void selectObject(const int obj_id);
 
   protected:
 	void init();

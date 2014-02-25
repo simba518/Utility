@@ -39,11 +39,14 @@ namespace QGLVEXT{
 
 	void draw()const;
 	int totalEleNum ()const{
-	  return 6;
+	  return 8;
 	}
 	void drawWithNames ()const;
 	void selectAxis(int a){
 	  selected_axis = a;
+	}
+	int selectedAxis()const{
+	  return selected_axis;
 	}
 	
   protected:
@@ -51,6 +54,7 @@ namespace QGLVEXT{
 				   float r, float g, float b)const;
 	void drawAxis(float x, float y, float z,
 				  float r, float g, float b)const;
+	void drawOriginal(float r, float g, float b)const;
 	
   private:
 	int selected_axis;
