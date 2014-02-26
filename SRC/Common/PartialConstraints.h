@@ -107,6 +107,9 @@ namespace UTILITY{
 	  _pc.resize(3,0);
 	  _frameid = 0;
 	}
+	void setZero(){
+	  _pc.setZero();
+	}
 
 	bool operator< (const PartialConstraints &other)const{
 	  return this->getFrameId() < other.getFrameId();
