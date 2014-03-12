@@ -140,6 +140,10 @@ void recoverFullMtl(){
   assert_eq(K.size2(), n*3);
   K *= -1.0f;
 
+  // cout << "K:\n";
+  // cout << K << endl;
+  // cout << endl << endl;
+
   // compute mass matrix
   INFO_LOG("compute mass matrix");
   MassMatrix mass;

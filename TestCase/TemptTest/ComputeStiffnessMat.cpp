@@ -12,7 +12,6 @@ bool ComputeStiffnessMat::prepare(){
   for(int i=0;i<(int)_vol_mesh->tets().size();i++) {
 	_volume[i]=_vol_mesh->volume(i);
   }
-  setMaterial(_vol_mesh->material()._G,_vol_mesh->material()._lambda);
   return true;
 }
 
@@ -20,7 +19,6 @@ const SXMatrix &ComputeStiffnessMat::K(const VectorXd &X){
 
   const int dim=(int)_vol_mesh->nodes().size()*3;
   _Kx.resize(dim,dim);
-  _Kx.setZero();
 
   this->computeTetForceDerivX(_tet_k,X);
   for(int i=0,etr=0;i<(int)_vol_mesh->tets().size();i++){
@@ -34,8 +32,7 @@ const SXMatrix &ComputeStiffnessMat::K(const VectorXd &X){
 		  for(int c=0;c<3;c++){
 			const int grow = e[j]*3+r;
 			const int gcol = e[k]*3+c;
-			const double value = dfM.elem(r,c).getValue();
-			_Kx.elem(grow, gcol) += value;
+			_Kx.elem(grow, gcol) += dfM.elem(r,c);
 		  }
 	  }
   }
@@ -71,7 +68,7 @@ void ComputeStiffnessMat::forceDerivX_tet(TetDF &df, const int& i, const VectorX
 
 	  for(int fx=0;fx<3;fx++)
 	  	for(int fd=0;fd<3;fd++){
-	  	  df.df[fx][x](fd,d) = deriv.elem(fd,fx);
+	  	  df.df[fx][x].elem(fd,d) = deriv.elem(fd,fx);
 		}
 	}
 

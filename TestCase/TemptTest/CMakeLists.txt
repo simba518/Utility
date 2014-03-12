@@ -17,4 +17,5 @@ TARGET_LINK_LIBRARIES( ${APPNAME}
   ${Boost_LIBRARIES}
   ${LAPACK_LIBRARIES}
   libpthread.so
+  /usr/lib/i386-linux-gnu/libdl.so
   )

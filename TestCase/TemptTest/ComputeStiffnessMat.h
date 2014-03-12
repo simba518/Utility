@@ -23,7 +23,9 @@ namespace ELASTIC_OPT{
   class ComputeStiffnessMat{
 	
   public:
-	ComputeStiffnessMat(pTetMesh_const vol_mesh):_vol_mesh(vol_mesh){}
+	ComputeStiffnessMat(pTetMesh_const vol_mesh):_vol_mesh(vol_mesh){
+	  setMaterial(_vol_mesh->material()._G,_vol_mesh->material()._lambda);
+	}
 	template<class T> 
 	void setMaterial(const std::vector<T> &G,const std::vector<T> &lambda){
 	  assert_eq(G.size(), lambda.size());
