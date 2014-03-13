@@ -18,9 +18,11 @@ bool ComputeStiffnessMat::prepare(){
 const SXMatrix &ComputeStiffnessMat::K(const VectorXd &X){
 
   const int dim=(int)_vol_mesh->nodes().size()*3;
+  _Kx.setZero();
   _Kx.resize(dim,dim);
 
   this->computeTetForceDerivX(_tet_k,X);
+
   for(int i=0,etr=0;i<(int)_vol_mesh->tets().size();i++){
 
 	const Vector4i& e=_vol_mesh->tets()[i];

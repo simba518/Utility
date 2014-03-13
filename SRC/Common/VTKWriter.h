@@ -260,6 +260,38 @@ namespace UTILITY{
 	ostringstream _points,_cells,_cellTypes;
 	string _dataType;
   };
+
+  // other methods
+  template <typename OS, typename INT>
+  void tet2vtk(OS &os,const double *node, size_t node_num,const INT *tet, size_t tet_num){
+
+	os << "# vtk DataFile Version 2.0\nTET\nASCII\n\nDATASET UNSTRUCTURED_GRID\n";
+	os << "POINTS " << node_num << " double\n";
+	for(size_t i = 0; i < node_num; ++i)
+	  os << node[i*3+0] << " " << node[i*3+1] << " " << node[i*3+2] << "\n";
+
+	os << "CELLS " << tet_num << " " << tet_num*5 << "\n";
+	for(size_t i = 0; i < tet_num; ++i)
+	  os << 4 << "  "
+		 << tet[i*4+0] << " " << tet[i*4+1] << " "
+		 << tet[i*4+2] << " " << tet[i*4+3] << "\n";
+	os << "CELL_TYPES " << tet_num << "\n";
+	for(size_t i = 0; i < tet_num; ++i)
+	  os << 10 << "\n";
+  }
+
+  template <typename OS, typename Iterator, typename INT>
+  void vtk_data(OS &os, Iterator first, INT size, const char *value_name, const char *table_name = "my_table"){
+	os << "SCALARS " << value_name << " double\nLOOKUP_TABLE " << table_name << "\n";
+	for(size_t i = 0; i < size; ++i, ++first)
+	  os << *first << "\n";
+  }
+
+  template <typename OS, typename Iterator, typename INT>
+  void cell_data(OS &os, Iterator first, INT size, const char *value_name, const char *table_name = "my_table"){
+	os << "CELL_DATA " << size << "\n";
+	vtk_data(os, first, size, value_name, table_name);
+  }
   
 }//end of namespace
 

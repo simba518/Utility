@@ -29,14 +29,14 @@ const SparseMatrix<double> &ElasticForceTetFull::K(const VectorXd &X){
 	_Kx.valuePtr()[i] = 0.0f;
   }
   for(int i=0,etr=0;i<(int)_vol_mesh->tets().size();i++){
-
 	const TetDF &df = _tet_k[i];
 	for(int j=0;j<4;j++)
 	  for(int k=0;k<4;k++){
 		const Matrix3d& dfM=df.df[j][k];
 		for(int r=0;r<3;r++)
-		  for(int c=0;c<3;c++)
+		  for(int c=0;c<3;c++){
 			_Kx.valuePtr()[_entries[etr++]]+=dfM(r,c);
+		  }
 	  }
   }
   return _Kx;

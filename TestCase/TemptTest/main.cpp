@@ -7,6 +7,7 @@
 #include <SparseGenEigenSolver.h>
 #include <SparseMatrixTools.h>
 #include <ElasticForceTetFullStVK.h>
+#include <Timer.h>
 #include "ComputeStiffnessMat.h"
 using namespace std;
 using namespace UTILITY;
@@ -32,7 +33,6 @@ void testK(){
   assert(elas.prepare());
   VectorXd x0(n*3);
   mesh->nodes(x0);
-  elas.K(x0);
   const SXMatrix &K = elas.K(x0);
   
   MatrixXd Km;
@@ -47,18 +47,53 @@ void testK(){
   cout << "test end.." << endl;
 }
 
-void computeEigenValues(){
+void testKSMall(){
   
-  const string data_root = "/home/simba/Workspace/SolidSimulator/data/one_tet/model/";
+  const string tet_fname = std::string(TEST_DATA_DIR)+"one_tet.abq";
+  const string tet_mtl_fname = std::string(TEST_DATA_DIR)+"one_tet.elastic";
+  pTetMesh mesh = pTetMesh(new TetMesh);
+  assert ( mesh->load(tet_fname) );
+  assert ( mesh->loadElasticMtl(tet_mtl_fname) );
+  const int n = mesh->nodes().size();
+
+  VectorXd x0(n*3);
+  mesh->nodes(x0);
+
+  ElasticForceTetFullStVK elas_c(mesh);
+  assert(elas_c.prepare());
+  const MatrixXd ref_Km = elas_c.K(x0);
+
+  ComputeStiffnessMat elas(mesh);
+  assert(elas.prepare());
+  elas.K(x0);
+  const SXMatrix &K = elas.K(x0);
+  MatrixXd Km;
+  CASADI::convert(K,Km);
+  
+  assert_eq(Km.rows(),n*3);
+  assert_eq(Km.cols(),n*3);
+  assert_lt((Km-ref_Km).norm(),1e-5);
+  
+  cout<< "(K-K_ref).norm(): " << (Km-ref_Km).norm() << endl;
+  cout << "test end.." << endl;
+}
+
+void computeEigenValues(const string data_root,const int eigenNum,const set<int> &fixednodes){
   
   // load data.
+  INFO_LOG("load data");
   pTetMesh tetmesh = pTetMesh(new TetMesh());
   bool succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
   succ = tetmesh->loadElasticMtl(data_root+"mesh.elastic"); assert(succ);
   const int num_tet = (int)tetmesh->tets().size();
   const int n = tetmesh->nodes().size();
 
+  // save material
+  INFO_LOG("save material");
+  succ = tetmesh->writeElasticMtlVTK("./tempt/material_correct"); assert(succ);
+
   // compute K
+  INFO_LOG("compute K");
   ElasticForceTetFullStVK elas(tetmesh);
   assert(elas.prepare());
   VectorXd x0(n*3);
@@ -67,52 +102,60 @@ void computeEigenValues(){
   K *= -1.0f;
 
   // compute mass matrix
+  INFO_LOG("compute mass matrix");
   MassMatrix mass;
-  DiagonalMatrix<double,-1> diagM;
-  mass.compute(diagM,*tetmesh);
+  DiagonalMatrix<double,-1> M;
+  mass.compute(M,*tetmesh);
+
+  // remove fixed nodes
+  SparseMatrix<double> P;
+  EIGEN3EXT::genReshapeMatrix(K.rows(),3,fixednodes,P);
+  K = P*(K*P.transpose());
+  const SparseMatrix<double> diagM = P*(M*P.transpose());
 
   /// compute W, lambda
-  MatrixXd W;
-  VectorXd lambda;
-  const int eigenNum = 11;
+  INFO_LOG("compute W, lambda");
+  MatrixXd W_full;
+  VectorXd lambda_full;
   const SparseMatrix<double> Klower = EIGEN3EXT::getLower(K);
-  succ = EigenSparseGenEigenSolver::solve(Klower,diagM,W,lambda,eigenNum); assert(succ);
+  succ = EigenSparseGenEigenSolver::solve(Klower,diagM,W_full,lambda_full,eigenNum); 
+  assert(succ);
+
+  // const MatrixXd W = W_full.rightCols(lambda_full.size()-6);
+  // const VectorXd lambda = lambda_full.tail(lambda_full.size()-6);
 
   // test Wt*M*W
-  const MatrixXd WtMWI = W.transpose()*diagM*W-MatrixXd::Identity(W.cols(),W.cols());
-  const MatrixXd KW_MWLambda = K*W-(diagM*W)*lambda.asDiagonal();
+  INFO_LOG("check results");
+  const MatrixXd WtMWI = W_full.transpose()*diagM*W_full-MatrixXd::Identity(W_full.cols(),W_full.cols());
+  const MatrixXd KW_MWLambda = K*W_full-(diagM*W_full)*lambda_full.asDiagonal();
   cout << "(WtMW-I).norm(): " << WtMWI.norm() << endl;
   cout << "(KW_MWLambda).norm(): " << KW_MWLambda.norm() << endl;
-  cout << "eigenvalues: " << lambda.transpose() << endl;
+  cout << "eigenvalues: " << lambda_full.transpose() << endl;
   cout << "norm(Klower): " << Klower.norm() << endl;
   cout << "norm(M): " << diagM.diagonal().norm() << endl;
 
+  // add fixed nodes to W, and lambda, then save
+  const MatrixXd W = P.transpose()*W_full;
+  const VectorXd lambda = lambda_full;
   succ = write(data_root+"tempt_eigenvalues.b", lambda); assert(succ);
   succ = write(data_root+"tempt_eigenvectors.b", W); assert(succ);
   
 }
 
-void recoverFullMtl(){
+void recoverFullMtl(pTetMesh tetmesh, const set<int> &fixednodes,
+					const MatrixXd &eigen_W, const VectorXd &eigen_lambda,
+					const double mu_neigh, const string save_to){
 
-  const string data_root = "/home/simba/Workspace/SolidSimulator/data/one_tet/model/";
-  
   // load data.
   INFO_LOG("loading data");
-  pTetMesh tetmesh = pTetMesh(new TetMesh());
-  bool succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
-  succ = tetmesh->loadElasticMtl(data_root+"tempt_mesh.elastic"); assert(succ);
   const int num_tet = (int)tetmesh->tets().size();
   const int n = tetmesh->nodes().size();
 
   SXMatrix W, lambda;
-  MatrixXd eigen_W;
-  succ = load(data_root+"tempt_eigenvectors.b",eigen_W); assert(succ);
   CASADI::convert(eigen_W, W);
   assert_eq(W.size1(), n*3);
   assert_lt(W.size2(), W.size1());
 
-  VectorXd eigen_lambda;
-  succ = load(data_root+"tempt_eigenvalues.b",eigen_lambda); assert(succ);
   lambda.resize(eigen_lambda.size(), eigen_lambda.size());
   for (int i = 0; i < eigen_lambda.size(); ++i){
     lambda.elem(i,i) = eigen_lambda[i];
@@ -134,8 +177,12 @@ void recoverFullMtl(){
   assert(elas.prepare());
   VectorXd x0(n*3);
   tetmesh->nodes(x0);
-  elas.K(x0);
+
+  Timer timer;
+  timer.start();
   SXMatrix K = elas.K(x0);
+  timer.stop("elas.K(x0) ");
+
   assert_eq(K.size1(), n*3);
   assert_eq(K.size2(), n*3);
   K *= -1.0f;
@@ -156,10 +203,24 @@ void recoverFullMtl(){
   assert_eq(M.size1(), n*3);
   assert_eq(M.size2(), n*3);
 
+
+  /// remove fixed nodes
+  if (fixednodes.size() > 0){
+
+	SparseMatrix<double> Pm;
+	EIGEN3EXT::genReshapeMatrix(K.size1(),3,fixednodes,Pm);
+	SXMatrix P;
+	CASADI::convert(Pm,P);
+	assert_eq(P.size1(),K.size1()-fixednodes.size()*3);
+	assert_eq(P.size2(),K.size1());
+	K = P.mul(K.mul(trans(P)));
+	M = P.mul(M.mul(trans(P)));
+	W = P.mul(W);
+  }
+
   // assemble objective function.
   INFO_LOG("assemble objective function.");
-  const double mu_G = 0.0f;
-  const double mu_L = 0.0f;
+  ;
 
   SX objfun = 0.0f;
   const SXMatrix M1 = K.mul(W)-M.mul(W.mul(lambda));
@@ -168,13 +229,20 @@ void recoverFullMtl(){
 	 objfun += M1.elem(i,j)*M1.elem(i,j);
   }
 
-  const vector<double> &g = tetmesh->material()._G;
-  const vector<double> &la = tetmesh->material()._lambda;
-  assert_eq(g.size(), num_tet);
-  assert_eq(la.size(), num_tet);
-  for (int i = 0; i < num_tet; ++i){
-	objfun += mu_G*(G[i]-g[i])*(G[i]-g[i]);
-	objfun += mu_L*(Lame[i]-la[i])*(Lame[i]-la[i]);
+  const VVec4i &neigh_tet = tetmesh->faceNeighTet();
+  for (int i = 0; i < neigh_tet.size(); ++i){
+	const double vi = tetmesh->volume(i);
+	assert_gt(vi,0);
+	for (int k = 0; k < 4; ++k){
+	  const int j = neigh_tet[i][k];
+	  if (j >= 0){
+		const double vj = tetmesh->volume(j);
+		assert_gt(vj,0);
+		assert(i!=j);
+		objfun += 0.5f*mu_neigh*(vi+vj)*(G[i]-G[j])*(G[i]-G[j]);
+		objfun += 0.5f*mu_neigh*(vi+vj)*(Lame[i]-Lame[j])*(Lame[i]-Lame[j]);
+	  }
+	}
   }
   objfun *= 0.5f;
 
@@ -184,12 +252,17 @@ void recoverFullMtl(){
   CasADi::IpoptSolver solver = CasADi::IpoptSolver(fun);
 
   solver.setOption("generate_hessian",true);
-  solver.setOption("tol",1e-8);
-  solver.setOption("max_iter",100);
+  solver.setOption("tol",1e-18);
+  solver.setOption("max_iter",1000);
+
+  timer.start();
   solver.init();
+  timer.stop("solver.init() ");
 
   VectorXd init_x;
   init_x.resize(G_Lame.size());
+  const vector<double> &g = tetmesh->material()._G;
+  const vector<double> &la = tetmesh->material()._lambda;
   for (int i = 0; i < num_tet; ++i){
     init_x[i] = g[i];
     init_x[i+num_tet] = la[i];
@@ -211,25 +284,155 @@ void recoverFullMtl(){
   }
   solver.setInput(lower,CasADi::NLP_LBX);
 
+  // solving
   INFO_LOG("solving");
+  timer.start();
   solver.solve();
-
-  // save results.
-  INFO_LOG("save results");
+  timer.stop("solver.solve() ");
   std::vector<double> vx(G_Lame.size());
   solver.getOutput(vx,CasADi::NLP_X_OPT);  
 
-  cout << endl << endl;
-  for (int i = 0; i < vx.size(); ++i){
-    cout << vx[i] << " ,";
+  // convert to Young's(E) and Poisson(v)
+  vector<double> Young_E(num_tet), Poisson_v(num_tet);
+  for (int i = 0; i < num_tet; ++i){
+
+	const double gi = vx[i];
+	const double li = vx[i+num_tet];
+	const Matrix<double,2,1> Ev = ElasticMaterial<double>::fromLameConstant(gi,li);
+	Young_E[i] = Ev(0,0);
+	Poisson_v[i] = Ev(1,0);
+	
+	tetmesh->material()._G[i] = gi;
+	tetmesh->material()._lambda[i] = li;
+  }
+
+  // save results
+  INFO_LOG("save results");
+
+  cout << endl << endl << "G, L: \n";
+  for (int i = 0; i < num_tet; ++i){
+	cout << vx[i] << ", " << vx[i+num_tet] << endl;
   }
   cout << endl << endl;
+
+  cout << endl << endl << "E, v: \n";
+  for (int i = 0; i < num_tet; ++i){
+	cout << Young_E[i] << ", " << Poisson_v[i] << endl;
+  }
+  cout << endl << endl;
+
+  bool succ = tetmesh->writeElasticMtlVTK(save_to);
+  assert(succ);
+}
+
+void recoverCorrect(){
+
+  // const string data_root = "/home/simba/Workspace/SolidSimulator/data/one_tet/model/";
+  // const string data_root = "/home/simba/Workspace/SolidSimulator/data/two_tets/model/";
+  // const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam/model/";
+  const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam-coarse/model/";
+  // const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam-middle/model/";
+
+  vector<int> fixednodes_vec;
+  bool succ = loadVec(data_root+"/con_nodes.bou",fixednodes_vec, TEXT); assert(succ);
+  set<int> fixednodes;
+  for (int i = 0; i < fixednodes_vec.size(); ++i){
+    fixednodes.insert(fixednodes_vec[i]);
+  }
+
+  computeEigenValues(data_root, 10, fixednodes);
+
+  pTetMesh tetmesh = pTetMesh(new TetMesh());
+  succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
+  succ = tetmesh->loadElasticMtl(data_root+"tempt_mesh.elastic"); assert(succ);
+
+  MatrixXd eigen_W;
+  succ = load(data_root+"tempt_eigenvectors.b",eigen_W); assert(succ);
+
+  VectorXd eigen_lambda;
+  succ = load(data_root+"tempt_eigenvalues.b",eigen_lambda); assert(succ);
+
+  //recoverFullMtl(tetmesh, fixednodes, eigen_W, eigen_lambda,1e-2, "./tempt/material_sim_3");
+  recoverFullMtl(tetmesh, fixednodes, eigen_W, eigen_lambda,1e-6, "./tempt/material_sim_2");
+  // recoverFullMtl(tetmesh, fixednodes, eigen_W, eigen_lambda,1e-8,"./tempt/material_sim_1");
+  // recoverFullMtl(tetmesh,fixednodes, eigen_W, eigen_lambda,0.000,"./tempt/material_sim_0");
+}
+
+void recoverOptMtl(){
   
+  const string data_root = "/home/simba/Workspace/AnimationEditor/Data/beam_fine/model/";
+  pTetMesh tetmesh = pTetMesh(new TetMesh());
+  bool succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
+
+  // const string data_root2="/home/simba/Workspace/AnimationEditor/Data/beam_setmtl/model/";
+  // succ = tetmesh->loadElasticMtl(data_root2+"mesh.elastic"); assert(succ);
+  succ = tetmesh->loadElasticMtl(data_root+"mesh.elastic"); assert(succ);
+  
+  // tetmesh->writeElasticMtlVTK("./tempt/material_opt_ref");
+  // exit(0);
+  
+  vector<int> fixednodes_vec;
+  succ = loadVec(data_root+"/con_nodes.bou",fixednodes_vec, TEXT); assert(succ);
+  set<int> fixednodes;
+  for (int i = 0; i < fixednodes_vec.size(); ++i){
+    fixednodes.insert(fixednodes_vec[i]);
+  }
+
+  MatrixXd eigen_W, S;
+  succ = load(data_root+"scaled_W.b",eigen_W); assert(succ);
+  succ = load(data_root+"S_opt_rlst.b",S); assert(succ);
+  const MatrixXd t = eigen_W;
+  eigen_W = t.leftCols(S.rows())*S;
+
+  VectorXd eigen_lambda;
+  succ = load(data_root+"lambda_opt_rlst.b",eigen_lambda); assert(succ);
+
+  // succ = write("eigen_W.b",eigen_W); assert(succ);
+  // succ = write("eigen_Lambda.b",eigen_lambda); assert(succ);
+  // recoverFullMtl(tetmesh, fixednodes, eigen_W,eigen_lambda,1e12,"./tempt/material_opt_4");
+  // recoverFullMtl(tetmesh, fixednodes, eigen_W,eigen_lambda,1e8,"./tempt/material_opt_5");
+  // recoverFullMtl(tetmesh, fixednodes, eigen_W,eigen_lambda,10000,"./tempt/material_opt_3");
+  // recoverFullMtl(tetmesh, fixednodes, eigen_W,eigen_lambda,100,"./tempt/material_opt_2");
+  // recoverFullMtl(tetmesh, fixednodes, eigen_W,eigen_lambda,1.0,"./tempt/material_opt_1");
+  // recoverFullMtl(tetmesh,fixednodes,eigen_W,eigen_lambda,0.001,"./tempt/material_opt_01");
+  recoverFullMtl(tetmesh,fixednodes,eigen_W,eigen_lambda,0.0,"./tempt/material_opt_0");
+  recoverFullMtl(tetmesh,fixednodes,eigen_W,eigen_lambda,1e-8,"./tempt/material_opt_1_8");
+  recoverFullMtl(tetmesh,fixednodes,eigen_W,eigen_lambda,1e-6,"./tempt/material_opt_1_6");
+}
+
+void recoverOptMtlCorrect(){
+  
+  const string data_root = "/home/simba/Workspace/AnimationEditor/Data/beam_fine/model/";
+  pTetMesh tetmesh = pTetMesh(new TetMesh());
+  bool succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
+
+  succ = tetmesh->loadElasticMtl(data_root+"mesh.elastic"); assert(succ);
+  
+  vector<int> fixednodes_vec;
+  succ = loadVec(data_root+"/con_nodes.bou",fixednodes_vec, TEXT); assert(succ);
+  set<int> fixednodes;
+  for (int i = 0; i < fixednodes_vec.size(); ++i){
+    fixednodes.insert(fixednodes_vec[i]);
+  }
+
+  MatrixXd eigen_W;
+  succ = load(data_root+"eigenvectors.b",eigen_W); assert(succ);
+  const MatrixXd t = eigen_W;
+  eigen_W = t.leftCols(2);
+
+  VectorXd eigen_lambda;
+  succ = load(data_root+"eigenvalues.b",eigen_lambda); assert(succ);
+  const VectorXd te = eigen_lambda;
+  eigen_lambda = te.head(2);
+
+  recoverFullMtl(tetmesh, fixednodes, eigen_W, eigen_lambda, 1e6, "./tempt/material_opt_c");
 }
 
 int main(int argc, char *argv[]){
 
   // testK();
-  computeEigenValues();
-  recoverFullMtl();
+  // testKSMall();
+  // recoverCorrect();
+  recoverOptMtl();
+  // recoverOptMtlCorrect();
 }

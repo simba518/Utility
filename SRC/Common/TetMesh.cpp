@@ -321,7 +321,7 @@ bool TetMesh::loadElasticMtl(const std::string& filename){
   in >> tempt >> groups_num;
   assert_ge(groups_num,0);
 
-  if (0 == groups_num ){
+  if ( groups_num <= 1){
 	double rho, E,v;
   	in>>tempt>>tempt>>tempt>>E >>tempt>>v >>tempt>>rho;
 	_mtl.reset(elements_num, rho, E, v);
@@ -353,7 +353,6 @@ bool TetMesh::loadElasticMtl(const std::string& filename){
 		_mtl._G[tet_set[t]] = G_L[0];
 		_mtl._lambda[tet_set[t]] = G_L[1];
 	  }
-
 	}
   }
 
@@ -374,4 +373,58 @@ void TetMesh::computeSurfaceNormal(){
 	const Vector3d &v2 = p[f[i][2]];
     _normal[i] = (v1-v0).cross(v2-v0).normalized();
   }
+}
+
+bool TetMesh::writeElasticMtlVTK(const string filename)const{
+  
+  vector<double> nodes;
+  this->nodes(nodes);
+  vector<int> tets;
+  this->tets(tets);
+
+  vector<double> E, v, rho;
+  const ElasticMaterial<double> &mtl = this->material();
+  for (int i = 0; i < tets.size()/4; ++i){
+	const Matrix<double,2,1> ev = ElasticMaterial<double>::fromLameConstant(mtl._G[i],mtl._lambda[i]);
+  	E.push_back(ev(0,0));
+  	v.push_back(ev(1,0));
+  	rho.push_back(mtl._rho[i]);
+  }
+
+  ofstream file_G;
+  file_G.open((filename+".Shear_G.vtk").c_str());
+  tet2vtk(file_G, &(nodes[0]), (size_t)(nodes.size()/3), &(tets[0]), (size_t)(tets.size()/4));
+  cell_data(file_G, mtl._G.begin(), mtl._G.size(), "Shear", "Shear");
+  bool succ = file_G.good();
+  file_G.close();
+
+  ofstream file_Lame;
+  file_Lame.open((filename+".Lame_l.vtk").c_str());
+  tet2vtk(file_Lame,&(nodes[0]),(size_t)(nodes.size()/3),&(tets[0]),(size_t)(tets.size()/4));
+  cell_data(file_Lame, mtl._lambda.begin(), mtl._lambda.size(), "Lema's", "Lema's");
+  succ &= file_Lame.good();
+  file_Lame.close();
+
+  ofstream file_E;
+  file_E.open((filename+".Young_E.vtk").c_str());
+  tet2vtk(file_E, &(nodes[0]), (size_t)(nodes.size()/3), &(tets[0]), (size_t)(tets.size()/4));
+  cell_data(file_E, E.begin(), E.size(), "Young's", "Young's");
+  succ &= file_E.good();
+  file_E.close();
+
+  ofstream file_v;
+  file_v.open((filename+".Poisson_v.vtk").c_str());
+  tet2vtk(file_v, &(nodes[0]), (size_t)(nodes.size()/3), &(tets[0]), (size_t)(tets.size()/4));
+  cell_data(file_v, v.begin(), v.size(), "Poisson's", "Poisson's");
+  succ &= file_v.good();
+  file_v.close();
+
+  ofstream file_rho;
+  file_rho.open((filename+".density_rho.vtk").c_str());
+  tet2vtk(file_rho,&(nodes[0]),(size_t)(nodes.size()/3),&(tets[0]),(size_t)(tets.size()/4));
+  cell_data(file_rho, rho.begin(), rho.size(), "Density", "Density");
+  succ &= file_rho.good();
+  file_rho.close();
+
+  return succ;
 }

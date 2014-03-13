@@ -280,6 +280,7 @@ namespace UTILITY{
 		succ = writeVTK(filename+TOSTR(i)+".vtk",U[i],binary);
 	  return succ;
 	}
+	bool writeElasticMtlVTK(const string filename)const;
 
   protected:
 	void computeSurfaceNormal();
