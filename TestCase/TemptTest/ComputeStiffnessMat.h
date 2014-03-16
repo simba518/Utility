@@ -16,8 +16,7 @@ namespace ELASTIC_OPT{
   };
   
   /**
-   * @class ComputeStiffnessMat base class for full elastic forces of
-   * tetrahedron mesh.
+   * @class compute stiffness matrix using casadi.
    * 
    */
   class ComputeStiffnessMat{
