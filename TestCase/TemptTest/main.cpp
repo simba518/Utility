@@ -113,7 +113,7 @@ void computeEigenValues(const string data_root,const int eigenNum,const set<int>
   INFO_LOG("load data");
   pTetMesh tetmesh = pTetMesh(new TetMesh());
   bool succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
-  succ = tetmesh->loadElasticMtl(data_root+"mesh.elastic"); assert(succ);
+  succ = tetmesh->loadElasticMtl(data_root+"mesh_smooth.elastic"); assert(succ);
   const int num_tet = (int)tetmesh->tets().size();
   const int n = tetmesh->nodes().size();
 
@@ -196,95 +196,54 @@ void recoverOpt(){
   mtlfit.useHessian(true);
 
   {
-	mtlfit.setMuSmooth(0.0f);
+	mtlfit.setMuSmooth(0.0f, 0.0f, 0.0f);
 	mtlfit.assembleObjfun();
 	mtlfit.solve();
 	mtlfit.saveResults("./tempt/material_opt_30");
-  }
-
-  {
-	mtlfit.setMuSmooth(1e-8);
-	mtlfit.assembleObjfun();
-	mtlfit.solve();
-	mtlfit.saveResults("./tempt/material_opt_40");
-  }
-
-  {
-	mtlfit.setMuSmooth(1e-4);
-	mtlfit.assembleObjfun();
-	mtlfit.solve();
-	mtlfit.saveResults("./tempt/material_opt_50");
-  }
-
-  {
-	mtlfit.setMuSmooth(1.0);
-	mtlfit.assembleObjfun();
-	mtlfit.solve();
-	mtlfit.saveResults("./tempt/material_opt_60");
   }
 }
 
 void recoverSim(){
 
   const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam-coarse/model/";
+  const string fixed_nodes = data_root + "/con_nodes2.bou";
   vector<int> fixednodes_vec;
-  bool succ = loadVec(data_root+"/con_nodes.bou",fixednodes_vec, TEXT); assert(succ);
+  bool succ = loadVec(fixed_nodes,fixednodes_vec, TEXT); assert(succ);
   set<int> fixednodes;
   for (int i = 0; i < fixednodes_vec.size(); ++i){
     fixednodes.insert(fixednodes_vec[i]);
-  }  
-  computeEigenValues(data_root, 10, fixednodes);
+  }
+  computeEigenValues(data_root, 20, fixednodes);
 
   MatrixXd eigen_W;
   succ = load(data_root+"tempt_eigenvectors.b",eigen_W); assert(succ);
   VectorXd eigen_lambda;
   succ = load(data_root+"tempt_eigenvalues.b",eigen_lambda); assert(succ);
 
-  MaterialFittingM2 mtlfit;
+  MaterialFitting mtlfit;
   mtlfit.loadTetMesh(data_root+"mesh.abq");
   mtlfit.loadMtl(data_root+"tempt_mesh.elastic");
-  mtlfit.loadFixednodes(data_root+"/con_nodes.bou");
+  mtlfit.loadFixednodes(fixed_nodes);
   mtlfit.setWLambda(eigen_W, eigen_lambda);
   mtlfit.computeK();
   mtlfit.computeM();
   mtlfit.removeFixedDOFs();
-  mtlfit.useHessian(false);
+  mtlfit.useHessian(true);
+  mtlfit.setMuAverageDensity(1.0);
 
   {
-	mtlfit.setMuSmooth(0.0f);
+	mtlfit.setMuSmooth(0.0f, 0.0f, 1.0f);
 	mtlfit.assembleObjfun();
 	mtlfit.solve();
 	mtlfit.saveResults("./tempt/material_sim_30");
   }
-
-  {
-	mtlfit.setMuSmooth(1e-8);
-	mtlfit.assembleObjfun();
-	mtlfit.solve();
-	mtlfit.saveResults("./tempt/material_sim_40");
-  }
-
-  {
-	mtlfit.setMuSmooth(1e-4);
-	mtlfit.assembleObjfun();
-	mtlfit.solve();
-	mtlfit.saveResults("./tempt/material_sim_50");
-  }
-
-  {
-	mtlfit.setMuSmooth(1.0);
-	mtlfit.assembleObjfun();
-	mtlfit.solve();
-	mtlfit.saveResults("./tempt/material_sim_60");
-  }
-
 }
 
 int main(int argc, char *argv[]){
 
-  testK();
-  testM();
-  testKSMall();
-  recoverSim();  
+  // testK();
+  // testM();
+  // testKSMall();
+  recoverSim();
   // recoverOpt();
 }

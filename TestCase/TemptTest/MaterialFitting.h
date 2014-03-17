@@ -30,7 +30,10 @@ namespace ELASTIC_OPT{
 	MaterialFitting(){
 	  tetmesh = pTetMesh(new TetMesh());
 	  use_hessian = false;
-	  mu_neigh = 1.0f;
+	  mu_neigh_G = 1.0f;
+	  mu_neigh_L = 1.0f;
+	  mu_neigh_rho = 1.0f;
+	  mu_average_rho = 1.0f;
 	}
 	void loadTetMesh(const string filename){
 	  const bool succ = tetmesh->load(filename); assert(succ);
@@ -58,9 +61,17 @@ namespace ELASTIC_OPT{
 	void useHessian(const bool use){
 	  use_hessian = use;
 	}
-	void setMuSmooth(const double mu){
+	void setMuSmooth(const double mu_G,const double mu_L,const double mu_rho){
+	  assert_ge(mu_G,0.0f);
+	  assert_ge(mu_L,0.0f);
+	  assert_ge(mu_rho,0.0f);
+	  mu_neigh_G = mu_G;
+	  mu_neigh_L = mu_L;
+	  mu_neigh_rho = mu_rho;
+	}
+	void setMuAverageDensity(const double mu){
 	  assert_ge(mu,0.0f);
-	  mu_neigh = mu;
+	  mu_average_rho = mu;
 	}
 	void computeK();
 	void computeM();
@@ -82,7 +93,13 @@ namespace ELASTIC_OPT{
 	virtual void initAllVariables(VSX &x)const{
 	  x = CASADI::connect(CASADI::connect(G,Lame),rho);
 	}
+	virtual void getInitValue(VectorXd &init_x)const;
+	virtual vector<double> getShearGResult()const;
+	virtual vector<double> getLameResult()const;
+	virtual vector<double> getDensityResult()const;
 	void addSmoothObjfun(SX &objfun)const;
+	void addAverageDensityObjfun(SX &objfun)const;
+	void addFixedNodesObjfun(SX &objfun)const;
 	
   protected:
 	SXMatrix W;
@@ -90,7 +107,7 @@ namespace ELASTIC_OPT{
 	pTetMesh tetmesh;
 	set<int> fixednodes;
 	bool use_hessian;
-	double mu_neigh;
+	double mu_neigh_G, mu_neigh_L, mu_neigh_rho, mu_average_rho;
 	SX objfun;
 	CASADI::VSX G;
 	CASADI::VSX Lame;
@@ -102,6 +119,7 @@ namespace ELASTIC_OPT{
   typedef boost::shared_ptr<MaterialFitting> pMaterialFitting;
   
   class MaterialFittingM2: public MaterialFitting{
+
   public:
 	MaterialFittingM2():MaterialFitting(){
 	  mu_mass = 1.0f;
@@ -116,6 +134,29 @@ namespace ELASTIC_OPT{
 	  mu_mass = mu;
 	}
 	void assembleObjfun();
+
+  private:
+	double mu_mass;
+	double mu_stiff;
+  };
+
+  class MaterialFittingM3: public MaterialFitting{
+
+  public:
+	MaterialFittingM3():MaterialFitting(){
+	  mu_mass = 1.0f;
+	  mu_stiff = 1.0f;
+	}
+
+  protected:
+	void initDensity(const int num_tet, VSX &rho)const;
+	void initAllVariables(VSX &x)const{
+	  x = CASADI::connect(G,Lame);
+	}
+	void getInitValue(VectorXd &init_x)const;
+	vector<double> getDensityResult()const{
+	  return tetmesh->material()._rho;
+	}
 
   private:
 	double mu_mass;
