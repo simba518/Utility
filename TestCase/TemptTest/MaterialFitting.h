@@ -76,9 +76,12 @@ namespace ELASTIC_OPT{
 	void computeK();
 	void computeM();
 	void removeFixedDOFs();
+	void hessGrad(MatrixXd &H, VectorXd &g)const;
 	virtual void assembleObjfun();
-	virtual void solve();
+	virtual void solveByIpopt();
+	virtual void solveByNNLS();
 	virtual void saveResults(const string filename)const;
+	void testFixedNodes();
 	
   protected:
 	virtual void initShearG(const int num_tet, VSX &G)const{
@@ -147,6 +150,9 @@ namespace ELASTIC_OPT{
 	  mu_mass = 1.0f;
 	  mu_stiff = 1.0f;
 	}
+	virtual void assembleObjfun(){
+	  MaterialFitting::assembleObjfun();
+	}
 
   protected:
 	void initDensity(const int num_tet, VSX &rho)const;
@@ -161,6 +167,30 @@ namespace ELASTIC_OPT{
   private:
 	double mu_mass;
 	double mu_stiff;
+  };
+
+  // fit only density
+  class MaterialFittingDensity: public MaterialFitting{
+
+  public:
+	void assembleObjfun();
+
+  protected:
+	void initShearG(const int num_tet, VSX &G)const;
+	void initLame(const int num_tet, VSX &Lame)const;
+	void initAllVariables(VSX &x)const{x = rho;}
+	void getInitValue(VectorXd &init_x)const;
+	vector<double> getShearGResult()const{return tetmesh->material()._G;}
+	vector<double> getLameResult()const{return tetmesh->material()._lambda;}
+	vector<double> getDensityResult()const;
+  };
+
+  // fit only G, L
+  class MaterialFittingGL: public MaterialFittingM3{
+	
+  public:
+	void assembleObjfun();
+	
   };
 
 }//end of namespace

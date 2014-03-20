@@ -1,5 +1,9 @@
 #include <stdio.h>
+#include <map>
+#include <Timer.h>
 #include "ComputeStiffnessMat.h"
+using namespace std;
+using namespace UTILITY;
 using namespace ELASTIC_OPT;
 
 bool ComputeStiffnessMat::prepare(){
@@ -20,8 +24,15 @@ const SXMatrix &ComputeStiffnessMat::K(const VectorXd &X){
   const int dim=(int)_vol_mesh->nodes().size()*3;
   _Kx.setZero();
   _Kx.resize(dim,dim);
-
   this->computeTetForceDerivX(_tet_k,X);
+  _Kx.reserve(_tet_k.size()*16);
+
+  std::vector<int> row,col;
+  std::vector<SX> d;
+  row.reserve(_tet_k.size()*16*9);
+  col.reserve(_tet_k.size()*16*9);
+  d.reserve(_tet_k.size()*16*9);
+  map<pair<int,int>, int> record;
 
   for(int i=0,etr=0;i<(int)_vol_mesh->tets().size();i++){
 
@@ -34,10 +45,21 @@ const SXMatrix &ComputeStiffnessMat::K(const VectorXd &X){
 		  for(int c=0;c<3;c++){
 			const int grow = e[j]*3+r;
 			const int gcol = e[k]*3+c;
-			_Kx.elem(grow, gcol) += dfM.elem(r,c);
+			const map<pair<int,int>,int>::iterator it = record.find(pair<int,int>(grow,gcol));
+			if (it != record.end()){
+			  const int index = it->second;
+			  assert_in(index,0,d.size());
+			  d[index] += dfM.elem(r,c);
+			}else{
+			  row.push_back(grow);
+			  col.push_back(gcol);
+			  d.push_back(dfM.elem(r,c));
+			  record[pair<int,int>(grow,gcol)] = d.size()-1;
+			}
 		  }
 	  }
   }
+  _Kx = SXMatrix::sparse(row, col, d, dim, dim);
   return _Kx;
 }
 

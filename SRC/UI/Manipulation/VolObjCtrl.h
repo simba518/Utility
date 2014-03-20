@@ -101,7 +101,12 @@ namespace UTILITY{
 		  succ &= volobjmesh->loadTetMesh(filename);
 		}
 		if ( inf.readFilePath("vol2obj_weights",filename,true)){
-		  succ &= volobjmesh->loadWeights(filename);
+		  if(!volobjmesh->loadWeights(filename)&&succ){
+			volobjmesh->buildInterpWeights();
+			volobjmesh->writeWeights(filename);
+		  }
+		}else if(succ){
+		  volobjmesh->buildInterpWeights();
 		}
 	  }
 	  return succ;

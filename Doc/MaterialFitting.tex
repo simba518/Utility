@@ -1,0 +1,60 @@
+\documentclass[9pt,twocolumn]{extarticle}
+
+\usepackage[hmargin=0.5in,tmargin=0.5in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{subfigure}
+
+\usepackage{cleveref}
+\usepackage{color}
+\newcommand{\TODO}[1]{\textcolor{red}{#1}}
+
+\newcommand{\FPP}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\argmin}{\operatornamewithlimits{arg\ min}}
+\author{Siwang Li}
+
+\title{Full-space Material Fitting}
+
+%% document begin here
+\begin{document}
+\maketitle
+
+\setlength{\parskip}{0.5ex}
+
+\section{Algorithm}
+Given the optimized modal basis $W=\hat{W}S$ and the corresponding eigenvalues
+$\Lambda$, we solve the following quadratic optimization problem for the Shear
+modulus $G_i$, Lame's first parameter $l_i$, and density $\rho_i$ for all
+tetrahedron $i$,
+\begin{equation} \label{opt}
+  \min_{G,l,\rho} \Phi(G,l,\rho)+s_gS_c(G)+s_lS_c(l)+s_mS_a(\rho)+t_mT(\rho)
+\end{equation}
+\[
+  \mbox{s.t. }  G_i>0 \mbox{, } l_i>0 \mbox{, and } \rho_i>0  
+\]
+where
+\begin{equation*}
+  \left\{ \begin{array}{rl}
+      &\Phi(G,l,\rho) = \frac{1}{2}\|\tilde{K}_0(G,l)W-\tilde{M}(\rho)W\Lambda\|_2^2\\
+      &S_a(x) = \frac{1}{2}\sum_{(i,j)_{n}}(x_i-x_j)^2V_{i,j}, \mbox{ for All }i\\
+      &S_c(x) = \frac{1}{2}\sum_{(i,j)_{n}}(x_i-x_j)^2V_{i,j}, \mbox{ for } i\in C\\
+      &T(x) = \frac{1}{2}(\sum_{i}x_iv_{i}-\sum_{j}\tilde{x}_jv_{j})^2
+    \end{array} \right.
+\end{equation*}
+Here, $\tilde{K}_0(G,l)$ is the stiffness matrix for the rest shape,
+$\tilde{M}(\rho)$ is the mass matrix, and $(i,j)_{n}$ indicates a neighbor
+tetrahedron pair, $V_{i,j}=\frac{1}{4}(v_i+v_j)$ with $v_i$ indicates the volume
+of tetrahedron $i$. The item $\Phi(G,l,\rho)$ indicates that the general
+eigenvalue problem should be satisfied, and we further define $S_a(\cdot)$,
+$S_c(\cdot)$ and $T(\cdot)$ to enforce that the density of the whole object
+should be smooth, the $G$ and $l$ at the constrained parts should be smooth and
+similar to their neighbor tetrahedrons, and the total mass should be equal to
+some fixed value.
+
+\subsection{Constrained Nodes}
+For constrained nodes, we first remove the corresponding columns and rows from
+$\tilde{K}, \tilde{M}$, and remove the corresponding rows in $W$, then use them
+to solve for $G,l,\rho$.
+
+\end{document}

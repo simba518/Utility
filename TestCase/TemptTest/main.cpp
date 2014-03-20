@@ -113,7 +113,7 @@ void computeEigenValues(const string data_root,const int eigenNum,const set<int>
   INFO_LOG("load data");
   pTetMesh tetmesh = pTetMesh(new TetMesh());
   bool succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
-  succ = tetmesh->loadElasticMtl(data_root+"mesh_smooth.elastic"); assert(succ);
+  succ = tetmesh->loadElasticMtl(data_root+"mesh.elastic"); assert(succ);
   const int num_tet = (int)tetmesh->tets().size();
   const int n = tetmesh->nodes().size();
 
@@ -173,7 +173,8 @@ void computeEigenValues(const string data_root,const int eigenNum,const set<int>
 
 void recoverOpt(){
   
-  const string data_root = "/home/simba/Workspace/OthersProjects/AnimationEditor_sig/Data/beam_fine/model/";
+  // const string data_root = "/home/simba/Workspace/OthersProjects/AnimationEditor_sig/Data/beam_fine/model/";
+  const string data_root = "/home/simba/Workspace/AnimationEditor/Data/beam-coarse/model/";
 
   MatrixXd eigen_W, S;
   bool succ = load(data_root+"scaled_W.b",eigen_W); assert(succ);
@@ -184,43 +185,44 @@ void recoverOpt(){
   VectorXd eigen_lambda;
   succ = load(data_root+"lambda_opt_rlst.b",eigen_lambda); assert(succ);
 
-  MaterialFitting mtlfit;
+  MaterialFittingGL mtlfit;
   mtlfit.loadTetMesh(data_root+"mesh.abq");
   mtlfit.loadMtl(data_root+"mesh.elastic");
   mtlfit.loadFixednodes(data_root+"/con_nodes.bou");
-  mtlfit.setWLambda(eigen_W, eigen_lambda);
-
+  mtlfit.setWLambda(eigen_W.leftCols(5), eigen_lambda.head(5));
   mtlfit.computeK();
   mtlfit.computeM();
   mtlfit.removeFixedDOFs();
   mtlfit.useHessian(true);
+  mtlfit.setMuAverageDensity(0.0f);
 
   {
-	mtlfit.setMuSmooth(0.0f, 0.0f, 0.0f);
-	mtlfit.assembleObjfun();
-	mtlfit.solve();
-	mtlfit.saveResults("./tempt/material_opt_30");
+  	mtlfit.setMuSmooth(0.0f, 0.0f, 0.0f);
+  	mtlfit.assembleObjfun();
+	// mtlfit.solveByIpopt();
+	mtlfit.solveByNNLS();
+  	mtlfit.saveResults("./tempt/material_opt_30");
   }
 }
 
 void recoverSim(){
 
   const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam-coarse/model/";
-  const string fixed_nodes = data_root + "/con_nodes2.bou";
+  const string fixed_nodes = data_root + "/con_nodes.bou";
   vector<int> fixednodes_vec;
   bool succ = loadVec(fixed_nodes,fixednodes_vec, TEXT); assert(succ);
   set<int> fixednodes;
   for (int i = 0; i < fixednodes_vec.size(); ++i){
     fixednodes.insert(fixednodes_vec[i]);
   }
-  computeEigenValues(data_root, 20, fixednodes);
+  computeEigenValues(data_root, 2, fixednodes);
 
   MatrixXd eigen_W;
   succ = load(data_root+"tempt_eigenvectors.b",eigen_W); assert(succ);
   VectorXd eigen_lambda;
   succ = load(data_root+"tempt_eigenvalues.b",eigen_lambda); assert(succ);
 
-  MaterialFitting mtlfit;
+  MaterialFittingGL mtlfit;
   mtlfit.loadTetMesh(data_root+"mesh.abq");
   mtlfit.loadMtl(data_root+"tempt_mesh.elastic");
   mtlfit.loadFixednodes(fixed_nodes);
@@ -229,12 +231,13 @@ void recoverSim(){
   mtlfit.computeM();
   mtlfit.removeFixedDOFs();
   mtlfit.useHessian(true);
-  mtlfit.setMuAverageDensity(1.0);
+  mtlfit.setMuAverageDensity(0.0f);
 
   {
-	mtlfit.setMuSmooth(0.0f, 0.0f, 1.0f);
+	mtlfit.setMuSmooth(1.0f, 1.0f, 1.0f);
 	mtlfit.assembleObjfun();
-	mtlfit.solve();
+	// mtlfit.solveByIpopt();
+	mtlfit.solveByNNLS();
 	mtlfit.saveResults("./tempt/material_sim_30");
   }
 }
@@ -242,8 +245,8 @@ void recoverSim(){
 int main(int argc, char *argv[]){
 
   // testK();
-  // testM();
   // testKSMall();
+  // testM();
   recoverSim();
   // recoverOpt();
 }
