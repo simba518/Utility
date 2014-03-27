@@ -20,10 +20,8 @@ using CasADi::SX;
 
 namespace ELASTIC_OPT{
   
-  /**
-   * @class MaterialFitting
-   * 
-   */
+  // fit G,L,and density by using MA,
+  // K(G,L)*W = M(\rho)*W*\Lambda
   class MaterialFitting{
 	
   public:
@@ -75,12 +73,17 @@ namespace ELASTIC_OPT{
 	}
 	void computeK();
 	void computeM();
+	void computeM(DiagonalMatrix<double,-1> &M)const;
+	void computeM(DiagonalMatrix<double,-1> &M,const vector<double> &rho)const;
 	void removeFixedDOFs();
 	void hessGrad(MatrixXd &H, VectorXd &g)const;
 	virtual void assembleObjfun();
 	virtual void solveByIpopt();
 	virtual void solveByNNLS();
 	virtual void saveResults(const string filename)const;
+	virtual vector<double> getShearGResult()const;
+	virtual vector<double> getLameResult()const;
+	virtual vector<double> getDensityResult()const;
 	void testFixedNodes();
 	
   protected:
@@ -97,12 +100,12 @@ namespace ELASTIC_OPT{
 	  x = CASADI::connect(CASADI::connect(G,Lame),rho);
 	}
 	virtual void getInitValue(VectorXd &init_x)const;
-	virtual vector<double> getShearGResult()const;
-	virtual vector<double> getLameResult()const;
-	virtual vector<double> getDensityResult()const;
+	virtual SXMatrix assembleObjMatrix();
 	void addSmoothObjfun(SX &objfun)const;
+	void computeSmoothObjFunctions(vector<SX> &funs)const;
 	void addAverageDensityObjfun(SX &objfun)const;
 	void addFixedNodesObjfun(SX &objfun)const;
+	void print_NNLS_exit_code(const int exit_code)const;
 	
   protected:
 	SXMatrix W;
@@ -120,11 +123,39 @@ namespace ELASTIC_OPT{
 	vector<double> rlst;
   };
   typedef boost::shared_ptr<MaterialFitting> pMaterialFitting;
-  
-  class MaterialFittingM2: public MaterialFitting{
+
+  // fit only G, L using MA.
+  // K(G,L)*W = M*W*\Lambda
+  class MaterialFitting_MA_K: public MaterialFitting{
 
   public:
-	MaterialFittingM2():MaterialFitting(){
+	MaterialFitting_MA_K():MaterialFitting(){
+	  mu_mass = 1.0f;
+	  mu_stiff = 1.0f;
+	}
+	vector<double> getDensityResult()const{
+	  return tetmesh->material()._rho;
+	}
+
+  protected:
+	void initDensity(const int num_tet, VSX &rho)const;
+	void initAllVariables(VSX &x)const{
+	  x = CASADI::connect(G,Lame);
+	}
+	void getInitValue(VectorXd &init_x)const;
+
+  private:
+	double mu_mass;
+	double mu_stiff;
+  };
+
+  // fit G,L,and density by diagonalizing K, M.
+  // W^t*K(G,L)*W = \Lambda
+  // W^t*M(\rho)*W = I
+  class MaterialFitting_Diag_KM: public MaterialFitting{
+
+  public:
+	MaterialFitting_Diag_KM():MaterialFitting(){
 	  mu_mass = 1.0f;
 	  mu_stiff = 1.0f;
 	}
@@ -143,54 +174,29 @@ namespace ELASTIC_OPT{
 	double mu_stiff;
   };
 
-  class MaterialFittingM3: public MaterialFitting{
+  // fit only density by diagonalizing M.
+  // W^t*M(\rho)*W = I
+  class MaterialFitting_Diag_M: public MaterialFitting{
 
   public:
-	MaterialFittingM3():MaterialFitting(){
-	  mu_mass = 1.0f;
-	  mu_stiff = 1.0f;
-	}
-	virtual void assembleObjfun(){
-	  MaterialFitting::assembleObjfun();
-	}
+	vector<double> getShearGResult()const{return tetmesh->material()._G;}
+	vector<double> getLameResult()const{return tetmesh->material()._lambda;}
+	vector<double> getDensityResult()const;
 
   protected:
-	void initDensity(const int num_tet, VSX &rho)const;
-	void initAllVariables(VSX &x)const{
-	  x = CASADI::connect(G,Lame);
-	}
-	void getInitValue(VectorXd &init_x)const;
-	vector<double> getDensityResult()const{
-	  return tetmesh->material()._rho;
-	}
-
-  private:
-	double mu_mass;
-	double mu_stiff;
-  };
-
-  // fit only density
-  class MaterialFittingDensity: public MaterialFitting{
-
-  public:
-	void assembleObjfun();
-
-  protected:
+	SXMatrix assembleObjMatrix();
 	void initShearG(const int num_tet, VSX &G)const;
 	void initLame(const int num_tet, VSX &Lame)const;
 	void initAllVariables(VSX &x)const{x = rho;}
 	void getInitValue(VectorXd &init_x)const;
-	vector<double> getShearGResult()const{return tetmesh->material()._G;}
-	vector<double> getLameResult()const{return tetmesh->material()._lambda;}
-	vector<double> getDensityResult()const;
   };
 
-  // fit only G, L
-  class MaterialFittingGL: public MaterialFittingM3{
+  // fit only G, L by diagonalizing K.
+  // W^t*K(G,L)*W = \Lambda
+  class MaterialFitting_Diag_K: public MaterialFitting_MA_K{
 	
-  public:
-	void assembleObjfun();
-	
+  protected:
+	SXMatrix assembleObjMatrix();
   };
 
 }//end of namespace

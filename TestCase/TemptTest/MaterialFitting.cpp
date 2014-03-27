@@ -1,7 +1,9 @@
 #include <SparseGenEigenSolver.h>
 #include <SparseMatrixTools.h>
+#include <MassMatrix.h>
 #include "nnls.h"
 #include "MaterialFitting.h"
+using namespace UTILITY;
 using namespace ELASTIC_OPT;
 
 void MaterialFitting::computeK(){
@@ -32,6 +34,23 @@ void MaterialFitting::computeM(){
   timer.start();
   mass.compute(M,*tetmesh,rho);
   timer.stop("computeM: ");
+}
+
+void MaterialFitting::computeM(DiagonalMatrix<double,-1>&M)const{
+
+  assert(tetmesh);
+  MassMatrix mass;
+  mass.compute(M,*tetmesh);
+}
+
+void MaterialFitting::computeM(DiagonalMatrix<double,-1>&M,const vector<double>&rh)const{
+  
+  assert(tetmesh);
+  MassMatrix mass;
+  const vector<double> r0 = tetmesh->material()._rho;
+  tetmesh->material()._rho = rh;
+  mass.compute(M,*tetmesh);
+  tetmesh->material()._rho = r0;
 }
 
 void MaterialFitting::removeFixedDOFs(){
@@ -91,22 +110,82 @@ void MaterialFitting::assembleObjfun(){
   TRACE_FUN();
   objfun = 0.0f;
   addSmoothObjfun(objfun);
-  addAverageDensityObjfun(objfun);
-  addFixedNodesObjfun(objfun);
+  // addAverageDensityObjfun(objfun);
+  // addFixedNodesObjfun(objfun);
 
-  const SXMatrix M1 = K.mul(W)-M.mul(W.mul(lambda));
+  const SXMatrix M1 = assembleObjMatrix();
   for (int i = 0; i < M1.size1(); ++i){
     for (int j = 0; j < M1.size2(); ++j)
   	  objfun += M1.elem(i,j)*M1.elem(i,j);
   }
-
   objfun *= 0.5f;
 }
 
-void MaterialFitting::addSmoothObjfun(SX &objfun)const{
+void MaterialFitting::solveByNNLS(){
+
+  const SXMatrix M1 = assembleObjMatrix();
+  vector<SX> smooth_funs;
+  computeSmoothObjFunctions(smooth_funs);
   
+  SXMatrix obj_fun_m(M1.size1()*M1.size2()+smooth_funs.size(),1);
+  for (int i = 0; i < M1.size1(); ++i){
+    for (int j = 0; j < M1.size2(); ++j)
+	  obj_fun_m.elem(i*M1.size2()+j,0) = M1.elem(i,j);
+  }
+  for (int i = 0; i < smooth_funs.size(); ++i){
+    obj_fun_m.elem(M1.size2()*M1.size2()+i,0) = smooth_funs[i];
+  }
+
+  VSX variable_x;
+  initAllVariables(variable_x);
+  CasADi::SXFunction g_fun = CasADi::SXFunction(variable_x,obj_fun_m);
+  g_fun.init();
+  
+  VectorXd x0(variable_x.size()), b;
+  x0.setZero();
+  CASADI::evaluate(g_fun, x0, b);
+  b = -b;
+
+  MatrixXd J = CASADI::convert<double>(g_fun.jac());
+  assert_eq(J.rows(), b.size());
+  assert_eq(J.cols(), x0.size());
+  
+  VectorXd x(b.size()),  w(J.cols()), zz(J.rows());
+  VectorXi index(J.cols()*2);
+  getInitValue(x);
+  
+  int exit_code = 0;
+  double residual = 1e-18;
+  nnls(&J(0,0), J.rows(), J.rows(), J.cols(), 
+  	   &b[0], &x[0], &residual,
+  	   &w[0], &zz[0], &index[0], &exit_code);
+  INFO_LOG("residual: " << residual);
+  print_NNLS_exit_code(exit_code);
+
+  rlst.resize(x.size());
+  for (int i = 0; i < x.size(); ++i){
+    rlst[i] = x[i];
+  }
+
+  const MatrixXd H = J.transpose()*J;
+  SelfAdjointEigenSolver<MatrixXd> es;
+  es.compute(H);
+  cout << "The eigenvalues of H are: " << es.eigenvalues().transpose() << endl;
+}
+
+SXMatrix MaterialFitting::assembleObjMatrix(){
+  const SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
+  return M1;
+}
+
+void MaterialFitting::computeSmoothObjFunctions(vector<SX> &funs)const{
+
   const VVec4i &neigh_tet = tetmesh->faceNeighTet();
+  funs.clear();
+  funs.reserve(neigh_tet.size()*4);
+
   for (int i = 0; i < neigh_tet.size(); ++i){
+
 	const double vi = tetmesh->volume(i);
 	assert_gt(vi,0);
 	for (int k = 0; k < 4; ++k){
@@ -115,11 +194,23 @@ void MaterialFitting::addSmoothObjfun(SX &objfun)const{
 		const double vj = tetmesh->volume(j);
 		assert_gt(vj,0);
 		assert(i!=j);
-		// objfun += 0.25f*mu_neigh_G*(vi+vj)*(G[i]-G[j])*(G[i]-G[j]);
-		// objfun += 0.25f*mu_neigh_L*(vi+vj)*(Lame[i]-Lame[j])*(Lame[i]-Lame[j]);
-		objfun += 0.25f*mu_neigh_rho*(vi+vj)*(rho[i]-rho[j])*(rho[i]-rho[j]);
+		if (mu_neigh_G > 0)
+		  funs.push_back( 0.5f*sqrt(mu_neigh_G*(vi+vj))*(G[i]-G[j]) );
+		if (mu_neigh_L > 0)
+		  funs.push_back( 0.5f*sqrt(mu_neigh_L*(vi+vj))*(Lame[i]-Lame[j]) );
+		if (mu_neigh_rho > 0)
+		  funs.push_back( 0.5f*sqrt(mu_neigh_rho*(vi+vj))*(rho[i]-rho[j]) );
 	  }
 	}
+  }
+}
+
+void MaterialFitting::addSmoothObjfun(SX &objfun)const{
+  
+  vector<SX> funs;
+  computeSmoothObjFunctions(funs);
+  for (int i = 0; i < funs.size(); ++i){
+    objfun += funs[i]*funs[i];
   }
 }
 
@@ -194,6 +285,20 @@ void MaterialFitting::hessGrad(MatrixXd &H, VectorXd &g)const{
   H = CASADI::convert<double>(fun.hess());
 }
 
+void MaterialFitting::print_NNLS_exit_code(const int exit_code)const{
+  
+  switch (exit_code){
+  case 1: INFO_LOG("nnls solve success!");
+	break;
+  case 2: ERROR_LOG("nnls failed, the dimensions of the problem are bad, either m .le. 0 or n .le. 0.");
+	break;
+  case 3: ERROR_LOG("nnls failed, iteration count exceeded.");
+	break;
+  default: ERROR_LOG("nnls failed, unknown reason.");
+	break;
+  }
+}
+
 void MaterialFitting::solveByIpopt(){
   
   TRACE_FUN();
@@ -227,43 +332,6 @@ void MaterialFitting::solveByIpopt(){
   solver.solve();
   rlst.resize(variable_x.size());
   solver.getOutput(rlst,CasADi::NLP_X_OPT);
-}
-
-void MaterialFitting::solveByNNLS(){
-  
-  MatrixXd H;
-  VectorXd grad;
-  hessGrad(H, grad);
-  grad = -grad;
-
-  VectorXd x(grad.size()),  w(H.cols()), zz(H.rows());
-  VectorXi index(H.cols()*2);
-  int exit_code;
-  double residual;
-
-  nnls(&H(0,0), H.rows(), H.rows(), H.cols(), 
-	   &grad[0], &x[0], &residual,
-	   &w[0], &zz[0], &index[0], &exit_code);
-
-  cout<< "r: " << residual << endl;
-  cout<< "x: " << x.transpose() << endl;
-
-  switch (exit_code){
-  case 1: INFO_LOG("nnls solve success!");
-	break;
-  case 2: ERROR_LOG("nnls failed, the dimensions of the problem are bad, either m .le. 0 or n .le. 0.");
-	break;
-  case 3: ERROR_LOG("nnls failed, iteration count exceeded.");
-	break;
-  default: ERROR_LOG("nnls failed, unknown reason.");
-	break;
-  }
-
-  // const VectorXd x = H.ldlt().solve(-grad);
-  rlst.resize(x.size());
-  for (int i = 0; i < x.size(); ++i){
-    rlst[i] = x[i];
-  }
 }
 
 void MaterialFitting::testFixedNodes(){
@@ -300,38 +368,15 @@ void MaterialFitting::saveResults(const string filename)const{
   tetmesh->material() = mtl_0;
 }
 
-void MaterialFittingM2::assembleObjfun(){
-  
-  TRACE_FUN();
-  objfun = 0.0f;
-  addSmoothObjfun(objfun);
-  addAverageDensityObjfun(objfun);
-  addFixedNodesObjfun(objfun);
-
-  const MatrixXd I = MatrixXd::Identity(lambda.size(),lambda.size());
-  const SXMatrix M1 = trans(W).mul(K.mul(W))-lambda;
-  const SXMatrix M2 = trans(W).mul(M.mul(W))-CASADI::convert(I);
-  for (int i = 0; i < M1.size1(); ++i){
-    for (int j = 0; j < M1.size2(); ++j){
-	  objfun += mu_stiff*M1.elem(i,j)*M1.elem(i,j);
-	  objfun += mu_mass*M2.elem(i,j)*M2.elem(i,j);
-	}
-  }
-
-  objfun *= 0.5f;
-}
-
-void MaterialFittingM3::initDensity(const int num_tet, VSX &rho)const{
+void MaterialFitting_MA_K::initDensity(const int num_tet, VSX &rho)const{
 
   const vector<double> &r = tetmesh->material()._rho;
   assert_eq(num_tet, r.size());
   rho.resize(num_tet);
-  for (int i = 0; i < num_tet; ++i){
-	rho[i] = r[i];
-  }
+  for (int i = 0; i < num_tet; ++i)	rho[i] = r[i];
 }
 
-void MaterialFittingM3::getInitValue(VectorXd &init_x)const{
+void MaterialFitting_MA_K::getInitValue(VectorXd &init_x)const{
 
   const vector<double> &g = tetmesh->material()._G;
   const vector<double> &la = tetmesh->material()._lambda;
@@ -343,26 +388,35 @@ void MaterialFittingM3::getInitValue(VectorXd &init_x)const{
   }
 }
 
-void MaterialFittingDensity::assembleObjfun(){
-
+void MaterialFitting_Diag_KM::assembleObjfun(){
+  
   TRACE_FUN();
   objfun = 0.0f;
   addSmoothObjfun(objfun);
-  // addAverageDensityObjfun(objfun);
-  // addFixedNodesObjfun(objfun);
+  addAverageDensityObjfun(objfun);
+  addFixedNodesObjfun(objfun);
 
   const MatrixXd I = MatrixXd::Identity(lambda.size(),lambda.size());
-  const SXMatrix M2 = trans(W).mul(M.mul(W))-CASADI::convert(I);
-  for (int i = 0; i < M2.size1(); ++i){
-    for (int j = 0; j < M2.size2(); ++j){
-	  objfun += M2.elem(i,j)*M2.elem(i,j);
+  const SXMatrix M1 = trans(W).mul(K.mul(W))-lambda;
+  const SXMatrix _Diag_KM = trans(W).mul(M.mul(W))-CASADI::convert(I);
+  for (int i = 0; i < M1.size1(); ++i){
+    for (int j = 0; j < M1.size2(); ++j){
+	  objfun += mu_stiff*M1.elem(i,j)*M1.elem(i,j);
+	  objfun += mu_mass*_Diag_KM.elem(i,j)*_Diag_KM.elem(i,j);
 	}
   }
 
   objfun *= 0.5f;
 }
 
-void MaterialFittingDensity::initShearG(const int num_tet, VSX &G)const{
+SXMatrix MaterialFitting_Diag_M::assembleObjMatrix(){
+
+  const MatrixXd I = MatrixXd::Identity(lambda.size(),lambda.size());
+  const SXMatrix M2 = trans(W).mul(M.mul(W))-CASADI::convert(I);
+  return M2;
+}
+
+void MaterialFitting_Diag_M::initShearG(const int num_tet, VSX &G)const{
   
   const vector<double> &r = tetmesh->material()._G;
   assert_eq(num_tet, r.size());
@@ -372,7 +426,7 @@ void MaterialFittingDensity::initShearG(const int num_tet, VSX &G)const{
   }
 }
 
-void MaterialFittingDensity::initLame(const int num_tet, VSX &Lame)const{
+void MaterialFitting_Diag_M::initLame(const int num_tet, VSX &Lame)const{
 
   const vector<double> &r = tetmesh->material()._lambda;
   assert_eq(num_tet, r.size());
@@ -382,7 +436,7 @@ void MaterialFittingDensity::initLame(const int num_tet, VSX &Lame)const{
   }
 }
 
-void MaterialFittingDensity::getInitValue(VectorXd &init_x)const{
+void MaterialFitting_Diag_M::getInitValue(VectorXd &init_x)const{
     
   const vector<double> &r = tetmesh->material()._rho;
   const int num_tet = tetmesh->tets().size();
@@ -392,36 +446,15 @@ void MaterialFittingDensity::getInitValue(VectorXd &init_x)const{
   }
 }
 
-vector<double> MaterialFittingDensity::getDensityResult()const{
+vector<double> MaterialFitting_Diag_M::getDensityResult()const{
 
   const int num_tet = tetmesh->tets().size();
   assert_ge(rlst.size(),num_tet);
   return vector<double>(rlst.begin(),rlst.begin()+num_tet);
 }
 
-void MaterialFittingGL::assembleObjfun(){
+SXMatrix MaterialFitting_Diag_K::assembleObjMatrix(){
 
-  TRACE_FUN();
-  objfun = 0.0f;
-  // addSmoothObjfun(objfun);
-  // addAverageDensityObjfun(objfun);
-  // addFixedNodesObjfun(objfun);
-
-  SXMatrix inv_M(M.size1(),M.size2());
-  assert_eq(M.size1(), M.size2());
-  for (int i = 0; i < M.size1(); ++i){
-	assert_eq(M.elem(i,i).getValue(), M.elem(i,i).getValue());
-	assert_gt(M.elem(i,i).getValue(), 0.0f);
-    inv_M.elem(i,i) = 1.0f/M.elem(i,i).getValue();
-  }
-
-  const MatrixXd I = MatrixXd::Identity(lambda.size(),lambda.size());
-  // const SXMatrix M1 = trans(W).mul(K.mul(W))-lambda;
-  const SXMatrix M1 = trans(W).mul(inv_M).mul(K.mul(W))-lambda;
-  for (int i = 0; i < M1.size1(); ++i){
-    for (int j = 0; j < M1.size2(); ++j){
-	  objfun += M1.elem(i,j)*M1.elem(i,j);
-	}
-  }
-  objfun *= 0.5f;
+  const SXMatrix M1 = trans(W).mul(K.mul(W))-lambda;
+  return M1;
 }
