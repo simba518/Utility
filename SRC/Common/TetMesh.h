@@ -42,7 +42,7 @@ namespace UTILITY{
   
 	/// yp: [ Young's modulus(E), Poisson's ratio(v)]
 	/// gl: [ Shear modulus(G),  Lamé's first parameter(Lambda)]
-	/// chttp://en.wikipedia.org/wiki/Lam%C3%A9%27s_first_parameter
+	/// http://en.wikipedia.org/wiki/Lam%C3%A9%27s_first_parameter
 	static Matrix<T,2,1> toLameConstant(const Matrix<T,2,1>& yp){
 	  Matrix<T,2,1> gl;
 	  gl.x()=yp.x()/(2.0f*(1.0f+yp.y()));

@@ -28,10 +28,12 @@ namespace ELASTIC_OPT{
 	MaterialFitting(){
 	  tetmesh = pTetMesh(new TetMesh());
 	  use_hessian = false;
-	  mu_neigh_G = 1.0f;
-	  mu_neigh_L = 1.0f;
-	  mu_neigh_rho = 1.0f;
-	  mu_average_rho = 1.0f;
+	  mu_neigh_G = 0.0f;
+	  mu_neigh_L = 0.0f;
+	  mu_neigh_rho = 0.0f;
+	  mu_average_rho = 0.0f;
+	  mu_neigh_poission = 0.0f;
+	  mu_neigh_E = 0.0f;
 	}
 	void loadTetMesh(const string filename){
 	  const bool succ = tetmesh->load(filename); assert(succ);
@@ -59,12 +61,20 @@ namespace ELASTIC_OPT{
 	void useHessian(const bool use){
 	  use_hessian = use;
 	}
-	void setMuSmooth(const double mu_G,const double mu_L,const double mu_rho){
+	void setMuSmoothGL(const double mu_G,const double mu_L){
 	  assert_ge(mu_G,0.0f);
 	  assert_ge(mu_L,0.0f);
-	  assert_ge(mu_rho,0.0f);
 	  mu_neigh_G = mu_G;
 	  mu_neigh_L = mu_L;
+	}	
+	void setMuSmoothEv(const double mu_E,const double mu_v){
+	  assert_ge(mu_E,0.0f);
+	  assert_ge(mu_v,0.0f);
+	  mu_neigh_E = mu_E;
+	  mu_neigh_poission = mu_v;
+	}
+	void setMuSmoothDensity(const double mu_rho){
+	  assert_ge(mu_rho,0.0f);
 	  mu_neigh_rho = mu_rho;
 	}
 	void setMuAverageDensity(const double mu){
@@ -73,27 +83,31 @@ namespace ELASTIC_OPT{
 	}
 	void computeK();
 	void computeM();
+	void computeK(SparseMatrix<double> &K)const;
+	void computeK(SparseMatrix<double> &K,const vector<double>&G,const vector<double>&L)const;
 	void computeM(DiagonalMatrix<double,-1> &M)const;
 	void computeM(DiagonalMatrix<double,-1> &M,const vector<double> &rho)const;
 	void removeFixedDOFs();
 	void hessGrad(MatrixXd &H, VectorXd &g)const;
 	virtual void assembleObjfun();
-	virtual void solveByIpopt();
-	virtual void solveByNNLS();
+	void solveByIpopt();
+	void solveByNNLS();
+	void solveByLinearSolver();
 	virtual void saveResults(const string filename)const;
 	virtual vector<double> getShearGResult()const;
 	virtual vector<double> getLameResult()const;
 	virtual vector<double> getDensityResult()const;
 	void testFixedNodes();
+	void printResult()const;
 	
   protected:
-	virtual void initShearG(const int num_tet, VSX &G)const{
+	virtual void initShearG(const int num_tet, VSX &G){
 	  G = CASADI::makeSymbolic(num_tet, "G");
 	}
-	virtual void initLame(const int num_tet, VSX &Lame)const{
+	virtual void initLame(const int num_tet, VSX &Lame){
 	  Lame = CASADI::makeSymbolic(num_tet, "lame");
 	}
-	virtual void initDensity(const int num_tet, VSX &rho)const{
+	virtual void initDensity(const int num_tet, VSX &rho){
 	  rho = CASADI::makeSymbolic(num_tet, "rho");
 	}
 	virtual void initAllVariables(VSX &x)const{
@@ -101,11 +115,33 @@ namespace ELASTIC_OPT{
 	}
 	virtual void getInitValue(VectorXd &init_x)const;
 	virtual SXMatrix assembleObjMatrix();
+
 	void addSmoothObjfun(SX &objfun)const;
 	void computeSmoothObjFunctions(vector<SX> &funs)const;
 	void addAverageDensityObjfun(SX &objfun)const;
 	void addFixedNodesObjfun(SX &objfun)const;
 	void print_NNLS_exit_code(const int exit_code)const;
+
+	template<class T>
+	T getPoissonV(const T&G, const T&L)const{return L/(2.0*(L+G));}
+	template<class T>
+	T getYoungE(const T&G, const T&L)const{return G*(3.0*L+2.0*G)/(L+G);}
+	template<class T>
+	vector<T> getPoissonV(const vector<T>&G, const vector<T>&L)const{
+	  assert_eq(G.size(),L.size());
+	  vector<T> v(G.size());
+	  for (size_t i = 0; i < G.size(); ++i)
+		v[i] = getPoissonV(G[i],L[i]);
+	  return v;
+	}
+	template<class T>
+	vector<T> getYoungE(const vector<T>&G, const vector<T>&L)const{
+	  assert_eq(G.size(),L.size());
+	  vector<T> E(L.size());
+	  for (size_t i = 0; i < L.size(); ++i)
+		E[i] = getYoungE(G[i],L[i]);
+	  return E;
+	}
 	
   protected:
 	SXMatrix W;
@@ -113,7 +149,7 @@ namespace ELASTIC_OPT{
 	pTetMesh tetmesh;
 	set<int> fixednodes;
 	bool use_hessian;
-	double mu_neigh_G, mu_neigh_L, mu_neigh_rho, mu_average_rho;
+	double mu_neigh_G, mu_neigh_L, mu_neigh_rho,mu_average_rho,mu_neigh_poission,mu_neigh_E;
 	SX objfun;
 	CASADI::VSX G;
 	CASADI::VSX Lame;
@@ -185,8 +221,8 @@ namespace ELASTIC_OPT{
 
   protected:
 	SXMatrix assembleObjMatrix();
-	void initShearG(const int num_tet, VSX &G)const;
-	void initLame(const int num_tet, VSX &Lame)const;
+	void initShearG(const int num_tet, VSX &G);
+	void initLame(const int num_tet, VSX &Lame);
 	void initAllVariables(VSX &x)const{x = rho;}
 	void getInitValue(VectorXd &init_x)const;
   };
@@ -197,6 +233,113 @@ namespace ELASTIC_OPT{
 	
   protected:
 	SXMatrix assembleObjMatrix();
+  };
+
+  // use Young's parameter E and Poisson's ratio v as parameters.
+  // W^t*K(E,v)*W = \Lambda
+  class MaterialFitting_EV:public MaterialFitting{
+	
+  public:
+	vector<double> getShearGResult()const{return getShareG(getYoungE(),getPoissonV());}
+	vector<double> getLameResult()const{return getLameL(getYoungE(),getPoissonV());}
+	
+  protected:
+	void initShearG(const int num_tet, VSX &G){
+	  init_Ev(num_tet,E,v);
+	  G = getShareG(E,v);
+	}
+	void initLame(const int num_tet, VSX &Lame){
+	  init_Ev(num_tet,E,v);
+	  Lame = getLameL(E,v);
+	}
+	virtual void initDensity(const int num_tet, VSX &rho)const{
+	  const vector<double> &r = tetmesh->material()._rho;
+	  assert_eq(num_tet, r.size());
+	  rho.resize(num_tet);
+	  for (int i = 0; i < num_tet; ++i)	rho[i] = r[i];
+	}
+	virtual vector<double> getDensityResult()const{
+	  return tetmesh->material()._rho;
+	}
+	virtual void initAllVariables(VSX &x)const{x = CASADI::connect(E,v);}
+	virtual void getInitValue(VectorXd &init_x)const;
+	virtual SXMatrix assembleObjMatrix();
+
+	virtual void init_Ev(const int num_tet, VSX &E, VSX &v){
+	  assert_eq(E.size(),v.size());
+	  if (E.size() != num_tet){
+		E = CASADI::makeSymbolic(num_tet, "E");
+		v = CASADI::makeSymbolic(num_tet, "v");
+	  }
+	}
+	virtual vector<double> getYoungE()const{
+	  const int num_tet = tetmesh->tets().size();
+	  assert_ge(rlst.size(),num_tet);
+	  return vector<double>(rlst.begin(),rlst.begin()+num_tet);
+	}
+	virtual vector<double> getPoissonV()const{
+	  const int num_tet = tetmesh->tets().size();
+	  assert_ge(rlst.size(),num_tet*2);
+	  return vector<double>(rlst.begin()+num_tet,rlst.begin()+2*num_tet);
+	}
+
+	template<class T>
+	T getShareG(const T&E, const T&v)const{return E/(2.0*(1.0+v));}
+	template<class T>
+	T getLameL(const T&E, const T&v)const{return (E*v)/((1.0+v)*(1.0-2.0*v));}
+	template<class T>
+	vector<T> getShareG(const vector<T>&E, const vector<T>&v)const{
+	  assert_eq(E.size(),v.size());
+	  vector<T> G(E.size());
+	  for (size_t i = 0; i < E.size(); ++i)
+		G[i] = getShareG(E[i],v[i]);
+	  return G;
+	}
+	template<class T>
+	vector<T> getLameL(const vector<T>&E, const vector<T>&v)const{
+	  assert_eq(E.size(),v.size());
+	  vector<T> L(E.size());
+	  for (size_t i = 0; i < E.size(); ++i)
+		L[i] = getLameL(E[i],v[i]);
+	  return L;
+	}
+	
+  protected:
+	VSX E,v;
+  };
+
+  // fix v, and fit only E by by diagonalizing K.
+  // W^t*K(E)*W = \Lambda
+  class MaterialFitting_EV_Diag_K:public MaterialFitting_EV{
+	
+  protected:
+	void init_Ev(const int num_tet, VSX &E, VSX &v){
+	  assert_eq(E.size(),v.size());
+	  if (E.size() != num_tet){
+		E = CASADI::makeSymbolic(num_tet, "E");
+		const vector<double> vv = getPoissonV();
+		assert_eq(vv.size(),E.size());
+		v.resize(vv.size());
+		for (int i = 0; i < vv.size(); ++i)
+		  v[i] = vv[i];
+	  }
+	}
+	void initAllVariables(VSX &x)const{x = E;}
+	void getInitValue(VectorXd &init_x)const{
+
+	  const vector<double> &g = tetmesh->material()._G;
+	  const vector<double> &la = tetmesh->material()._lambda;
+	  const vector<double> E = MaterialFitting::getYoungE(g,la);
+	  const int num_tet = tetmesh->tets().size();
+	  init_x.resize(num_tet);
+	  for (int i = 0; i < num_tet; ++i)
+		init_x[i] = E[i];
+	}
+	vector<double> getPoissonV()const{
+	  const vector<double> &g = tetmesh->material()._G;
+	  const vector<double> &la = tetmesh->material()._lambda;
+	  return MaterialFitting::getPoissonV(g,la);
+	}
   };
 
 }//end of namespace

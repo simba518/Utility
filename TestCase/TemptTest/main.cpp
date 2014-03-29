@@ -196,9 +196,12 @@ void recoverOpt(){
   	mtlfit_m.computeM();
   	mtlfit_m.removeFixedDOFs();
   	mtlfit_m.useHessian(true);
+
+  	mtlfit_m.setMuSmoothGL(0, 0);
+  	mtlfit_m.setMuSmoothEv(0, 0);
+	mtlfit_m.setMuSmoothDensity(1000.0f);
   	mtlfit_m.setMuAverageDensity(0.0f);
 
-  	mtlfit_m.setMuSmooth(0, 0, 1000.0f);
   	mtlfit_m.assembleObjfun();
   	mtlfit_m.solveByIpopt();
   	mtlfit_m.saveResults("./tempt/material_opt_m_30");
@@ -229,9 +232,12 @@ void recoverOpt(){
   	mtlfit_k.computeM();
   	mtlfit_k.removeFixedDOFs();
   	mtlfit_k.useHessian(true);
+
+  	mtlfit_k.setMuSmoothGL(1e-15, 1e-15);
+  	mtlfit_k.setMuSmoothEv(0, 0);
+	mtlfit_k.setMuSmoothDensity(0.0f);
   	mtlfit_k.setMuAverageDensity(0.0f);
 
-  	mtlfit_k.setMuSmooth(1e-15, 1e-15, 0.0f);
   	mtlfit_k.assembleObjfun();
   	mtlfit_k.solveByIpopt();
   	mtlfit_k.saveResults("./tempt/material_opt_k_30");
@@ -265,9 +271,12 @@ void recoverSim(){
 	mtlfit_m.computeM();
 	mtlfit_m.removeFixedDOFs();
 	mtlfit_m.useHessian(true);
-	mtlfit_m.setMuAverageDensity(0.0f);
 
-	mtlfit_m.setMuSmooth(0, 0, 1e-15);
+  	mtlfit_m.setMuSmoothGL(0, 0);
+  	mtlfit_m.setMuSmoothEv(0, 0);
+	mtlfit_m.setMuSmoothDensity(1e-15);
+  	mtlfit_m.setMuAverageDensity(0.0f);
+
 	mtlfit_m.assembleObjfun();
 	mtlfit_m.solveByIpopt();
 	mtlfit_m.saveResults("./tempt/material_sim_m_30");
@@ -278,6 +287,9 @@ void recoverSim(){
 	DiagonalMatrix<double,-1> inv_sqrt_M_real, sqrt_M_new;
 	mtlfit_m.computeM(inv_sqrt_M_real);
 	mtlfit_m.computeM(sqrt_M_new, mtlfit_m.getDensityResult());
+	const DiagonalMatrix<double,-1> M_real= inv_sqrt_M_real;
+	const DiagonalMatrix<double,-1> M_new = sqrt_M_new;
+	cout<< "\n\nW^t*M*W: \n" << (eigen_W.transpose()*M_new*eigen_W) << endl;
 	for (int i = 0; i < inv_sqrt_M_real.rows(); ++i){
 	  assert_gt(inv_sqrt_M_real.diagonal()[i], 0);
 	  assert_gt(sqrt_M_new.diagonal()[i], 0);
@@ -285,9 +297,10 @@ void recoverSim(){
 	  sqrt_M_new.diagonal()[i] = sqrt(sqrt_M_new.diagonal()[i]);
 	}
 	eigen_W = inv_sqrt_M_real*(sqrt_M_new*eigen_W);
+	cout<< "\n\nW^t*M0*W: \n\n\n" << (eigen_W.transpose()*M_real*eigen_W) << endl;
   }
 
-  MaterialFitting_Diag_K mtlfit_k;
+  MaterialFitting_EV_Diag_K mtlfit_k;
   { // fit G, l
 	INFO_LOG("fit G, l");
 	mtlfit_k.loadTetMesh(data_root+"mesh.abq");
@@ -298,12 +311,26 @@ void recoverSim(){
 	mtlfit_k.computeM();
 	mtlfit_k.removeFixedDOFs();
 	mtlfit_k.useHessian(true);
-	mtlfit_k.setMuAverageDensity(0.0f);
 
-	mtlfit_k.setMuSmooth(1e-15, 1e-15, 0.0f);
+  	mtlfit_k.setMuSmoothGL(0, 0);
+  	mtlfit_k.setMuSmoothEv(10000, 0);
+	mtlfit_k.setMuSmoothDensity(0.0f);
+  	mtlfit_k.setMuAverageDensity(0.0f);
+
 	mtlfit_k.assembleObjfun();
-	mtlfit_k.solveByIpopt();
+	// mtlfit_k.solveByIpopt();
+	mtlfit_k.solveByLinearSolver();
 	mtlfit_k.saveResults("./tempt/material_sim_k_30");
+
+	SparseMatrix<double> K, K0;
+	mtlfit_k.computeK(K,mtlfit_k.getShearGResult(),mtlfit_k.getLameResult());
+	mtlfit_k.computeK(K0);
+	const MatrixXd la = eigen_lambda.asDiagonal();
+	const MatrixXd m1 = (eigen_W.transpose()*K*eigen_W-la);
+	const MatrixXd m0 = (eigen_W.transpose()*K0*eigen_W-la);
+	cout << "\n\nW^t*K0*W-Lambda:\n\n"<<m0.norm()<<"\n\n"<<m0<<"\n\n";
+	cout << "\n\nW^t*K*W-Lambda:\n\n"<<m1.norm()<<"\n\n"<<m1<<"\n\n";
+	mtlfit_k.printResult();
   }
 }
 
@@ -334,9 +361,12 @@ void recoverSim_MA_K(){
 	mtlfit.computeM();
 	mtlfit.removeFixedDOFs();
 	mtlfit.useHessian(true);
-	mtlfit.setMuAverageDensity(0.0f);
 
-	mtlfit.setMuSmooth(1e-15, 1e-15, 0.0f);
+  	mtlfit.setMuSmoothGL(1e-15, 1e-15);
+  	mtlfit.setMuSmoothEv(0, 0);
+	mtlfit.setMuSmoothDensity(0.0f);
+  	mtlfit.setMuAverageDensity(0.0f);
+
 	mtlfit.assembleObjfun();
 	mtlfit.solveByIpopt();
 	// mtlfit.solveByNNLS();
@@ -367,9 +397,13 @@ void recoverOpt_MA_K(){
   	mtlfit.computeM();
   	mtlfit.removeFixedDOFs();
   	mtlfit.useHessian(true);
+
+  	mtlfit.setMuSmoothGL(1000, 1000);
+  	mtlfit.setMuSmoothEv(0, 0);
+	mtlfit.setMuSmoothDensity(0.0f);
+  	mtlfit.setMuAverageDensity(0.0f);
   	mtlfit.setMuAverageDensity(0.0f);
 
-  	mtlfit.setMuSmooth(1000, 1000, 0.0f);
   	mtlfit.assembleObjfun();
   	mtlfit.solveByIpopt();
   	// mtlfit.solveByNNLS();
@@ -382,8 +416,8 @@ int main(int argc, char *argv[]){
   // testK();
   // testKSMall();
   // testM();
-  // recoverSim();
+  recoverSim();
   // recoverOpt();
   // recoverSim_MA_K();
-  recoverOpt_MA_K();
+  // recoverOpt_MA_K();
 }

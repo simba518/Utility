@@ -227,6 +227,7 @@ namespace CASADI{
 	for (int i = 0; i < SM.size1(); ++i){
 	  for (int j = 0; j < SM.size2(); ++j){
 		M(i,j) = SM.elem(i,j).getValue();
+		assert_eq_ext(M(i,j),M(i,j),"i="<<i<<",j="<<j<<",SM(i,j)="<<SM.elem(i,j));
 	  }
 	}
   }
