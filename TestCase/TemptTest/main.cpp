@@ -253,7 +253,7 @@ void recoverSim(){
   set<int> fixednodes;
   for (int i = 0; i < fixednodes_vec.size(); ++i)
     fixednodes.insert(fixednodes_vec[i]);
-  computeEigenValues(data_root, 10, fixednodes);
+  computeEigenValues(data_root, 5, fixednodes);
 
   MatrixXd eigen_W;
   succ = load(data_root+"tempt_eigenvectors.b",eigen_W); assert(succ);
@@ -312,14 +312,16 @@ void recoverSim(){
 	mtlfit_k.removeFixedDOFs();
 	mtlfit_k.useHessian(true);
 
+	mtlfit_k.setBounds(1e4,2e6);
   	mtlfit_k.setMuSmoothGL(0, 0);
-  	mtlfit_k.setMuSmoothEv(10000, 0);
+  	mtlfit_k.setMuSmoothEv(1e-12, 0);
 	mtlfit_k.setMuSmoothDensity(0.0f);
   	mtlfit_k.setMuAverageDensity(0.0f);
 
 	mtlfit_k.assembleObjfun();
-	// mtlfit_k.solveByIpopt();
-	mtlfit_k.solveByLinearSolver();
+	mtlfit_k.solveByIpopt();
+	// mtlfit_k.solveByLinearSolver();
+	// mtlfit_k.solveByNNLS();
 	mtlfit_k.saveResults("./tempt/material_sim_k_30");
 
 	SparseMatrix<double> K, K0;

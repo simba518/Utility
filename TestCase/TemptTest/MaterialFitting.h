@@ -34,6 +34,8 @@ namespace ELASTIC_OPT{
 	  mu_average_rho = 0.0f;
 	  mu_neigh_poission = 0.0f;
 	  mu_neigh_E = 0.0f;
+	  lower_bound = 0.0f;
+	  upper_bound = -1.0f;
 	}
 	void loadTetMesh(const string filename){
 	  const bool succ = tetmesh->load(filename); assert(succ);
@@ -60,6 +62,10 @@ namespace ELASTIC_OPT{
 	}
 	void useHessian(const bool use){
 	  use_hessian = use;
+	}
+	void setBounds(const double lower, const double upper){
+	  lower_bound = lower;
+	  upper_bound = upper;
 	}
 	void setMuSmoothGL(const double mu_G,const double mu_L){
 	  assert_ge(mu_G,0.0f);
@@ -116,6 +122,12 @@ namespace ELASTIC_OPT{
 	virtual void getInitValue(VectorXd &init_x)const;
 	virtual SXMatrix assembleObjMatrix();
 
+	virtual VSX getG()const{return G;}
+	virtual VSX getLame()const{return Lame;}
+	virtual VSX getRho()const{return rho;}
+	virtual VSX getE()const{return getYoungE(G,Lame);}
+	virtual VSX getV()const{return getPoissonV(G,Lame);}
+
 	void addSmoothObjfun(SX &objfun)const;
 	void computeSmoothObjFunctions(vector<SX> &funs)const;
 	void addAverageDensityObjfun(SX &objfun)const;
@@ -157,6 +169,7 @@ namespace ELASTIC_OPT{
 	SXMatrix K;
 	SXMatrix M;
 	vector<double> rlst;
+	double lower_bound, upper_bound;
   };
   typedef boost::shared_ptr<MaterialFitting> pMaterialFitting;
 
@@ -264,6 +277,9 @@ namespace ELASTIC_OPT{
 	virtual void initAllVariables(VSX &x)const{x = CASADI::connect(E,v);}
 	virtual void getInitValue(VectorXd &init_x)const;
 	virtual SXMatrix assembleObjMatrix();
+
+	virtual VSX getE()const{return E;}
+	virtual VSX getV()const{return v;}
 
 	virtual void init_Ev(const int num_tet, VSX &E, VSX &v){
 	  assert_eq(E.size(),v.size());

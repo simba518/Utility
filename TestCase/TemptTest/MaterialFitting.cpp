@@ -226,11 +226,18 @@ void MaterialFitting::solveByIpopt(){
   solver.setInput(&init_x[0],CasADi::NLP_X_INIT);
 
   // set bounds
-  vector<double> lower;
-  lower.resize(variable_x.size());
-  for (int i = 0; i < lower.size(); ++i)
-    lower[i] = 0.0f;
-  solver.setInput(lower,CasADi::NLP_LBX);
+  vector<double> lower(variable_x.size()), upper(variable_x.size());
+  for (int i = 0; i < lower.size(); ++i){
+    lower[i] = lower_bound;
+    upper[i] = upper_bound;
+  }
+  if (lower_bound >= 0.0f){
+	solver.setInput(lower,CasADi::NLP_LBX);
+  }
+  if (upper_bound > 0.0f){
+	assert_gt(upper_bound, lower_bound);
+	solver.setInput(upper,CasADi::NLP_UBX);
+  }
 
   // solving
   solver.solve();
@@ -267,11 +274,11 @@ void MaterialFitting::computeSmoothObjFunctions(vector<SX> &funs)const{
   funs.clear();
   funs.reserve(neigh_tet.size()*4);
 
-  const VSX E = getYoungE(G,Lame);
-  const VSX v = getPoissonV(G,Lame);
-  cout<<"E0: " << E[0] <<endl;
-  cout<<"v0: " << v[0] <<endl;
-
+  const VSX G = getG();
+  const VSX Lame = getLame();
+  const VSX rho = getRho();
+  const VSX E = getE();
+  const VSX v = getV();
   for (int i = 0; i < neigh_tet.size(); ++i){
 
 	const double vi = tetmesh->volume(i);
@@ -371,10 +378,17 @@ void MaterialFitting::hessGrad(MatrixXd &H, VectorXd &g)const{
 
   CasADi::SXFunction grad_fun = CasADi::SXFunction(variable_x,fun.jac());
   grad_fun.init();
+
+  CasADi::SXFunction hess_fun = CasADi::SXFunction(variable_x,fun.hess());
+  hess_fun.init();
+
   VectorXd x0(variable_x.size());
   x0.setZero();
   CASADI::evaluate(grad_fun, x0, g);
-  H = CASADI::convert<double>(fun.hess());
+  CASADI::evaluate(hess_fun, x0, H);
+
+  assert_eq(g.norm(), g.norm());
+  assert_eq(H.norm(), H.norm());
 }
 
 void MaterialFitting::print_NNLS_exit_code(const int exit_code)const{
