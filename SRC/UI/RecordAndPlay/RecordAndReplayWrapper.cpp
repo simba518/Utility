@@ -16,7 +16,7 @@ void RecordAndReplayWrapper::record()
 
 void RecordAndReplayWrapper::replay()
 {
-	m_recorder.replay(1.0);
+	m_recorder.replayScaled(1.0);
 }
 
 void RecordAndReplayWrapper::save()

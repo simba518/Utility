@@ -64,6 +64,30 @@ namespace UTILITY{
 	  return fromLameConstant(gl);
 	}
 
+	static T getPoissonV(const T&G, const T&L){return L/(2.0*(L+G));}
+	static T getYoungE(const T&G, const T&L){return G*(3.0*L+2.0*G)/(L+G);}
+	static vector<T> getPoissonV(const vector<T>&G, const vector<T>&L){
+	  assert_eq(G.size(),L.size());
+	  vector<T> v(G.size());
+	  for (size_t i = 0; i < G.size(); ++i)
+		v[i] = getPoissonV(G[i],L[i]);
+	  return v;
+	}
+	static vector<T> getYoungE(const vector<T>&G, const vector<T>&L){
+	  assert_eq(G.size(),L.size());
+	  vector<T> E(L.size());
+	  for (size_t i = 0; i < L.size(); ++i)
+		E[i] = getYoungE(G[i],L[i]);
+	  return E;
+	}
+
+	vector<T> getPoissonV()const{
+	  return getPoissonV(_G, _lambda);
+	}
+	vector<T> getYoungE()const{
+	  return getYoungE(_G, _lambda);
+	}
+
 	std::vector<T> _rho; // Density
 	std::vector<T> _G; // Shear modulus.
 	std::vector<T> _lambda; // Lamé's first parameter.
@@ -242,6 +266,7 @@ namespace UTILITY{
 	// io
 	bool load(const std::string& filename);
 	bool loadElasticMtl(const std::string& filename);
+	bool writeElasticMtl(const std::string& filename)const;
 
 	bool write(const std::string& filename)const;
 	template<class VECTOR>

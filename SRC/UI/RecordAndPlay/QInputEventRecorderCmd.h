@@ -30,7 +30,7 @@ namespace UTILITY{
 	  if (!record){
 		INFO_LOG("begin to replay using event file: "<<f_name);
 		recorder.load(f_name.c_str());
-		recorder.replay(1.0);
+		recorder.replayScaled(1.0);
 	  }else{
 		INFO_LOG("begin to record using event file: "<<f_name);
 		record = true;

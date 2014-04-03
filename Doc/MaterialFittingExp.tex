@@ -1,0 +1,73 @@
+\documentclass[9pt,twocolumn]{extarticle}
+
+\usepackage[hmargin=0.5in,tmargin=0.5in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{subfigure}
+
+\usepackage{cleveref}
+\usepackage{color}
+\newcommand{\TODO}[1]{\textcolor{red}{#1}}
+
+\newcommand{\FPP}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\argmin}{\operatornamewithlimits{arg\ min}}
+\author{Siwang Li}
+
+\title{Full Space Material Fitting}
+
+%% document begin here
+\begin{document}
+\maketitle
+
+\setlength{\parskip}{0.5ex}
+
+\section{Formulation}
+Our input include the optimized modal basis $W$, the corresponding eigenvalues
+$\Lambda$, the mass matrix $\tilde{M}$, as well as the fixed Poisson's ratio
+$v$, then we solve for the Young's parameters $E=(E_1,\cdots,E_{tet})$ for all
+tetrahedrons using this formulation
+\begin{equation} \label{all}
+  \min_{E}(\phi_e(E)+\mu_{e}\phi_s(E)), \mbox{s.t. } E_i>0
+\end{equation}
+where $\mu_e$ are some penalty parameters, and
+\begin{equation} \label{smooth}
+  \phi_s(x) = \frac{1}{2}\sum_{(i,j)_{n}}(x_i-x_j)^2V_{i,j}, \mbox{ for all
+    tet. }i
+\end{equation}
+which indicates that, the material $x$ should be smooth, where $(i,j)_{n}$ represents a
+neighbor tetrahedron pair, and $V_{i,j}=\frac{1}{4}(v_i+v_j)$ with $v_i$ is the
+volume of tetrahedron $i$. 
+
+The objective function $\phi_e(E)$ is defined such that the following motion
+equation can be diagonalized by some basis matrix $\tilde{W}$,
+\begin{equation} \label{motion_eq}
+  \tilde{M}\ddot{x} + K(E)x = 0
+\end{equation}
+where $\tilde{M}$ is the given mass matrix. To achieve this, we first solve for
+the density $\rho$ using 
+\begin{equation} \label{mass}
+   \min_{\rho}\frac{1}{2}\|W^TM(\rho)W-I\|_F^2+\mu_{r}\phi_s(\rho), \mbox{s.t. }
+   \rho_i>0
+\end{equation}
+Then transform the basis matrix $W$ as
+\begin{equation} \label{W_ext}
+  \tilde{W}=\tilde{M}^{-\frac{1}{2}}M^{\frac{1}{2}}W
+\end{equation}
+It is obviously that $\tilde{W}^T\tilde{M}\tilde{W}\approx I$, and we can solve
+for $E$ by using
+\begin{equation} \label{diag_k}
+  \phi_e(E) = \frac{1}{2}\|\tilde{W}^TK(E)\tilde{W}-\Lambda\|_F^2
+\end{equation}
+
+\paragraph{Constrained nodes.}
+In all the experiments, the left end of the beam is fixed, and for these
+constrained nodes, we first remove the corresponding columns and rows from
+$\tilde{K}, \tilde{M}, M$, and remove the corresponding rows in $W$, then use
+them to solve for $E$.
+
+\section{Experiments}
+
+
+
+\end{document}

@@ -33,7 +33,8 @@ void MaterialFitting::computeM(){
   initDensity(tetmesh->tets().size(),rho);
   Timer timer;
   timer.start();
-  mass.compute(M,*tetmesh,rho);
+  mass.computeDiag(M,*tetmesh,rho);
+  // mass.compute(M,*tetmesh,rho);
   timer.stop("computeM: ");
 }
 
@@ -81,6 +82,35 @@ void MaterialFitting::computeM(DiagonalMatrix<double,-1>&M,const vector<double>&
   tetmesh->material()._rho = rh;
   mass.compute(M,*tetmesh);
   tetmesh->material()._rho = r0;
+}
+
+void MaterialFitting::computeM(SparseMatrix<double> &M)const{
+  assert(tetmesh);
+  MassMatrix mass;
+  mass.compute(M,*tetmesh);
+}
+
+void MaterialFitting::computeM(SparseMatrix<double> &M,const vector<double> &rh)const{
+
+  assert(tetmesh);
+  MassMatrix mass;
+  const vector<double> r0 = tetmesh->material()._rho;
+  tetmesh->material()._rho = rh;
+  mass.compute(M,*tetmesh);
+  tetmesh->material()._rho = r0;
+}
+
+SparseMatrix<double> MaterialFitting::getMatrixForRemovingFixedDOFs()const{
+
+  assert(tetmesh);
+  const int nx3 = tetmesh->nodes().size()*3;
+  SparseMatrix<double> Pm;
+  if (fixednodes.size() > 0){
+	EIGEN3EXT::genReshapeMatrix(nx3,3,fixednodes,Pm);
+  }else{
+	Pm = EIGEN3EXT::eye(nx3, 1.0);
+  }
+  return Pm;
 }
 
 void MaterialFitting::removeFixedDOFs(){
@@ -438,7 +468,8 @@ void MaterialFitting::saveResults(const string filename)const{
   tetmesh->material()._lambda = l;
   tetmesh->material()._rho = r;
 
-  const bool succ = tetmesh->writeElasticMtlVTK(filename); assert(succ);
+  bool succ = tetmesh->writeElasticMtlVTK(filename); assert(succ);
+  succ = tetmesh->writeElasticMtl(filename+".elastic"); assert(succ);
 
   tetmesh->material() = mtl_0;
 }
@@ -452,7 +483,7 @@ void MaterialFitting::printResult()const{
   cout << "\n\n";
 }
 
-void MaterialFitting_MA_K::initDensity(const int num_tet, VSX &rho)const{
+void MaterialFitting_MA_K::initDensity(const int num_tet, VSX &rho){
 
   const vector<double> &r = tetmesh->material()._rho;
   assert_eq(num_tet, r.size());
@@ -494,10 +525,15 @@ void MaterialFitting_Diag_KM::assembleObjfun(){
 }
 
 SXMatrix MaterialFitting_Diag_M::assembleObjMatrix(){
-
+  
   const MatrixXd I = MatrixXd::Identity(lambda.size(),lambda.size());
-  const SXMatrix M2 = trans(W).mul(M.mul(W))-CASADI::convert(I);
-  return M2;
+  SXMatrix M1 = trans(W).mul(M.mul(W))-CASADI::convert(I);
+  // for (int i = 0; i < M1.size1(); ++i){
+  //   for (int j = 0; j < M1.size2(); ++j){
+  // 	  if (i!=j)	M1(i,j) *= 0.1f;
+  // 	}
+  // }
+  return M1;
 }
 
 void MaterialFitting_Diag_M::initShearG(const int num_tet, VSX &G){
@@ -560,6 +596,45 @@ void MaterialFitting_EV::getInitValue(VectorXd &init_x)const{
 
 SXMatrix MaterialFitting_EV::assembleObjMatrix(){
 
-  const SXMatrix M1 = trans(W).mul(K.mul(W))-lambda;
+  SXMatrix M1 = trans(W).mul(K.mul(W))-lambda;
+  // for (int i = 0; i < M1.size1(); ++i){
+  //   for (int j = 0; j < M1.size2(); ++j){
+  // 	  if (i!=j)	M1(i,j) *= 1.0f;
+  // 	}
+  // }
+  return M1;
+}
+
+SXMatrix MaterialFitting_Diag_M_ScaleW::assembleObjMatrix(){
+  
+  const SXMatrix S = CASADI::makeEyeMatrix(scale_W);
+  const SXMatrix I = CASADI::makeEyeMatrix(VectorXd::Ones(scale_W.size()));
+
+  const SXMatrix M1 = trans(W).mul(M.mul(W))-S;
+  const SXMatrix M2 = sqrt(1e-4)*(I-S);
+
+  SXMatrix M3(S.size1()*2, S.size2());
+  for (int i = 0; i < S.size1(); ++i)
+    for (int j = 0; j < S.size2(); ++j){
+	  M3(i,j) = M1(i,j);
+	  M3(S.size2()+i,j) = M2(i,j);
+	}
+  return M3;
+}
+
+void MaterialFitting_Diag_M_ScaleW::getInitValue(VectorXd &init_x)const{
+  
+  const int num_tet = tetmesh->tets().size();
+  const int r = W.size2();
+  const vector<double> &rho = tetmesh->material()._rho;
+  init_x.resize(num_tet+r);
+  for (int i = 0; i < num_tet; ++i)
+    init_x[i] = rho[i];
+  for (int i = 0; i < r; ++i)
+    init_x[num_tet+i] = 1.0f;
+}
+
+SXMatrix MaterialFitting_EV_MA_K::assembleObjMatrix(){ 
+  SXMatrix M1 = trans(W).mul(K.mul(W)-M.mul(W.mul(lambda)));
   return M1;
 }

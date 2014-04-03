@@ -359,6 +359,38 @@ bool TetMesh::loadElasticMtl(const std::string& filename){
   return true;
 }
 
+bool TetMesh::writeElasticMtl(const std::string& filename)const{
+
+  ofstream out(filename.c_str());
+  if (!out.is_open()){
+	ERROR_LOG("failed to open file " << filename);
+	return false;
+  }
+
+  const int elements_num = tets().size();
+  const vector<double> &rho = _mtl._rho;
+  const vector<double> E = _mtl.getYoungE();
+  const vector<double> v = _mtl.getPoissonV();
+  assert_eq(rho.size(), elements_num);
+  assert_eq(E.size(), elements_num);
+  assert_eq(v.size(), elements_num);
+
+  out << "*groups " << elements_num << "\n\n";
+  for (int i = 0; i < elements_num; ++i){
+    out << "*MATERIAL, NAME=GROUP_" << i << "\n";
+	out << "*ELASTIC\n";
+	out << E[i] << ", " << v[i] << "\n";
+	out << "*DENSITY " << rho[i] << "\n";
+	out << "*num_of_tets " << 1 << "\n\n";
+  }
+  for (int i = 0; i < elements_num; ++i){
+	out << "\n*ELSET, ELSET=GROUP_"<<i<<"\n"<<i;
+  }
+  bool succ = out.good();
+  out.close();
+  return succ;
+}
+
 void TetMesh::computeSurfaceNormal(){
   
   const VVec3d &p = nodes();
@@ -382,14 +414,10 @@ bool TetMesh::writeElasticMtlVTK(const string filename)const{
   vector<int> tets;
   this->tets(tets);
 
-  vector<double> E, v, rho;
   const ElasticMaterial<double> &mtl = this->material();
-  for (int i = 0; i < tets.size()/4; ++i){
-	const Matrix<double,2,1> ev = ElasticMaterial<double>::fromLameConstant(mtl._G[i],mtl._lambda[i]);
-  	E.push_back(ev(0,0));
-  	v.push_back(ev(1,0));
-  	rho.push_back(mtl._rho[i]);
-  }
+  const vector<double> E = mtl.getYoungE();
+  const vector<double> v = mtl.getPoissonV();
+  const vector<double> &rho = mtl._rho;
 
   ofstream file_G;
   file_G.open((filename+".Shear_G.vtk").c_str());

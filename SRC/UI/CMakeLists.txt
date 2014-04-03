@@ -18,6 +18,7 @@ SET(UI_SOURCES
 
   RecordAndPlay/QInputEventRecorder.cpp
   RecordAndPlay/RecordAndReplayWrapper.cpp
+  RecordAndPlay/QInputEventRecorderWidget.cpp
   Manipulation/SelectCtrl.cpp
   Manipulation/DragCtrl.cpp
   Animation/AniCtrl.cpp
@@ -30,6 +31,7 @@ SET(UI_HEADERS
 
   RecordAndPlay/QInputEventRecorder.h
   RecordAndPlay/RecordAndReplayWrapper.h
+  RecordAndPlay/QInputEventRecorderWidget.h
   Manipulation/Manipulatoion.h
   Manipulation/SelectCtrl.h
   Manipulation/DragCtrl.h
@@ -41,11 +43,15 @@ SET(UI_HEADERS
 )
 
 SET(UI_FORMS 
-
+  RecordAndPlay/record_replay.ui
 )
 
 QT4_WRAP_CPP(UI_HEADERS_MOC ${UI_HEADERS})
+
+SET(CMAKE_CURRENT_BINARY_DIR_RECORDED ${CMAKE_CURRENT_BINARY_DIR})
+SET(CMAKE_CURRENT_BINARY_DIR  ${CMAKE_CURRENT_LIST_DIR}/RecordAndPlay)
 QT4_WRAP_UI(UI_FORMS_HEADERS ${UI_FORMS})
+SET(CMAKE_CURRENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR_RECORDED})
 
 ADD_LIBRARY(${LIBRARY_NAME}
 

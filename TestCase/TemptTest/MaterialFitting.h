@@ -51,7 +51,7 @@ namespace ELASTIC_OPT{
 		fixednodes.insert(fixednodes_vec[i]);
 	  }
 	}
-	void setWLambda(const MatrixXd &eigen_W,const VectorXd &eigen_lambda){
+	virtual void setWLambda(const MatrixXd &eigen_W,const VectorXd &eigen_lambda){
 	  CASADI::convert(eigen_W, W);
 	  lambda.resize(eigen_lambda.size(), eigen_lambda.size());
 	  for (int i = 0; i < eigen_lambda.size(); ++i)
@@ -93,7 +93,10 @@ namespace ELASTIC_OPT{
 	void computeK(SparseMatrix<double> &K,const vector<double>&G,const vector<double>&L)const;
 	void computeM(DiagonalMatrix<double,-1> &M)const;
 	void computeM(DiagonalMatrix<double,-1> &M,const vector<double> &rho)const;
+	void computeM(SparseMatrix<double> &M)const;
+	void computeM(SparseMatrix<double> &M,const vector<double> &rho)const;
 	void removeFixedDOFs();
+	SparseMatrix<double> getMatrixForRemovingFixedDOFs()const;
 	void hessGrad(MatrixXd &H, VectorXd &g)const;
 	virtual void assembleObjfun();
 	void solveByIpopt();
@@ -114,6 +117,7 @@ namespace ELASTIC_OPT{
 	  Lame = CASADI::makeSymbolic(num_tet, "lame");
 	}
 	virtual void initDensity(const int num_tet, VSX &rho){
+	  TRACE_FUN();
 	  rho = CASADI::makeSymbolic(num_tet, "rho");
 	}
 	virtual void initAllVariables(VSX &x)const{
@@ -187,7 +191,7 @@ namespace ELASTIC_OPT{
 	}
 
   protected:
-	void initDensity(const int num_tet, VSX &rho)const;
+	void initDensity(const int num_tet, VSX &rho);
 	void initAllVariables(VSX &x)const{
 	  x = CASADI::connect(G,Lame);
 	}
@@ -233,11 +237,11 @@ namespace ELASTIC_OPT{
 	vector<double> getDensityResult()const;
 
   protected:
-	SXMatrix assembleObjMatrix();
+	virtual SXMatrix assembleObjMatrix();
 	void initShearG(const int num_tet, VSX &G);
 	void initLame(const int num_tet, VSX &Lame);
-	void initAllVariables(VSX &x)const{x = rho;}
-	void getInitValue(VectorXd &init_x)const;
+	virtual void initAllVariables(VSX &x)const{x = rho;}
+	virtual void getInitValue(VectorXd &init_x)const;
   };
 
   // fit only G, L by diagonalizing K.
@@ -265,7 +269,8 @@ namespace ELASTIC_OPT{
 	  init_Ev(num_tet,E,v);
 	  Lame = getLameL(E,v);
 	}
-	virtual void initDensity(const int num_tet, VSX &rho)const{
+	virtual void initDensity(const int num_tet, VSX &rho){
+	  TRACE_FUN();
 	  const vector<double> &r = tetmesh->material()._rho;
 	  assert_eq(num_tet, r.size());
 	  rho.resize(num_tet);
@@ -356,6 +361,37 @@ namespace ELASTIC_OPT{
 	  const vector<double> &la = tetmesh->material()._lambda;
 	  return MaterialFitting::getPoissonV(g,la);
 	}
+  };
+
+  // fix v, and fit only E by by using modal analysis.
+  // K(E)*W = M0*W*\Lambda
+  class MaterialFitting_EV_MA_K:public MaterialFitting_EV_Diag_K{
+  protected:
+	SXMatrix assembleObjMatrix();
+  };
+
+  // fit density and scale of the basis by diagonalizing M.
+  // ||W^t*M(\rho)*W-S||+||S-I|| where S is a diagonal matrix.
+  class MaterialFitting_Diag_M_ScaleW: public MaterialFitting_Diag_M{
+
+  public:
+	void setWLambda(const MatrixXd &eigen_W,const VectorXd &eigen_lambda){
+	  MaterialFitting_Diag_M::setWLambda(eigen_W, eigen_lambda);
+	  scale_W = CASADI::makeSymbolic(eigen_lambda.size(),"s");
+	}
+
+  protected:
+	SXMatrix assembleObjMatrix();
+	void initAllVariables(VSX &x)const{
+	  assert(tetmesh);
+	  assert_eq(rho.size(), tetmesh->tets().size());
+	  assert_eq(W.size2(), scale_W.size());
+	  x = CASADI::connect(rho,scale_W);
+	}
+	void getInitValue(VectorXd &init_x)const;
+
+  private:
+	VSX scale_W;
   };
 
 }//end of namespace
