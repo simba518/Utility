@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'record_replay.ui'
 **
-** Created: Fri Apr 4 11:06:40 2014
+** Created: Fri Apr 4 13:26:46 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -49,6 +49,7 @@ public:
     QProgressBar *progressBar;
     QLabel *current_total;
     QLabel *file_path;
+    QLabel *label;
 
     void setupUi(QWidget *record_replay_dialog)
     {
@@ -156,6 +157,17 @@ public:
 
         verticalLayout_2->addWidget(file_path);
 
+        label = new QLabel(record_replay_dialog);
+        label->setObjectName(QString::fromUtf8("label"));
+        QFont font;
+        font.setPointSize(8);
+        font.setItalic(true);
+        label->setFont(font);
+        label->setTextFormat(Qt::RichText);
+        label->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+
+        verticalLayout_2->addWidget(label);
+
 
         retranslateUi(record_replay_dialog);
 
@@ -165,8 +177,35 @@ public:
     void retranslateUi(QWidget *record_replay_dialog)
     {
         record_replay_dialog->setWindowTitle(QApplication::translate("record_replay_dialog", "record&replay", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        record_replay_dialog->setToolTip(QString());
+#endif // QT_NO_TOOLTIP
+#ifndef QT_NO_STATUSTIP
+        record_replay_dialog->setStatusTip(QString());
+#endif // QT_NO_STATUSTIP
+#ifndef QT_NO_WHATSTHIS
+        record_replay_dialog->setWhatsThis(QString());
+#endif // QT_NO_WHATSTHIS
         pushButton_saveAs->setText(QApplication::translate("record_replay_dialog", "saveAs", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        pushButton_clear->setToolTip(QApplication::translate("record_replay_dialog", "remove all operations.", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+#ifndef QT_NO_STATUSTIP
+        pushButton_clear->setStatusTip(QString());
+#endif // QT_NO_STATUSTIP
+#ifndef QT_NO_WHATSTHIS
+        pushButton_clear->setWhatsThis(QString());
+#endif // QT_NO_WHATSTHIS
         pushButton_clear->setText(QApplication::translate("record_replay_dialog", "clear", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        pushButton_cut->setToolTip(QApplication::translate("record_replay_dialog", "remove the remainning operations.", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+#ifndef QT_NO_WHATSTHIS
+        pushButton_cut->setWhatsThis(QString());
+#endif // QT_NO_WHATSTHIS
+#ifndef QT_NO_ACCESSIBILITY
+        pushButton_cut->setAccessibleDescription(QString());
+#endif // QT_NO_ACCESSIBILITY
         pushButton_cut->setText(QApplication::translate("record_replay_dialog", "cut", 0, QApplication::UnicodeUTF8));
         pushButton_load->setText(QApplication::translate("record_replay_dialog", "load", 0, QApplication::UnicodeUTF8));
         pushButton_save->setText(QApplication::translate("record_replay_dialog", "save", 0, QApplication::UnicodeUTF8));
@@ -174,9 +213,19 @@ public:
         radioButton_pause->setText(QApplication::translate("record_replay_dialog", "pause", 0, QApplication::UnicodeUTF8));
         radioButton_play->setText(QApplication::translate("record_replay_dialog", "play", 0, QApplication::UnicodeUTF8));
         radioButton_record->setText(QApplication::translate("record_replay_dialog", "record", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        checkBox_observer->setToolTip(QApplication::translate("record_replay_dialog", "send message to observer.", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+#ifndef QT_NO_STATUSTIP
+        checkBox_observer->setStatusTip(QString());
+#endif // QT_NO_STATUSTIP
+#ifndef QT_NO_ACCESSIBILITY
+        checkBox_observer->setAccessibleDescription(QString());
+#endif // QT_NO_ACCESSIBILITY
         checkBox_observer->setText(QApplication::translate("record_replay_dialog", "observer", 0, QApplication::UnicodeUTF8));
         current_total->setText(QApplication::translate("record_replay_dialog", "current/total", 0, QApplication::UnicodeUTF8));
         file_path->setText(QApplication::translate("record_replay_dialog", "file:", 0, QApplication::UnicodeUTF8));
+        label->setText(QApplication::translate("record_replay_dialog", "author: Simba,  email: lisiwangcg@gmail.com", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

@@ -31,6 +31,15 @@
   <property name="windowTitle">
    <string>record&amp;replay</string>
   </property>
+  <property name="toolTip">
+   <string/>
+  </property>
+  <property name="statusTip">
+   <string/>
+  </property>
+  <property name="whatsThis">
+   <string/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
@@ -45,6 +54,15 @@
        </item>
        <item row="6" column="0">
         <widget class="QPushButton" name="pushButton_clear">
+         <property name="toolTip">
+          <string>remove all operations.</string>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
+         <property name="whatsThis">
+          <string/>
+         </property>
          <property name="text">
           <string>clear</string>
          </property>
@@ -52,6 +70,15 @@
        </item>
        <item row="3" column="0">
         <widget class="QPushButton" name="pushButton_cut">
+         <property name="toolTip">
+          <string>remove the remainning operations.</string>
+         </property>
+         <property name="whatsThis">
+          <string/>
+         </property>
+         <property name="accessibleDescription">
+          <string/>
+         </property>
          <property name="text">
           <string>cut</string>
          </property>
@@ -113,6 +140,15 @@
        </item>
        <item>
         <widget class="QCheckBox" name="checkBox_observer">
+         <property name="toolTip">
+          <string>send message to observer.</string>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
+         <property name="accessibleDescription">
+          <string/>
+         </property>
          <property name="text">
           <string>observer</string>
          </property>
@@ -150,6 +186,25 @@
     <widget class="QLabel" name="file_path">
      <property name="text">
       <string>file:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+       <italic>true</italic>
+      </font>
+     </property>
+     <property name="text">
+      <string>author: Simba,  email: lisiwangcg@gmail.com</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
