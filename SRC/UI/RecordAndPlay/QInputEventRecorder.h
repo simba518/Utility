@@ -36,6 +36,14 @@
 
 class QTimer;
 
+class QInputEventRecorderObserver{
+	
+public:
+  virtual void startReplayOperations() = 0;
+  virtual void stopReplayOperations() = 0;
+	
+};
+
 class QInputEventRecorder: public QObject
 {
   Q_OBJECT
@@ -69,12 +77,15 @@ class QInputEventRecorder: public QObject
   };
 
 public:
-  QInputEventRecorder(QObject *obj = 0);
+  QInputEventRecorder(QObject *obj = 0, QInputEventRecorderObserver *ob=0);
   ~QInputEventRecorder();
 
   bool eventFilter(QObject *obj, QEvent *ev);
 
   void setObj(QObject *obj) { m_Obj = obj; }
+  void setObserver(QInputEventRecorderObserver *ob){
+	observer = ob;
+  }
 
   void save(const QString &fileName);
   void load(const QString &fileName);
@@ -100,6 +111,9 @@ public slots:
   int removeTheUnplayedEvents(){
 	return removeTheEventsAfter(m_ReplayPos);
   }
+  void toggleObserver(){
+	enable_observer = enable_observer?false:true;
+  }
 
 protected slots:
   void replayOp();
@@ -113,6 +127,7 @@ private:
   QEvent *cloneEvent(QEvent*);
 
 private:
+  QInputEventRecorderObserver *observer;
   QObject *m_Obj;
   QVector<EventDelivery> m_Recording;
   int m_ReplayPos;
@@ -120,6 +135,7 @@ private:
   QDateTime m_RecordingStartTime;
   float m_ReplaySpeedFactor;
   bool is_saving;
+  bool enable_observer;
 };
 
 #endif // QINPUTEVENTRECORDER_H

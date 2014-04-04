@@ -101,7 +101,8 @@ QEvent* QInputEventRecorder::cloneEvent(QEvent *ev){
   return 0;
 }
 
-QInputEventRecorder::QInputEventRecorder(QObject *obj):m_Obj(obj),m_Timer(new QTimer),is_saving(false){
+QInputEventRecorder::QInputEventRecorder(QObject *obj,QInputEventRecorderObserver *ob):
+  m_Obj(obj),observer(ob),m_Timer(new QTimer),is_saving(false),enable_observer(false){
 
   m_ReplayPos = 0;
   m_Timer->setSingleShot(true);
@@ -190,6 +191,9 @@ void QInputEventRecorder::stop(){
   qApp->removeEventFilter(this);
   m_Timer->stop();
   emit isPaused(true);
+  if(enable_observer && observer!=NULL){
+	observer->stopReplayOperations();
+  }
 }
 
 void QInputEventRecorder::replayScaled(float speedFactor){
@@ -199,6 +203,9 @@ void QInputEventRecorder::replayScaled(float speedFactor){
 	stop();
 	emit replayDone();
 	return;
+  }
+  if(enable_observer && observer!=NULL){
+	observer->startReplayOperations();
   }
   m_ReplayPos = 0;
   m_ReplaySpeedFactor = speedFactor;

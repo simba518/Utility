@@ -211,16 +211,19 @@ void recoverOpt(){
   
   VectorXd eig_lambda;
   succ = load(data_root+"lambda.b",eig_lambda); assert(succ);
+  const double h = 0.03f;
+  eig_lambda *= 1.0f/(h*h);
 
-  const int used_r = 1;
+  succ = write("eig_lambda.b",eig_lambda); assert(succ);
+  succ = write("eig_W.b",eig_W); assert(succ);
+
+  const int used_r = 3;
   MatrixXd W = eig_W.leftCols(used_r);
   VectorXd lambda = eig_lambda.head(used_r);
   
   // MatrixXd W = eig_W.col(1);
   // VectorXd lambda = eig_lambda.segment<1>(1);
 
-  const double h = 0.02f;
-  lambda *= 1.0f/(h*h);
   cout<< "lambda: " << eig_lambda.transpose() << endl;
 
   MaterialFitting_Diag_M mtlfit_m;
@@ -238,7 +241,7 @@ void recoverOpt(){
 	mtlfit_m.setBounds(1e-20,1e8);
   	mtlfit_m.setMuSmoothGL(0, 0);
   	mtlfit_m.setMuSmoothEv(0, 0);
-	mtlfit_m.setMuSmoothDensity(1.0f);
+	mtlfit_m.setMuSmoothDensity(1.0);
   	mtlfit_m.setMuAverageDensity(0.0f);
 
   	mtlfit_m.assembleObjfun();
@@ -270,15 +273,15 @@ void recoverOpt(){
   	mtlfit_k->removeFixedDOFs();
   	mtlfit_k->useHessian(true);
 
-  	// mtlfit_k->setBounds(10,10000);
+  	mtlfit_k->setBounds(1e-8,1000);
   	mtlfit_k->setMuSmoothGL(0, 0);
-  	mtlfit_k->setMuSmoothEv(1e-8, 0);
+  	mtlfit_k->setMuSmoothEv(2e3, 0);
   	mtlfit_k->setMuSmoothDensity(0.0f);
   	mtlfit_k->setMuAverageDensity(0.0f);
 
   	mtlfit_k->assembleObjfun();
-  	// mtlfit_k->solveByIpopt();
-  	mtlfit_k->solveByLinearSolver();
+  	mtlfit_k->solveByIpopt();
+  	// mtlfit_k->solveByLinearSolver();
   	mtlfit_k->saveResults("./tempt/material_opt_k_30");
   	mtlfit_k->printResult();
   }
