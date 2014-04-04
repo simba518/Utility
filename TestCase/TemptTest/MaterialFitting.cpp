@@ -635,6 +635,8 @@ void MaterialFitting_Diag_M_ScaleW::getInitValue(VectorXd &init_x)const{
 }
 
 SXMatrix MaterialFitting_EV_MA_K::assembleObjMatrix(){ 
+
   SXMatrix M1 = trans(W).mul(K.mul(W)-M.mul(W.mul(lambda)));
+  // SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
   return M1;
 }

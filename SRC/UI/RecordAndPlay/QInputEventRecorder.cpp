@@ -56,14 +56,11 @@ static QString objectPath(QObject *obj)
   return res;
 }
 
-static bool isChild(QObject *obj, QObject *parent)
-{
-  while ((obj = obj->parent()))
-	{
-	  if (obj == parent)
-		return true;
-	}
-
+static bool isChild(QObject *obj, QObject *parent){
+  while ((obj = obj->parent())){
+	if (obj == parent)
+	  return true;
+  }
   return false;
 }
 
@@ -114,19 +111,19 @@ QInputEventRecorder::~QInputEventRecorder(){
 }
 
 bool QInputEventRecorder::eventFilter(QObject *obj, QEvent *ev){
-  if (!isChild(obj, m_Obj))
-	return false;
+
+  if (!isChild(obj, m_Obj)){
+  	return false;
+  }
 
   QEvent *clonedEv = cloneEvent(ev);
-
-  if (clonedEv)
-	{
-	  int timeOffset;
-	  QDateTime curDt(QDateTime::currentDateTime());
-	  timeOffset = m_RecordingStartTime.daysTo(curDt) * 24 * 3600 * 1000 + m_RecordingStartTime.time().msecsTo(curDt.time());
-	  m_Recording.push_back(EventDelivery(timeOffset, obj, clonedEv));
-	  emit updateTimeOffset();
-	}
+  if (clonedEv){
+	int timeOffset;
+	QDateTime curDt(QDateTime::currentDateTime());
+	timeOffset = m_RecordingStartTime.daysTo(curDt) * 24 * 3600 * 1000 + m_RecordingStartTime.time().msecsTo(curDt.time());
+	m_Recording.push_back(EventDelivery(timeOffset, obj, clonedEv));
+	emit updateTimeOffset();
+  }
 
   return false;
 }
@@ -198,12 +195,14 @@ void QInputEventRecorder::stop(){
 
 void QInputEventRecorder::replayScaled(float speedFactor){
 
+  qApp->removeEventFilter(this);
+  m_Timer->stop();
   if (m_Recording.size() == 0){
 	m_ReplayPos = 0;
-	stop();
 	emit replayDone();
 	return;
   }
+
   if(enable_observer && observer!=NULL){
 	observer->startReplayOperations();
   }
