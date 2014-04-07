@@ -9,6 +9,7 @@ TARGET_LINK_LIBRARIES( ${APPNAME}
   ${LIBDIR}/libutility_math.a
   ${LIBDIR}/libutility_elastic.a
   ${LIBDIR}/libutility_common.a
+  /usr/local/lib/libalglib.a
   ${ARPACK_LIBRARIES}
   ${SUPERLU2.0_LIBRARIES}
   ${LAPACK_LIBRARIES}

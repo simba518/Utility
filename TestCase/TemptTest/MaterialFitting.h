@@ -97,17 +97,36 @@ namespace ELASTIC_OPT{
 	void computeM(SparseMatrix<double> &M,const vector<double> &rho)const;
 	void removeFixedDOFs();
 	SparseMatrix<double> getMatrixForRemovingFixedDOFs()const;
+
 	void hessGrad(MatrixXd &H, VectorXd &g)const;
+	void hess(MatrixXd &H)const;
+	void grad(VectorXd &g)const;
+
 	virtual void assembleObjfun();
 	void solveByIpopt();
 	void solveByNNLS();
 	void solveByLinearSolver();
+	void solveByAlglib();
+	void solveByMPRGP();
+
 	virtual void saveResults(const string filename)const;
 	virtual vector<double> getShearGResult()const;
 	virtual vector<double> getLameResult()const;
 	virtual vector<double> getDensityResult()const;
 	void testFixedNodes();
 	void printResult()const;
+	int fixedNodeBefore(const int i)const{
+	  int b = 0;
+	  BOOST_FOREACH(int ele, fixednodes){
+		if(i < ele)
+		  break;
+		b ++;
+	  }
+	  return b;
+	}
+	bool isFixed(const int i)const{
+	  return fixednodes.find(i) != fixednodes.end();
+	}
 	
   protected:
 	virtual void initShearG(const int num_tet, VSX &G){

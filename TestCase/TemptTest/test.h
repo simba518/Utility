@@ -115,3 +115,40 @@ void testKSMall(){
   cout<< "(K-K_ref).norm(): " << (Km-ref_Km).norm() << endl;
   cout << "test end.." << endl;
 }
+
+
+#include <iostream>
+#include <cmath>
+#include <omp.h>
+#include <stdlib.h>
+#include <float.h>
+#include "QPSolver.h"
+using namespace std;
+
+float ScalarUtil<float>::scalar_max=FLT_MAX;
+float ScalarUtil<float>::scalar_eps=1E-5f;
+
+double ScalarUtil<double>::scalar_max=DBL_MAX;
+double ScalarUtil<double>::scalar_eps=1E-9;
+
+int main(int argc, char *argv[]){
+
+  FixedSparseMatrix<double> A;
+  MPRGPQPSolver<double>::Vec B(1),L(1),H(1);
+  A.resize(1,1);
+  A.insert(0,0) = 1;
+  B << -1;
+  L << 1.0f;
+  H << 10;
+
+  // solve for min 1/2*x^t*A*x-x^t*B, s.t.  L<=x<=H.
+  MPRGPQPSolver<double> f(A,B,L,H);
+  f.setCallback(boost::shared_ptr<Callback<double> >(new Callback<double>()));
+  MPRGPQPSolver<double>::Vec x(1);
+  x << 3.0;
+  f.solve(x);
+  printf("\n");
+  cout << x.transpose() << endl;
+
+  return 0;
+}

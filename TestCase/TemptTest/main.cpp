@@ -2,6 +2,7 @@
 #include <MatrixIO.h>
 #include <SparseGenEigenSolver.h>
 #include <SparseMatrixTools.h>
+#include <Timer.h>
 #include "MaterialFitting.h"
 using namespace UTILITY;
 using namespace EIGEN3EXT;
@@ -74,9 +75,11 @@ void computeEigenValues(const string data_root, const string mtl_file,
 }
 
 void recover(const string data_root, const string mtl_file, const string save_to,
-			 const MatrixXd &W, const VectorXd &lambda){
-  
-  MaterialFitting_EV_MA_K mtlfit_k;
+			 const MatrixXd &W, const VectorXd &lambda, 
+			 const double Gs=1e-3, const double Gl=1e-3,
+			 const double lower=1, const double upper=1e10){
+
+  MaterialFitting_MA_K mtlfit_k;
 
   { // fit G, l
   	INFO_LOG("fit G, l");
@@ -87,18 +90,19 @@ void recover(const string data_root, const string mtl_file, const string save_to
   	mtlfit_k.computeK();
   	mtlfit_k.computeM();
   	mtlfit_k.removeFixedDOFs();
-  	mtlfit_k.useHessian(true);
+  	mtlfit_k.useHessian(false);
 
-  	mtlfit_k.setBounds(1e-8,1000);
-  	mtlfit_k.setMuSmoothGL(0, 0);
-  	mtlfit_k.setMuSmoothEv(1e-15, 0);
+  	mtlfit_k.setBounds(lower,upper);
+  	mtlfit_k.setMuSmoothGL(Gs, Gl);
+  	mtlfit_k.setMuSmoothEv(0, 0);
   	mtlfit_k.setMuSmoothDensity(0.0f);
   	mtlfit_k.setMuAverageDensity(0.0f);
-
   	mtlfit_k.assembleObjfun();
-  	mtlfit_k.solveByIpopt();
-  	// mtlfit_k.solveByLinearSolver();
-	// mtlfit_k.solveByNNLS();
+
+  	// mtlfit_k.solveByIpopt();
+	// mtlfit_k.solveByAlglib();
+	mtlfit_k.solveByMPRGP();
+
   	mtlfit_k.saveResults(save_to);
   	mtlfit_k.printResult();
   }
@@ -133,10 +137,7 @@ void recover(const string data_root, const string mtl_file, const string save_to
 
 }
 
-void recoverSim(){
-
-  const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam-coarse/model/";
-  const string data_root_opt="/home/simba/Workspace/AnimationEditor/Data/beam-coarse/model/";
+void recoverSim(const string data_root, const string data_root_opt, const int used_r, const double h){
 
   { // compute eigenvalue
 	const string fixed_nodes = data_root + "/con_nodes.bou";
@@ -161,7 +162,6 @@ void recoverSim(){
 	
 	// load lambda
 	succ = load(data_root_opt+"lambda.b",eig_lambda); assert(succ);
-	const double h = 0.03f;
 	eig_lambda *= 1.0f/(h*h);
   }
 
@@ -170,7 +170,6 @@ void recoverSim(){
 	// succ = load(data_root+"tempt_eigenvalues.b",eig_lambda); assert(succ);
   }
 
-  const int used_r = 2;
   const MatrixXd W = eig_W.leftCols(used_r);
   const VectorXd lambda = eig_lambda.head(used_r);
   cout<< "\n\nLambda: " << lambda.transpose() << "\n\n";
@@ -178,7 +177,63 @@ void recoverSim(){
 
 }
 
+void recoverCoarse(){
+
+  const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam-coarse/model/";
+  const string data_root_opt ="/home/simba/Workspace/AnimationEditor/Data/beam-coarse/model/";
+  recoverSim(data_root, data_root_opt, 2, 0.03);
+}
+
+void recoverFine(){
+
+  const string data_root = "/home/simba/Workspace/SolidSimulator/data/beam/";
+
+  MatrixXd eig_W;
+  VectorXd eig_lambda;
+
+  bool succ = true;
+  { // load opt value
+	succ = load(data_root+"tempt/opt_W.b",eig_W); assert(succ);
+	succ = load(data_root+"tempt/opt_lambda.b",eig_lambda); assert(succ);
+  }
+
+  { // load real value
+	// succ = load(data_root+"tempt/eigenvectors_smooth.b",eig_W); assert(succ);
+	// succ = load(data_root+"tempt/eigenvalues_smooth.b",eig_lambda); assert(succ);
+  }
+
+  MatrixXd W(eig_W.rows(),2);
+  W.col(0) = eig_W.col(0);
+  W.col(1) = eig_W.col(1);
+  VectorXd lambda(2);
+  lambda << eig_lambda[0], eig_lambda[1];
+  cout<< "\n\nLambda: " << lambda.transpose() << "\n\n";
+
+  /// G,l \approx E/3
+  // solve
+  recover(data_root+"model/",data_root+"model/mesh.elastic","./tempt/test2",
+		  W,lambda,1e-8,1e-8,1e-3,1e16);
+
+  recover(data_root+"model/",data_root+"model/mesh.elastic","./tempt/test1",
+		  W,lambda,1e-8,1e-8,1e3,3e6);
+
+  recover(data_root+"model/",data_root+"model/mesh.elastic","./tempt/test3",
+		  W,lambda,1e-3,1e-3,1e-3,1e16);
+
+  recover(data_root+"model/",data_root+"model/tempt_mesh.elastic","./tempt/test4",
+		  W,lambda,1e-3,1e-3,1e-3,1e16);
+
+  W.resize(W.rows(), 1);
+  W.col(0) = eig_W.col(0);
+  lambda.resize(1);
+  lambda << eig_lambda[0];
+  recover(data_root+"model/",data_root+"model/mesh.elastic","./tempt/test5",
+		  W,lambda,1e-3,1e-3,1e-3,1e16);
+
+}
+
 int main(int argc, char *argv[]){
 
-  recoverSim();
+  // recoverCoarse();
+  recoverFine();
 }

@@ -2,7 +2,6 @@
 #include <SparseMatrixTools.h>
 #include <MassMatrix.h>
 #include <ElasticForceTetFullStVK.h>
-#include "nnls.h"
 #include "MaterialFitting.h"
 using namespace UTILITY;
 using namespace ELASTIC_OPT;
@@ -181,120 +180,10 @@ void MaterialFitting::assembleObjfun(){
   objfun *= 0.5f;
 }
 
-void MaterialFitting::solveByNNLS(){
-
-  const SXMatrix M1 = assembleObjMatrix();
-  vector<SX> smooth_funs;
-  computeSmoothObjFunctions(smooth_funs);
-  
-  SXMatrix obj_fun_m(M1.size1()*M1.size2()+smooth_funs.size(),1);
-  for (int i = 0; i < M1.size1(); ++i){
-    for (int j = 0; j < M1.size2(); ++j)
-	  obj_fun_m.elem(i*M1.size2()+j,0) = M1.elem(i,j);
-  }
-  for (int i = 0; i < smooth_funs.size(); ++i){
-    obj_fun_m.elem(M1.size2()*M1.size2()+i,0) = smooth_funs[i];
-  }
-
-  VSX variable_x;
-  initAllVariables(variable_x);
-  CasADi::SXFunction g_fun = CasADi::SXFunction(variable_x,obj_fun_m);
-  g_fun.init();
-  
-  VectorXd x0(variable_x.size()), b;
-  x0.setZero();
-  CASADI::evaluate(g_fun, x0, b);
-  b = -b;
-
-  MatrixXd J = CASADI::convert<double>(g_fun.jac());
-  assert_eq(J.rows(), b.size());
-  assert_eq(J.cols(), x0.size());
-  
-  VectorXd x(b.size()),  w(J.cols()), zz(J.rows());
-  VectorXi index(J.cols()*2);
-  getInitValue(x);
-  
-  int exit_code = 0;
-  double residual = 1e-18;
-  nnls(&J(0,0), J.rows(), J.rows(), J.cols(), 
-  	   &b[0], &x[0], &residual,
-  	   &w[0], &zz[0], &index[0], &exit_code);
-  INFO_LOG("residual: " << residual);
-  print_NNLS_exit_code(exit_code);
-
-  rlst.resize(x.size());
-  for (int i = 0; i < x.size(); ++i){
-    rlst[i] = x[i];
-  }
-
-  const MatrixXd H = J.transpose()*J;
-  SelfAdjointEigenSolver<MatrixXd> es;
-  es.compute(H);
-  cout << "The eigenvalues of H are: " << es.eigenvalues().transpose() << endl;
-}
-
-void MaterialFitting::solveByIpopt(){
-  
-  TRACE_FUN();
-
-  // init solver
-  VSX variable_x;
-  initAllVariables(variable_x);
-  CasADi::SXFunction fun = CasADi::SXFunction(variable_x,objfun);
-  CasADi::IpoptSolver solver = CasADi::IpoptSolver(fun);
-  solver.setOption("generate_hessian",use_hessian);
-  solver.setOption("tol",1e-18);
-  solver.setOption("max_iter",20000);
-  Timer timer;
-  timer.start();
-  solver.init();
-  timer.stop("solver init: ");
-
-  // set init value
-  VectorXd init_x;
-  getInitValue(init_x);
-  solver.setInput(&init_x[0],CasADi::NLP_X_INIT);
-
-  // set bounds
-  vector<double> lower(variable_x.size()), upper(variable_x.size());
-  for (int i = 0; i < lower.size(); ++i){
-    lower[i] = lower_bound;
-    upper[i] = upper_bound;
-  }
-  if (lower_bound >= 0.0f){
-	solver.setInput(lower,CasADi::NLP_LBX);
-  }
-  if (upper_bound > 0.0f){
-	assert_gt(upper_bound, lower_bound);
-	solver.setInput(upper,CasADi::NLP_UBX);
-  }
-
-  // solving
-  solver.solve();
-  rlst.resize(variable_x.size());
-  solver.getOutput(rlst,CasADi::NLP_X_OPT);
-}
-
-void MaterialFitting::solveByLinearSolver(){
-  
-  MatrixXd H;
-  VectorXd g;
-  hessGrad(H,g);
-
-  SelfAdjointEigenSolver<MatrixXd> es;
-  es.compute(H);
-  cout << "H.norm() = " << H.norm() << endl;
-  cout << "The eigenvalues of H are: \n" << es.eigenvalues().transpose() << endl;
-
-  const VectorXd x = H.lu().solve(-g);
-  rlst.resize(x.size());
-  for (int i = 0; i < x.size(); ++i)
-    rlst[i] = x[i];
-  cout<< "\n(H*x+g).norm() = " << (H*x+g).norm() << "\n\n";
-}
-
 SXMatrix MaterialFitting::assembleObjMatrix(){
-  const SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
+
+  const SXMatrix M1 = trans(W).mul(K.mul(W)-M.mul(W.mul(lambda)));
+  // const SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
   return M1;
 }
 
@@ -419,6 +308,125 @@ void MaterialFitting::hessGrad(MatrixXd &H, VectorXd &g)const{
 
   assert_eq(g.norm(), g.norm());
   assert_eq(H.norm(), H.norm());
+}
+
+void MaterialFitting::hess(MatrixXd &H)const{
+
+  // unimpelemented function
+  ERROR_LOG("unimpelemented function");
+  exit(0);
+
+  FUNC_TIMER();
+  
+  // init variables
+  VSX variable_x;
+  initAllVariables(variable_x);
+
+  // compute H for smooth functions
+  SparseMatrix<double> smooth_H;
+  {
+	vector<SX> funs;
+	computeSmoothObjFunctions(funs);
+	SX smooth_obj = 0.0;
+	for (int i = 0; i < funs.size(); ++i){
+	  smooth_obj += funs[i]*funs[i];
+	}
+
+	CasADi::SXFunction smooth_fun = CasADi::SXFunction(variable_x,smooth_obj);
+	smooth_fun.init();
+	const SXMatrix sH = smooth_fun.hess();
+	CASADI::convert(sH, smooth_H);
+  }
+
+  // compute H for ||W^t*K(x)*W - W^t*M0*W*\Lambda||
+  {
+	const int n = variable_x.size();
+	H.resize(n,n);
+	H.setZero();
+
+	const VVec4i &tets = tetmesh->tets();
+	const VectorUseti &nodeNeighNode = tetmesh->nodeNeighNode();
+	const int num_tet = tets.size();
+	assert_ge(n, num_tet);
+	assert_eq(n % num_tet,0);
+
+	MatrixXd W;
+	CASADI::convert(this->W, W);
+	const int r = W.cols();
+	MatrixXd Mi(r,r), Mj(r,r);
+
+	for (int i = 0; i < n; ++i){
+
+	  Mi.setZero();
+	  const int ti = i%num_tet;
+	  for (int t = 0; t < 4; ++t){
+
+		if (isFixed(tets[ti][t]))
+		  continue;
+		const int node_i = tets[ti][t]-fixedNodeBefore(tets[ti][t]);
+		assert_in(node_i*3,0,K.size1()-3);
+		BOOST_FOREACH(int node_neigh_i, nodeNeighNode[tets[ti][t]]){
+
+		  assert_in(node_neigh_i,0,tetmesh->nodes().size()-1);
+		  if (isFixed(node_neigh_i))
+			continue;
+		  node_neigh_i -= fixedNodeBefore(node_neigh_i);
+		  assert_in(node_neigh_i*3,0,K.size2()-3);
+
+		  SXMatrix Ki(3,3);
+		  for (int tmp = 0; tmp < 3; ++tmp){
+			Ki(0, tmp) = K(node_i*3+0, node_neigh_i*3+tmp);
+			Ki(1, tmp) = K(node_i*3+1, node_neigh_i*3+tmp);
+			Ki(2, tmp) = K(node_i*3+2, node_neigh_i*3+tmp);
+		  }
+
+		  Matrix3d Jm;
+		  { // compute Jm
+		  	CasADi::SXFunction fun = CasADi::SXFunction(variable_x[i],Ki);
+		  	fun.init();
+		  	const SXMatrix J = fun.jac();
+		  	Jm(0,0) = J.elem(0,0).getValue(); 
+		  	Jm(1,0) = J.elem(1,0).getValue(); 
+		  	Jm(2,0) = J.elem(2,0).getValue();
+
+		  	Jm(0,1) = J.elem(3,0).getValue(); 
+		  	Jm(1,1) = J.elem(4,0).getValue(); 
+		  	Jm(2,1) = J.elem(5,0).getValue();
+
+		  	Jm(0,2) = J.elem(6,0).getValue(); 
+		  	Jm(1,2) = J.elem(7,0).getValue(); 
+		  	Jm(2,2) = J.elem(8,0).getValue();
+		  }
+		  Mi += W.block(node_neigh_i*3,0,3,r).transpose()*Jm*W.block(node_neigh_i*3,0,3,r);
+		}
+	  }
+
+	  // for (int j = i; j < n; ++j){
+	  // 	const int tj = j%num_tet;
+	  // 	H(i,j) = H(j,i) = Map<Matrix<double, 36,1> >(&dKdXm(0,0)).dot(Map<Matrix<double, 36,1> >(&dKdXn(0,0)));
+	  // }
+	}	
+
+  }
+
+  assert_eq(H.rows(), smooth_H.rows());
+  assert_eq(H.cols(), smooth_H.cols());
+  H += smooth_H;
+}
+
+void MaterialFitting::grad(VectorXd &g)const{
+
+  VSX variable_x;
+  initAllVariables(variable_x);
+  CasADi::SXFunction fun = CasADi::SXFunction(variable_x,objfun);
+  fun.init();
+
+  CasADi::SXFunction grad_fun = CasADi::SXFunction(variable_x,fun.jac());
+  grad_fun.init();
+
+  VectorXd x0(variable_x.size());
+  x0.setZero();
+  CASADI::evaluate(grad_fun, x0, g);
 }
 
 void MaterialFitting::print_NNLS_exit_code(const int exit_code)const{
@@ -636,7 +644,7 @@ void MaterialFitting_Diag_M_ScaleW::getInitValue(VectorXd &init_x)const{
 
 SXMatrix MaterialFitting_EV_MA_K::assembleObjMatrix(){ 
 
-  SXMatrix M1 = trans(W).mul(K.mul(W)-M.mul(W.mul(lambda)));
-  // SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
+  const SXMatrix M1 = trans(W).mul(K.mul(W)-M.mul(W.mul(lambda)));
+  // const SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
   return M1;
 }
