@@ -169,21 +169,26 @@ void MaterialFitting::assembleObjfun(){
   TRACE_FUN();
   objfun = 0.0f;
   addSmoothObjfun(objfun);
+  
   // addAverageDensityObjfun(objfun);
   // addFixedNodesObjfun(objfun);
 
   const SXMatrix M1 = assembleObjMatrix();
   for (int i = 0; i < M1.size1(); ++i){
     for (int j = 0; j < M1.size2(); ++j)
-  	  objfun += M1.elem(i,j)*M1.elem(i,j);
+	  if (i == j)
+		objfun += M1.elem(i,j)*M1.elem(i,j);
   }
-  objfun *= 0.5f;
+
+  objfun *= scalor;
 }
 
 SXMatrix MaterialFitting::assembleObjMatrix(){
 
-  const SXMatrix M1 = trans(W).mul(K.mul(W)-M.mul(W.mul(lambda)));
-  // const SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
+  const SXMatrix WtMWL = trans(W).mul(M.mul(W)).mul(lambda);
+  const SXMatrix M1 = (trans(W).mul(K.mul(W)) - WtMWL);
+  // scalor = 1.0f/CASADI::convert<double>(WtMWL).norm();
+  // scalor = scalor*scalor;
   return M1;
 }
 
@@ -207,7 +212,7 @@ void MaterialFitting::computeSmoothObjFunctions(vector<SX> &funs)const{
 	  if (j >= 0){
 		const double vj = tetmesh->volume(j);
 		assert_gt(vj,0);
-		assert(i!=j);
+		assert_ne(i,j);
 		if (mu_neigh_G > 0)
 		  funs.push_back( 0.5f*sqrt(mu_neigh_G*(vi+vj))*(G[i]-G[j]) );
 		if (mu_neigh_L > 0)
@@ -285,6 +290,42 @@ void MaterialFitting::addFixedNodesObjfun(SX &objfun)const{
 		}
 	  }
 	}
+  }
+}
+
+void MaterialFitting::scale(){
+  
+  // scale W
+  const double w_norm = CASADI::convert<double>(W).norm();
+  assert_gt(w_norm,0);
+  W *= 1.0f/w_norm;
+  
+  // scale Lambda
+  assert_gt(lambda.size(),0);
+  scaled_lambda = lambda.elem(0,0).getValue();
+  for (int i = 0; i < lambda.size1(); ++i){
+  	const double la = lambda.elem(i,i).getValue();
+  	assert_gt_ext(la,0.0f,i);
+    if (la < scaled_lambda)
+  	  scaled_lambda = la;
+  }
+  lambda *= 1.0f/scaled_lambda;
+
+  // scale mass matrix
+  scaled_mass = CASADI::convert<double>(M).norm();
+  assert_gt(scaled_mass,0.0f);
+  M *= 1.0f/scaled_mass;
+
+}
+
+void MaterialFitting::unScale(){
+
+  assert_gt(scaled_mass,0);
+  assert_gt(scaled_lambda,0);
+  DEBUG_LOG("scaled_mass: "<< scaled_mass);
+  DEBUG_LOG("scaled_lambda: "<< scaled_lambda);
+  for (int i = 0; i < rlst.size(); ++i){
+    rlst[i] = rlst[i]*scaled_mass*scaled_lambda;
   }
 }
 
@@ -476,8 +517,11 @@ void MaterialFitting::saveResults(const string filename)const{
   tetmesh->material()._lambda = l;
   tetmesh->material()._rho = r;
 
+  INFO_LOG("save results to: " << filename);
+
   bool succ = tetmesh->writeElasticMtlVTK(filename); assert(succ);
   succ = tetmesh->writeElasticMtl(filename+".elastic"); assert(succ);
+  succ = writeVec(filename+"_x.b", rlst); assert(succ);
 
   tetmesh->material() = mtl_0;
 }
@@ -644,7 +688,10 @@ void MaterialFitting_Diag_M_ScaleW::getInitValue(VectorXd &init_x)const{
 
 SXMatrix MaterialFitting_EV_MA_K::assembleObjMatrix(){ 
 
-  const SXMatrix M1 = trans(W).mul(K.mul(W)-M.mul(W.mul(lambda)));
-  // const SXMatrix M1 = (K.mul(W)-M.mul(W.mul(lambda)));
+  const SXMatrix WtMWL = trans(W).mul(M.mul(W)).mul(lambda);
+  const SXMatrix M1 = (trans(W).mul(K.mul(W)) - WtMWL);
+  // scalor = 1.0f/CASADI::convert<double>(WtMWL).norm();
+  // scalor = scalor*scalor;
+  // scalor = 1e-8;
   return M1;
 }

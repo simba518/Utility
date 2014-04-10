@@ -36,6 +36,9 @@ namespace ELASTIC_OPT{
 	  mu_neigh_E = 0.0f;
 	  lower_bound = 0.0f;
 	  upper_bound = -1.0f;
+	  scalor = 1.0f;
+	  scaled_lambda = 1.0f;
+	  scaled_mass = 1.0f;
 	}
 	void loadTetMesh(const string filename){
 	  const bool succ = tetmesh->load(filename); assert(succ);
@@ -102,12 +105,14 @@ namespace ELASTIC_OPT{
 	void hess(MatrixXd &H)const;
 	void grad(VectorXd &g)const;
 
+	void scale();
+	void unScale();
 	virtual void assembleObjfun();
 	void solveByIpopt();
 	void solveByNNLS();
 	void solveByLinearSolver();
 	void solveByAlglib();
-	void solveByMPRGP();
+	void solveByMPRGP(const string init_x="");
 
 	virtual void saveResults(const string filename)const;
 	virtual vector<double> getShearGResult()const;
@@ -191,8 +196,9 @@ namespace ELASTIC_OPT{
 	CASADI::VSX rho;
 	SXMatrix K;
 	SXMatrix M;
+	SX scalor;
 	vector<double> rlst;
-	double lower_bound, upper_bound;
+	double lower_bound, upper_bound, scaled_mass, scaled_lambda;
   };
   typedef boost::shared_ptr<MaterialFitting> pMaterialFitting;
 

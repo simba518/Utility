@@ -60,8 +60,9 @@ void MaterialFitting::solveByNNLS(){
 }
 
 void MaterialFitting::solveByIpopt(){
-  
+
   TRACE_FUN();
+  FUNC_TIMER();
 
   // init solver
   VSX variable_x;
@@ -69,8 +70,8 @@ void MaterialFitting::solveByIpopt(){
   CasADi::SXFunction fun = CasADi::SXFunction(variable_x,objfun);
   CasADi::IpoptSolver solver = CasADi::IpoptSolver(fun);
   solver.setOption("generate_hessian",use_hessian);
-  solver.setOption("tol",1e-18);
-  solver.setOption("max_iter",20000);
+  solver.setOption("tol",1e-9);
+  solver.setOption("max_iter",10000);
   Timer timer;
   timer.start();
   solver.init();
@@ -102,6 +103,7 @@ void MaterialFitting::solveByIpopt(){
   solver.solve();
   rlst.resize(variable_x.size());
   solver.getOutput(rlst,CasADi::NLP_X_OPT);
+
 }
 
 void MaterialFitting::solveByLinearSolver(){
@@ -222,7 +224,7 @@ public:
   MatrixA(const SX &obj, const VSX &x){
 
 	TRACE_FUN();
-	CasADi::SXFunction fun = CasADi::SXFunction(x,obj);
+	fun = CasADi::SXFunction(x,obj);
 	fun.init();
 
 	CasADi::SXMatrix g = fun.jac();
@@ -251,9 +253,11 @@ public:
 	result += b;
   }
   double diag(const int i)const{
-	TRACE_FUN();
 	assert_in(i,0,H_diag.size()-1);
 	return H_diag[i];
+  }
+  const VectorXd &diag()const{
+	H_diag;
   }
   int rows()const{
 	return b.size();
@@ -261,14 +265,22 @@ public:
   const VectorXd &B()const{
 	return b;
   }
+  double funValue(const VectorXd &x)const{
+	return 0;
+	// VectorXd rlst;
+	// CASADI::evaluate(const_cast<CasADi::SXFunction &>(fun), x, rlst);  
+	// assert_eq(rlst.size(),1);
+	// return rlst[0];
+  }
   
 private:
+  CasADi::SXFunction fun;
   CasADi::SXFunction grad_fun;
   VectorXd b;
   VectorXd H_diag;
 };
 
-void MaterialFitting::solveByMPRGP(){
+void MaterialFitting::solveByMPRGP(const string init_x){
 
   // init A
   VSX variable_x;
@@ -286,20 +298,26 @@ void MaterialFitting::solveByMPRGP(){
   }
 
   // solve
-  MPRGPQPSolver<double, MatrixA<double> > solver(A,A.B(),lower,upper);
-  solver.setCallback(boost::shared_ptr<Callback<double> >(new Callback<double>()));
-  solver.setSolverParameters(1e-5,5000);
+  MPRGPQPSolver<double, MatrixA<double>, Kernel<double>, MatrixA<double> > solver(A,A.B(),lower,upper,false);
+  solver.setCallback(boost::shared_ptr<Callback<double, MatrixA<double> > >(new Callback<double, MatrixA<double> >(&A)));
+  solver.setSolverParameters(1e-8,100);
   VectorXd x;
-  getInitValue(x);
+  if ( init_x.size() <= 0 || !load(init_x,x)){
+	getInitValue(x);
+  }
+
   for (int i = 0; i < x.size(); ++i){
     x[i] = x[i] > lower_x? x[i]:lower_x;
     x[i] = x[i] < upper_x? x[i]:upper_x;
-	assert_in(x[i],lower_x,upper_x);
+  	assert_in(x[i],lower_x,upper_x);
   }
+
+  Timer timer;
+  timer.start();
   solver.solve(x);
+  timer.stop("x: ");
 
   rlst.resize(x.size());
   for (int i = 0; i < x.size(); ++i)
     rlst[i] = x[i];
-
 }

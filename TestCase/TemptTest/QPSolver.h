@@ -44,26 +44,40 @@ public:
   double diag(const int i)const{
 	return (*this)(i,i);
   }
+  double funValue(const VectorXd &x)const{
+	printf("unimplemented function is called\n");
+	return 0.0f;
+  }
 };
 
 // Iteration callback
-template <typename T>
+template <typename T, typename FUNCTION = FixedSparseMatrix<T> >
 struct Callback {
 public:
   typedef Eigen::Matrix<T,-1,1> Vec;
+  Callback(FUNCTION *func=NULL):function(func){}
   virtual ~Callback() {}
+  void setFunction(FUNCTION &func){
+	this->function = &func;
+  }
   virtual void reset() {}
   virtual sizeType operator()(const Vec& x,const T& residueNorm,const sizeType& n) {
 	printf("ITER %d: r=%f",(int)n,residueNorm);
+	if ( function && 0 == n%10){
+	  printf(", fun=%f", function->funValue(x));
+	}
 	return 0;
   }
   virtual sizeType operator()(const Vec& x,const Vec& g,const T& fx,const T& xnorm,const T& gnorm,const T& step,const sizeType& k,const sizeType& ls) {
 	printf("ITER %d: f=%f, x=%f, g=%f, s=%f",(int)k,fx,xnorm,gnorm,step);
 	return 0;
   }
+  
+private:
+  FUNCTION *function;
 };
 
-template <typename T>
+template <typename T, typename FUNCTION>
 struct Solver {
 public:
   enum SOLVER_RESULT {
@@ -72,53 +86,53 @@ public:
 	USER_REQUEST,
 	NEGATIVE_EIGENVALUE,
   };
-  Solver():_cb((Callback<T>*)NULL) {}
-  virtual void setCallback(typename boost::shared_ptr<Callback<T> >cb){_cb=cb;}
+  Solver():_cb((Callback<T, FUNCTION>*)NULL) {}
+  virtual void setCallback(typename boost::shared_ptr<Callback<T, FUNCTION> >cb){_cb=cb;}
 
 protected:
   sizeType _iterationsOut;
   T _residualOut;
-  boost::shared_ptr<Callback<T> > _cb;
+  boost::shared_ptr<Callback<T, FUNCTION> > _cb;
 };
 
-template <typename T,typename MAT, typename KERNEL_TYPE >
+template <typename T,typename MAT, typename KERNEL_TYPE, typename FUNCTION >
 class MPRGPQPSolver;
 
 //a set of trivial preconditioner
-template <typename T,typename KERNEL_TYPE, typename MAT>
+template <typename T,typename KERNEL_TYPE, typename MAT, typename FUNCTION>
 class InFaceNoPreconSolver{
 
   typedef Eigen::Matrix<T,-1,1> Vec;
 
 public:
   InFaceNoPreconSolver(const std::vector<char>& face):_face(face){}
-  virtual typename Solver<T>::SOLVER_RESULT solve(const Vec&rhs,Vec&result){
-  	MPRGPQPSolver<T,MAT,KERNEL_TYPE>::MASK_FACE(rhs,result,_face);
-  	return Solver<T>::SUCCESSFUL;
+  virtual typename Solver<T,FUNCTION>::SOLVER_RESULT solve(const Vec&rhs,Vec&result){
+  	MPRGPQPSolver<T,MAT,KERNEL_TYPE, FUNCTION>::MASK_FACE(rhs,result,_face);
+  	return Solver<T,FUNCTION>::SUCCESSFUL;
   }
-  virtual void setMatrix(const MAT& matrix,bool syncPrecon){}
+  virtual void setMatrix(const MAT& matrix){}
 
 protected:
   const std::vector<char>& _face;
 };
 
-template <typename T,typename KERNEL_TYPE, typename MAT >
-class DiagonalInFacePreconSolver : public InFaceNoPreconSolver<T,KERNEL_TYPE,MAT>{
+template <typename T,typename KERNEL_TYPE, typename MAT, typename FUNCTION >
+class DiagonalInFacePreconSolver : public InFaceNoPreconSolver<T,KERNEL_TYPE,MAT, FUNCTION>{
 
   typedef Eigen::Matrix<T,-1,1> Vec;
 
 public:
   DiagonalInFacePreconSolver(const std::vector<char>& face)
-	:InFaceNoPreconSolver<T,KERNEL_TYPE,MAT>(face){}
-  virtual typename Solver<T>::SOLVER_RESULT solve(const Vec&rhs,Vec&result){
+	:InFaceNoPreconSolver<T,KERNEL_TYPE,MAT, FUNCTION>(face){}
+  virtual typename Solver<T, FUNCTION>::SOLVER_RESULT solve(const Vec&rhs,Vec&result){
 	for(sizeType i=0;i<rhs.rows();i++){
-	  if(InFaceNoPreconSolver<T,KERNEL_TYPE,MAT>::_face[i] == 0)
+	  if(InFaceNoPreconSolver<T,KERNEL_TYPE,MAT,FUNCTION>::_face[i] == 0)
 		result[i]=rhs[i]/_matrix->diag(i);
 	  else result[i]=0.0f;
 	}
-	return Solver<T>::SUCCESSFUL;
+	return Solver<T, FUNCTION>::SUCCESSFUL;
   }
-  virtual void setMatrix(const MAT& matrix,bool syncPrecon){
+  virtual void setMatrix(const MAT& matrix){
 	_matrix=&matrix;
   }
   const MAT* _matrix;
@@ -197,13 +211,13 @@ struct Kernel {
 // 
 // use Preconditioned MPRGP as outter iteration (R-linear, large scale, simple
 // box constraint only)
-template <typename T,typename MAT=FixedSparseMatrix<T>, typename KERNEL_TYPE=Kernel<T> >
-class MPRGPQPSolver:public Solver<T>{
+template <typename T,typename MAT=FixedSparseMatrix<T>, typename KERNEL_TYPE=Kernel<T>, typename FUNCTION = FixedSparseMatrix<T> >
+class MPRGPQPSolver:public Solver<T, FUNCTION>{
 
 public:
   typedef Eigen::Matrix<T,-1,1> Vec;
   // constructor
-  MPRGPQPSolver(const MAT& A,const Vec& B,const Vec& L,const Vec& H)
+  MPRGPQPSolver(const MAT& A,const Vec& B,const Vec& L,const Vec& H,const bool precond=true)
   	:_A(A),_B(B),_L(L),_H(H){
   	setSolverParameters(1e-5f,1000);
   	KERNEL_TYPE::copy(_B,_g);
@@ -213,8 +227,12 @@ public:
   	KERNEL_TYPE::copy(_B,_phi);
   	KERNEL_TYPE::copy(_B,_gp);
   	_face.resize(_B.rows());
-  	_pre.reset(new InFaceNoPreconSolver<T,KERNEL_TYPE,MAT>(_face)); ///@todo
-  	// _pre.reset(new DiagonalInFacePreconSolver<T,KERNEL_TYPE,MAT>(_face));
+	if (precond){
+	  _pre.reset(new DiagonalInFacePreconSolver<T,KERNEL_TYPE,MAT,FUNCTION>(_face));
+	  _pre->setMatrix(_A);
+	}else{
+	  _pre.reset(new InFaceNoPreconSolver<T,KERNEL_TYPE,MAT,FUNCTION>(_face));
+	}
   }
   virtual ~MPRGPQPSolver(){}
   virtual void setSolverParameters(T toleranceFactor,sizeType maxIterations) {
@@ -225,9 +243,9 @@ public:
 	_Gamma=1.0f;
 	_alphaBar=2.0f/specRad(_A);
   }
-  virtual void setInFacePreconditioner(boost::shared_ptr<InFaceNoPreconSolver<T,KERNEL_TYPE,MAT> > pre){
+  virtual void setInFacePreconditioner(boost::shared_ptr<InFaceNoPreconSolver<T,KERNEL_TYPE,MAT,FUNCTION> > pre){
   	_pre=pre;
-  	_pre->setMatrix(_A,true);
+  	_pre->setMatrix(_A);
   }
 
   //methods
@@ -241,7 +259,8 @@ public:
   	tmp.normalize();
 
   	//power method
-  	for(sizeType iter=0;;iter++){
+  	// for(sizeType iter=0;;iter++){ /// @todo
+  	for(sizeType iter=0;iter <= 1000;iter++){
   	  G.multiply(tmp,tmpOut);
   	  T normTmpOut=tmpOut.norm();
   	  if(normTmpOut < ScalarUtil<T>::scalar_eps){
@@ -250,7 +269,7 @@ public:
   	  }
   	  tmpOut/=normTmpOut;
   	  delta=(tmpOut-tmp).norm();
-  	  // INFOV("Power Iter %d Err: %f, SpecRad: %f",iter,delta,normTmpOut)
+  	  printf("Power Iter %d Err: %f, SpecRad: %f\n",iter,delta,normTmpOut);
 	  if(delta <= eps){
 		if(ev)*ev=tmp;
 		return normTmpOut;
@@ -275,7 +294,7 @@ public:
   	return true;
   }
   ///@note the initial value in result should be in the bound.
-  virtual typename Solver<T>::SOLVER_RESULT solve(Vec&result){
+  virtual typename Solver<T,FUNCTION >::SOLVER_RESULT solve(Vec&result){
 
   	//declaration
   	T alphaCG,alphaF,beta;
@@ -304,7 +323,7 @@ public:
 	  if(_cb) (*_cb)(result,_residualOut,iteration);
 	  if(_residualOut < _toleranceFactor){
 		_iterationsOut=iteration;
-		return Solver<T>::SUCCESSFUL;
+		return Solver<T, FUNCTION>::SUCCESSFUL;
 	  }
 
 	  //test proportional x
@@ -388,7 +407,7 @@ public:
 	}
 
   	_iterationsOut=iteration;
-  	return Solver<T>::NOT_CONVERGENT;
+  	return Solver<T, FUNCTION>::NOT_CONVERGENT;
   }
   static void MASK_FACE(const Vec& in,Vec& out,const std::vector<char>& face){
   	OMP_PARALLEL_FOR_
@@ -475,7 +494,7 @@ protected:
   }
 protected:
   // internal structures
-  boost::shared_ptr<InFaceNoPreconSolver<T, KERNEL_TYPE, MAT> > _pre;
+  boost::shared_ptr<InFaceNoPreconSolver<T, KERNEL_TYPE, MAT, FUNCTION> > _pre;
   //problem
   const MAT& _A;
   const Vec& _B;
@@ -489,9 +508,9 @@ protected:
   std::vector<char> _face;
   Vec _g,_p,_z,_beta,_phi,_gp;
 
-  using Solver<T>::_residualOut;
-  using Solver<T>::_iterationsOut;
-  using Solver<T>::_cb;
+  using Solver<T,FUNCTION>::_residualOut;
+  using Solver<T,FUNCTION>::_iterationsOut;
+  using Solver<T,FUNCTION>::_cb;
 };
 
 #endif /* _QPSOLVER_H_ */
