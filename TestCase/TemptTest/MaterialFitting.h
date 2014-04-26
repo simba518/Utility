@@ -39,6 +39,7 @@ namespace ELASTIC_OPT{
 	  scalor = 1.0f;
 	  scaled_lambda = 1.0f;
 	  scaled_mass = 1.0f;
+	  fullspace_con_pen = 0.0f;
 	}
 	void loadTetMesh(const string filename){
 	  const bool succ = tetmesh->load(filename); assert(succ);
@@ -55,13 +56,18 @@ namespace ELASTIC_OPT{
 	  }
 	}
 	virtual void setWLambda(const MatrixXd &eigen_W,const VectorXd &eigen_lambda){
+
 	  CASADI::convert(eigen_W, W);
 	  lambda.resize(eigen_lambda.size(), eigen_lambda.size());
+	  ScaleMat = MatrixXd::Ones(eigen_lambda.size(), eigen_lambda.size());
 	  for (int i = 0; i < eigen_lambda.size(); ++i)
 		lambda.elem(i,i) = eigen_lambda[i];
 	  assert_lt(W.size2(), W.size1());
 	  assert_eq(lambda.size1(), W.size2());
 	  assert_eq(lambda.size2(), W.size2());
+	}
+	void setScaleMatrix(const MatrixXd &Scale){
+	  ScaleMat = Scale;
 	}
 	void useHessian(const bool use){
 	  use_hessian = use;
@@ -69,6 +75,10 @@ namespace ELASTIC_OPT{
 	void setBounds(const double lower, const double upper){
 	  lower_bound = lower;
 	  upper_bound = upper;
+	}
+	void setFullSpaceConPen(const double pen){
+	  assert_ge(pen,0);
+	  fullspace_con_pen = pen;
 	}
 	void setMuSmoothGL(const double mu_G,const double mu_L){
 	  assert_ge(mu_G,0.0f);
@@ -132,6 +142,8 @@ namespace ELASTIC_OPT{
 	bool isFixed(const int i)const{
 	  return fixednodes.find(i) != fixednodes.end();
 	}
+
+	bool saveAllInputs(const string mesh_name)const;
 	
   protected:
 	virtual void initShearG(const int num_tet, VSX &G){
@@ -149,6 +161,7 @@ namespace ELASTIC_OPT{
 	}
 	virtual void getInitValue(VectorXd &init_x)const;
 	virtual SXMatrix assembleObjMatrix();
+	void addFullSpaceConstraints(SX &objfun)const;
 
 	virtual VSX getG()const{return G;}
 	virtual VSX getLame()const{return Lame;}
@@ -186,6 +199,7 @@ namespace ELASTIC_OPT{
   protected:
 	SXMatrix W;
 	SXMatrix lambda;
+	MatrixXd ScaleMat;
 	pTetMesh tetmesh;
 	set<int> fixednodes;
 	bool use_hessian;
@@ -198,7 +212,7 @@ namespace ELASTIC_OPT{
 	SXMatrix M;
 	SX scalor;
 	vector<double> rlst;
-	double lower_bound, upper_bound, scaled_mass, scaled_lambda;
+	double lower_bound, upper_bound, scaled_mass, scaled_lambda, fullspace_con_pen;
   };
   typedef boost::shared_ptr<MaterialFitting> pMaterialFitting;
 

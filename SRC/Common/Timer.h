@@ -116,7 +116,8 @@ namespace UTILITY{
   class Timer{
 	
   public:
-	void start(){
+	void start(const std::string msg = ""){
+	  INFO_LOG_COND(msg<<msg, !(msg.size() > 0));
 	  _PerformanceCounter.StartCounter();
 	}
 	double stop(const std::string msg="time = ",const bool printOut=true,const int outPrecision=10){

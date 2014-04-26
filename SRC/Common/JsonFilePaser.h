@@ -55,6 +55,21 @@ namespace UTILITY{
 	  }
 	  return succ;
 	}
+	template<class VECTOR3D>
+	bool read3d(const std::string eleName, VECTOR3D &vec){
+	  assert_eq(vec.size(), 3);
+	  std::vector<double> tv;
+	  bool succ = false;
+	  if(read(eleName, tv) && tv.size() == 3){
+		vec[0] = tv[0];
+		vec[1] = tv[1];
+		vec[2] = tv[2];
+		succ = true;
+	  }
+	  ERROR_LOG_COND("the length of the vector should be 3, not "<< tv.size(), tv.size()==3);
+	  return succ;
+	}
+
 	template<class VECTOR>
 	bool readVecFile(const std::string eleName, VECTOR &value,IO_TYPE io_type=BINARY){
 	  std::string vectorFile;

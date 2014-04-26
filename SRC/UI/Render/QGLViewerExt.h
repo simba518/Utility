@@ -67,6 +67,7 @@ namespace QGLVEXT{
 	void pauseAnimation (){
 	  if (animationIsStarted()){
 		QGLViewer::stopAnimation();
+		update();
 	  }else{
 		QGLViewer::startAnimation();
 	  }
@@ -126,7 +127,6 @@ namespace QGLVEXT{
 	virtual void displayText();
 	virtual void drawMouse();
 	virtual void draw3DGrid()const;
-		
 
 	// other
 	virtual QString helpString ()const;

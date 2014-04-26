@@ -100,7 +100,7 @@ namespace UTILITY{
 		if ( inf.readFilePath("vol_file",filename,true) ){
 		  succ &= volobjmesh->loadTetMesh(filename);
 		}
-		if ( inf.readFilePath("vol2obj_weights",filename,true)){
+		if ( inf.readFilePath("vol2obj_weights",filename,false)){
 		  if(!volobjmesh->loadWeights(filename)&&succ){
 			volobjmesh->buildInterpWeights();
 			volobjmesh->writeWeights(filename);

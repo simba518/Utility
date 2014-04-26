@@ -169,15 +169,12 @@ void MaterialFitting::assembleObjfun(){
   TRACE_FUN();
   objfun = 0.0f;
   addSmoothObjfun(objfun);
-  
-  // addAverageDensityObjfun(objfun);
-  // addFixedNodesObjfun(objfun);
+  addFullSpaceConstraints(objfun);
 
   const SXMatrix M1 = assembleObjMatrix();
   for (int i = 0; i < M1.size1(); ++i){
     for (int j = 0; j < M1.size2(); ++j)
-	  if (i == j)
-		objfun += M1.elem(i,j)*M1.elem(i,j);
+	  objfun += M1.elem(i,j)*M1.elem(i,j)*ScaleMat(i,j)*ScaleMat(i,j);
   }
 
   objfun *= scalor;
@@ -187,9 +184,42 @@ SXMatrix MaterialFitting::assembleObjMatrix(){
 
   const SXMatrix WtMWL = trans(W).mul(M.mul(W)).mul(lambda);
   const SXMatrix M1 = (trans(W).mul(K.mul(W)) - WtMWL);
-  // scalor = 1.0f/CASADI::convert<double>(WtMWL).norm();
-  // scalor = scalor*scalor;
   return M1;
+}
+
+void MaterialFitting::addFullSpaceConstraints(SX &objfun)const{
+
+  TRACE_FUN();
+
+  if (fullspace_con_pen <= 0.0f){
+	return ;
+  }
+
+  Timer timer;
+  timer.start("start compute kernel");
+  const MatrixXd W = CASADI::convert<double>(this->W).transpose();
+  const MatrixXd W_kernel = W.fullPivLu().kernel();
+  timer.stop("finish compute kernel: ");
+  assert_gt(W_kernel.norm(), 0);
+  
+  timer.start("start compute full con");
+  INFO_LOG("wait until i = " << W_kernel.cols()<<"\n\ni = ");
+  for (int i = 0; i < W_kernel.cols(); ++i){
+	const VectorXd wi = W_kernel.col(i);
+	const SXMatrix wis = CASADI::convert(wi);
+	objfun += fullspace_con_pen/trans(wis).mul(K.mul(wis)).elem(0,0);
+	if (i % 50 == 0){
+	  cout << i << ", ";
+	  cout.flush();
+	}
+  }
+  timer.stop("\n\nfinish compute full con: ");
+  
+  // VSX x;
+  // initAllVariables(x);
+  // for (int i = 0; i < x.size(); ++i){
+  //   objfun += fullspace_con_pen/x[i];
+  // }
 }
 
 void MaterialFitting::computeSmoothObjFunctions(vector<SX> &funs)const{
@@ -529,9 +559,8 @@ void MaterialFitting::saveResults(const string filename)const{
 void MaterialFitting::printResult()const{
   
   cout << "\nnumber of variables: " << rlst.size() << endl;
-  for (int i = 0; i < rlst.size(); ++i){
+  for (int i = 0; i < rlst.size(); ++i)
     cout << rlst[i]<< " ";
-  }
   cout << "\n\n";
 }
 
@@ -686,12 +715,50 @@ void MaterialFitting_Diag_M_ScaleW::getInitValue(VectorXd &init_x)const{
     init_x[num_tet+i] = 1.0f;
 }
 
-SXMatrix MaterialFitting_EV_MA_K::assembleObjMatrix(){ 
+SXMatrix MaterialFitting_EV_MA_K::assembleObjMatrix(){
 
   const SXMatrix WtMWL = trans(W).mul(M.mul(W)).mul(lambda);
   const SXMatrix M1 = (trans(W).mul(K.mul(W)) - WtMWL);
-  // scalor = 1.0f/CASADI::convert<double>(WtMWL).norm();
-  // scalor = scalor*scalor;
-  // scalor = 1e-8;
   return M1;
+}
+
+// save input W, lambda, M , fixed nodes, and mesh.vol
+bool MaterialFitting::saveAllInputs(const string mesh_name)const{
+
+  TRACE_FUN();
+
+  const int r = W.size2();
+  const int nx3 = tetmesh->nodes().size()*3;
+
+  const MatrixXd W = CASADI::convert<double>(this->W);
+  bool succ = write(mesh_name+"W.b_norm_is_"+TOSTR(W.norm()), W); assert(succ);
+
+  cout<< "\n\n" << W << "\n\n";
+
+  VectorXd lambda(r);
+  for (int i = 0; i < r; ++i){
+    lambda[i] = (this->lambda.elem(i,i).getValue());
+  }
+  succ=write(mesh_name+"lambda_scaled.b_norm_is_"+TOSTR(lambda.norm()),lambda);assert(succ);
+
+  cout<< "\n\n" << lambda << "\n\n";
+
+  VectorXd M_diag(nx3);
+  assert_eq(M.size1(), M.size2());
+  assert_eq(M.size1(), nx3);
+  for (int i = 0; i < nx3; ++i){
+    M_diag[i] = M.elem(i,i).getValue();
+  }
+  succ = write(mesh_name+"M.b_norm_is_"+TOSTR(M_diag.norm()), M_diag); assert(succ);
+
+  cout<< "\n\n" << M_diag << "\n\n";
+
+  vector<int> fixednodes_vec;
+  BOOST_FOREACH(const int ele, fixednodes){
+	fixednodes_vec.push_back(ele);
+  }
+  succ = writeVec(mesh_name+"con_nodes.txt",fixednodes_vec,UTILITY::TEXT); assert(succ);
+  succ = tetmesh->write(mesh_name+"mesh.vol"); assert(succ);
+
+  return true;
 }

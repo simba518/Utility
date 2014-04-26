@@ -10,6 +10,13 @@
 #include <iostream>
 #include <assert.h>
 
+#define assert_ext(cond, info)											\
+  if (!cond)															\
+	{																	\
+	  std::cout << "additional info: "<< info << std::endl;				\
+	  assert(cond);														\
+	}																	\
+
 #if defined(WIN32) || defined(NDEBUG)/* Not NDEBUG.  */
 
 # define assert_eq(value_a,value_b)		
@@ -20,7 +27,7 @@
 # define assert_lt(value_a,value_b)		
 # define assert_in(value_a,min,max)
 
-# define assert_eq_ext(value_a,value_b,info)		
+# define assert_eq_ext(value_a,value_b,info)
 # define assert_ne_ext(value_a,value_b,info)		
 # define assert_ge_ext(value_a,value_b,info)		
 # define assert_gt_ext(value_a,value_b,info)		

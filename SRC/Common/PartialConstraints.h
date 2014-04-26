@@ -192,6 +192,9 @@ namespace UTILITY{
 	const set<pPartialConstraints> &getPartialConSet()const{
 	  return _partialCons;
 	}
+	set<pPartialConstraints> &getPartialConSet(){
+	  return _partialCons;
+	}
 	vector<PartialConstraints> getPartialConSetSorted()const{
 	  vector<PartialConstraints> conVec;
 	  BOOST_FOREACH(pPartialConstraints con, _partialCons)

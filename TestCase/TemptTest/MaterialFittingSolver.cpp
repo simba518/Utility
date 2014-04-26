@@ -71,7 +71,7 @@ void MaterialFitting::solveByIpopt(){
   CasADi::IpoptSolver solver = CasADi::IpoptSolver(fun);
   solver.setOption("generate_hessian",use_hessian);
   solver.setOption("tol",1e-9);
-  solver.setOption("max_iter",10000);
+  solver.setOption("max_iter",3000);
   Timer timer;
   timer.start();
   solver.init();
@@ -266,11 +266,10 @@ public:
 	return b;
   }
   double funValue(const VectorXd &x)const{
-	return 0;
-	// VectorXd rlst;
-	// CASADI::evaluate(const_cast<CasADi::SXFunction &>(fun), x, rlst);  
-	// assert_eq(rlst.size(),1);
-	// return rlst[0];
+	VectorXd rlst;
+	CASADI::evaluate(const_cast<CasADi::SXFunction &>(fun), x, rlst);  
+	assert_eq(rlst.size(),1);
+	return rlst[0];
   }
   
 private:
@@ -302,9 +301,9 @@ void MaterialFitting::solveByMPRGP(const string init_x){
   solver.setCallback(boost::shared_ptr<Callback<double, MatrixA<double> > >(new Callback<double, MatrixA<double> >(&A)));
   solver.setSolverParameters(1e-8,100);
   VectorXd x;
-  if ( init_x.size() <= 0 || !load(init_x,x)){
-	getInitValue(x);
-  }
+  getInitValue(x);
+  // if ( init_x.size() <= 0 || !load(init_x,x)){
+  // }
 
   for (int i = 0; i < x.size(); ++i){
     x[i] = x[i] > lower_x? x[i]:lower_x;

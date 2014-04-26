@@ -40,6 +40,9 @@ namespace QGLVEXT{
 	  return current_pos;
 	}
 	virtual void applyTransform() = 0;
+	void translateCamera(const double x,const double y, const double z){
+	  con_track_ball->translateCamera(x,y,z);
+	}
 
   public slots:
 	void manipulate();

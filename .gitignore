@@ -24,3 +24,5 @@ temp*
 .qglviewer.xml
 
 qt_act_recorder.txt
+
+*.log

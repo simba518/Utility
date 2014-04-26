@@ -21,6 +21,9 @@ namespace QGLVEXT{
 	ConTrackBall(pQGLViewerExt v, ManipulatedFrame* frame=NULL):viewer(v){
 	  init();
 	  addConstrainedFrame( NULL==frame ? viewer->camera()->frame():frame);
+	  camera_translate[0] = 0.0f;
+	  camera_translate[1] = 0.0f;
+	  camera_translate[2] = 0.0f;
 	}
 	void addConstrainedFrame(ManipulatedFrame* frame){
 	  assert(frame);
@@ -51,10 +54,17 @@ namespace QGLVEXT{
 	}
 
 	void translate(const double x,const double y, const double z){
-	  p_AxisTorus->translate(x,y,z);
+	  p_AxisTorus->translate(camera_translate[0]+x,
+							 camera_translate[1]+y,
+							 camera_translate[2]+z);
 	}
 	void scale(const double x,const double y, const double z){
 	  p_AxisTorus->scale(x,y,z);
+	}
+	void translateCamera(const double x,const double y, const double z){
+	  camera_translate[0] = x;
+	  camera_translate[1] = y;
+	  camera_translate[2] = z;
 	}
 	void draw()const{
 	  p_AxisTorus->draw();
@@ -89,6 +99,7 @@ namespace QGLVEXT{
 	bool m_enabled;
 	bool m_show;
 	bool m_hit;
+	double camera_translate[3];
   };
   
   typedef boost::shared_ptr<ConTrackBall> pConTrackBall;
