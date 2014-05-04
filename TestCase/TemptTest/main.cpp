@@ -550,25 +550,79 @@ int main(int argc, char *argv[]){
   // recoverRealDino();
 
 
+  // load mesh
   const string data_root = "/home/simba/Workspace/SolidSimulator/data/dino-mtlopt/model/";
-  
   pTetMesh tetmesh = pTetMesh(new TetMesh());
   bool succ = tetmesh->load(data_root+"mesh.abq"); assert(succ);
   succ = tetmesh->loadElasticMtl(data_root+"/mesh.elastic"); assert(succ);
   INFO_LOG("save material");
   succ = tetmesh->writeElasticMtlVTK("./tempt/material_correct"); assert(succ);
 
+  // compute M
   INFO_LOG("compute mass matrix");
   MassMatrix mass;
-  DiagonalMatrix<double,-1> M;
+  SparseMatrix<double> M;
   mass.compute(M,*tetmesh);
-  const MatrixXd denseM = M;
 
-  VectorXd diagM(M.rows());
-  for (int i = 0; i < M.rows(); ++i){
-    diagM[i] = denseM(i,i);
+  // compute K
+  INFO_LOG("compute stiffness matrix");
+  INFO_LOG("compute K");
+  ElasticForceTetFullStVK elas(tetmesh);
+  assert(elas.prepare());
+  VectorXd x0(tetmesh->nodes().size()*3);
+  tetmesh->nodes(x0);
+  SparseMatrix<double> K = elas.K(x0);
+  K *= -1.0f;
+
+  // solve eigen value problem
+  const SparseMatrix<double> Klower = EIGEN3EXT::getLower(K);
+  const SparseMatrix<double> Mlower = EIGEN3EXT::getLower(M);
+  const int eigenNum = 20;
+  MatrixXd W;
+  VectorXd lambda;
+  succ = EigenSparseGenEigenSolver::solve(Klower,Mlower,W,lambda,eigenNum); assert(succ);
+
+  // save data
+  ofstream out;
+  out.open("dino.stiffness");
+  out << K.rows()<< "\t" << K.cols();
+  for (int k=0; k<K.outerSize(); ++k){
+	for (SparseMatrix<double>::InnerIterator it(K,k); it; ++it){
+	  out << endl;
+	  out <<it.row()<< " "<<it.col()<<" " << it.value();
+	}
   }
-  cout<< endl << diagM.transpose() << endl;
+  out.close();
+    
+  out.open("dino.mass");
+  out << M.rows()<< "\t" << M.cols();
+  for (int k=0; k<M.outerSize(); ++k){
+	for (SparseMatrix<double>::InnerIterator it(M,k); it; ++it){
+	  out << endl;
+	  out <<it.row()<< " "<<it.col()<< " " << it.value();
+	}
+  }
+  out.close();
 
-  succ = write("dino_diagM.b", diagM); assert(succ);
+  out.open("dino.eigenvalues");
+  out << lambda.size();
+  for (int i = 0; i < lambda.size(); ++i){
+    out << endl << lambda[i];
+  }
+  out.close();
+
+  out.open("dino.eigenvectors");
+  out << W.rows()<< "\t" << W.cols();
+  for (int r = 0; r < W.rows(); ++r){
+	out << endl;
+	for (int c = 0; c < W.cols(); ++c){
+	  out << W(r,c);
+	  if (c != W.cols()-1)
+		out << " ";
+	}
+  }
+  out.close();
+
+  return 1;
+
 }

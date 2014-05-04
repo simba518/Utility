@@ -171,4 +171,17 @@ BOOST_AUTO_TEST_CASE(testObjBeamVtKWrite){
   mesh.writeVTK(fnameout2,false);
 }
 
+BOOST_AUTO_TEST_CASE(testObjCombine){
+
+  Objmesh mesh_beam;
+  TEST_ASSERT( mesh_beam.load(string(TEST_DATA_DIR)+"beam.obj") );
+
+  Objmesh mesh_dino;
+  TEST_ASSERT( mesh_dino.load(string(TEST_DATA_DIR)+"dino.obj") );
+
+  mesh_beam.combine(mesh_dino);
+  TEST_ASSERT(mesh_beam.write(string(TEST_DATA_DIR)+"tempt_test_combine_dino_beam.obj"));
+
+}
+
 BOOST_AUTO_TEST_SUITE_END()

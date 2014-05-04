@@ -60,6 +60,7 @@ namespace UTILITY{
 	void setFaces(const VECTOR &f){setVec(f,_faces);}
 	template<class VECTOR>
 	void setNormalIndex(const VECTOR &ni){setVec(ni,_normalIndex);}
+	void combine(const Objmesh &other); // add the data from other to this.
 
 	// get
 	const ObjMtl &getMtl()const{
@@ -114,6 +115,7 @@ namespace UTILITY{
 	  if(getVertsNum()>0)	center = center/getVertsNum();
 	  return center;
 	}
+	void moveCenterTo(const Eigen::Vector3d &pos);
 
 	// IO
 	// load triangle obj file

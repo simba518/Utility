@@ -3,6 +3,7 @@
 #include <AuxTools.h>
 using namespace boost::filesystem;
 using namespace UTILITY;
+using namespace Eigen;
 
 void ObjMtl::setDefault(){
 
@@ -253,4 +254,44 @@ bool Objmesh::loadMtl(const string fname){
   }
   inf.close();
   return true;
+}
+
+void Objmesh::moveCenterTo(const Eigen::Vector3d &pos){
+  
+  if (_verts.size() > 0){
+	const Eigen::Vector3d disp = pos-getCenter();
+	for (int i = 0; i < _verts.size()/3; ++i){
+	  _verts.segment<3>(i*3) += disp;
+	}
+  }
+}
+
+void Objmesh::combine(const Objmesh &other){
+
+  const VectorXd &v = other.getVerts();
+  const VectorXd &n = other.getVertNormal();
+  const VectorXi &fi = other.getFaces();
+  const VectorXi &ni = other.getNormalIndex();
+  
+  VectorXd t_verts(v.size()+_verts.size()), t_vertNormal(n.size()+_vertNormal.size());
+  VectorXi t_faces(fi.size()+_faces.size()), t_normalIndex(ni.size()+_normalIndex.size());
+
+  t_verts.head(_verts.size()) = _verts;
+  t_verts.tail(v.size()) = v;
+
+  t_vertNormal.head(_vertNormal.size()) = _vertNormal;
+  t_vertNormal.tail(n.size()) = n;
+
+  t_faces.head(_faces.size()) = _faces;
+  t_faces.tail(fi.size()).setConstant(_verts.size()/3);
+  t_faces.tail(fi.size()) += fi;
+
+  t_normalIndex.head(_normalIndex.size()) = _normalIndex;
+  t_normalIndex.tail(ni.size()).setConstant(_verts.size()/3);
+  t_normalIndex.tail(ni.size()) += ni;
+
+  _verts = t_verts;
+  _vertNormal = t_vertNormal;
+  _faces = t_faces;
+  _normalIndex = t_normalIndex;
 }
