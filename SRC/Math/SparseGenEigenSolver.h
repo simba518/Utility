@@ -11,6 +11,7 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Sparse>
 #include <assertext.h>
+#include <string>
 
 namespace EIGEN3EXT{
 
@@ -37,12 +38,21 @@ namespace EIGEN3EXT{
    *(4)number of the required eigen numbers should small than the dimension of the problem:\n
    *n_eig < n \n
    *\see eigensymTest.cpp
+   * 
+   * @see http://docs.scipy.org/doc/scipy/reference/tutorial/arpack.html for mode and which
+   * @note By using shift mode 'S', we need use "LM" instead of "SM".
+   * some possible pair for (mode, which):
+   * ('S', "LM"): smallest eigenvalues. (we can use ('R', "SM"), but it is slow.)
+   * ('R', "LM"): largest eigenvalues.
+   * ('S', "BE") or ('R','BE'): smallest and largest eigenvalues.
    */
   template <typename T>
   bool eigensym( const T *valA,int nnzA,  const int *irowA,  const int *pcolA,
 				 const T *valB,int nnzB,  const int *irowB,  const int *pcolB,
 				 int n,int n_eig,
-				 T *vals,T *vecs);
+				 T *vals,T *vecs,
+				 const char mode = 'S',
+				 const std::string which = "LM");
   
   /**
    * @class EigenSparseGenEigenSolver providing the interface for solving the
@@ -57,6 +67,12 @@ namespace EIGEN3EXT{
    * (2) the matrix K and M should be column compressed, which means that the 
    * function K.makeCompressed() and M.makeCompressed() shoulbe be called after 
    * initialization.
+   * for mode and which:
+   * @see http://docs.scipy.org/doc/scipy/reference/tutorial/arpack.html 
+   * some possible pair for (mode, which):
+   * ('S', "LM"): smallest eigenvalues. (we can use ('R', "SM"), but it is slow.)
+   * ('R', "LM"): largest eigenvalues.
+   * ('S', "BE") or ('R','BE'): smallest and largest eigenvalues.
    */
   class EigenSparseGenEigenSolver{
 
@@ -66,7 +82,9 @@ namespace EIGEN3EXT{
 					   const Eigen::SparseMatrix<real> &M,
 					   Eigen::Matrix<real,Eigen::Dynamic,Eigen::Dynamic> &eig_vec,
 					   Eigen::Matrix<real,Eigen::Dynamic,1> &eig_val,
-					   const int max_eig_num){
+					   const int max_eig_num,
+					   const char mode = 'S',
+					   const std::string which = "LM"){
 
 	  //check the parameters
 	  assert_gt(max_eig_num,0);
@@ -99,7 +117,7 @@ namespace EIGEN3EXT{
 	  bool succ = eigensym(k_data,k_nonzero_num,k_rowind,k_colptr,
 	  					   m_data,m_nonzero_num,m_rowind,m_colptr,
 	  					   k_rows,max_eig_num,
-	  					   p_eig_val,p_eig_vec);
+	  					   p_eig_val,p_eig_vec,mode,which);
 
 	  return  succ;
 	}
@@ -107,9 +125,11 @@ namespace EIGEN3EXT{
 	template <typename real>
 	static bool solve (const Eigen::SparseMatrix<real> &K,
 					   const Eigen::DiagonalMatrix<real,-1> &diagM,
-						 Eigen::Matrix<real,Eigen::Dynamic,Eigen::Dynamic> &eig_vec,
-						 Eigen::Matrix<real,Eigen::Dynamic,1> &eig_val,
-						 const int max_eig_num){
+					   Eigen::Matrix<real,Eigen::Dynamic,Eigen::Dynamic> &eig_vec,
+					   Eigen::Matrix<real,Eigen::Dynamic,1> &eig_val,
+					   const int max_eig_num,
+					   const char mode = 'S',
+					   const std::string which = "LM"){
 	  Eigen::SparseMatrix<real> M(diagM.rows(),diagM.cols());
 	  typedef Eigen::Triplet<real> T;
 	  std::vector<T> triplets;
@@ -117,7 +137,7 @@ namespace EIGEN3EXT{
 	  for (size_t i = 0; i < diagM.diagonal().rows(); ++i)
 		triplets.push_back(T(i,i,diagM.diagonal()[i]));
 	  M.setFromTriplets(triplets.begin(),triplets.end());
-	  return solve(K,M,eig_vec,eig_val,max_eig_num);
+	  return solve(K,M,eig_vec,eig_val,max_eig_num,mode,which);
 	}
 	
   };

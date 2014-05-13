@@ -37,22 +37,25 @@ BOOST_AUTO_TEST_CASE(TestEigenSolver){
   MatrixXd eig_vec;
   VectorXd eig_val;
   const int max_eig_num = 2;
-  K.makeCompressed();
-
-  TEST_ASSERT( EigenSparseGenEigenSolver::solve(K,M,eig_vec,eig_val,max_eig_num) );
-
   const MatrixXd Km = K;
   const MatrixXd Mm = M;
   Eigen::GeneralizedSelfAdjointEigenSolver<MatrixXd > es(Km,Mm);
   const MatrixXd eigen_m = es.eigenvectors().topLeftCorner(n,max_eig_num);
-  
+
+  K.makeCompressed();
+  TEST_ASSERT( EigenSparseGenEigenSolver::solve(K,M,eig_vec,eig_val,max_eig_num) );
+  ASSERT_EQ_SMALL_VEC_TOL( es.eigenvalues(), eig_val, eig_val.size(), 1e-8 );
   for (int i = 0; i < max_eig_num; ++i){
-	
-  	TEST_ASSERT( abs(es.eigenvalues()[i] - eig_val[i]) < 1e-8 );
-	TEST_ASSERT( ((eigen_m.col(i)-eig_vec.col(i)).norm() < 1e-8) ||  
+	TEST_ASSERT( ((eigen_m.col(i)-eig_vec.col(i)).norm() < 1e-8) || 
 					((eigen_m.col(i)+eig_vec.col(i)).norm() < 1e-8) );
   }
 
+  TEST_ASSERT( EigenSparseGenEigenSolver::solve(K,M,eig_vec,eig_val,max_eig_num,'R',"LM") );
+  ASSERT_EQ_SMALL_VEC_TOL( es.eigenvalues().tail(max_eig_num), eig_val, eig_val.size(),1e-8);
+
+  TEST_ASSERT( EigenSparseGenEigenSolver::solve(K,M,eig_vec,eig_val,2,'R',"BE") );
+  ASSERT_EQ_TOL(es.eigenvalues()[0], eig_val[0], 1e-8);
+  ASSERT_EQ_TOL(es.eigenvalues()[K.rows()-1], eig_val[1], 1e-8);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

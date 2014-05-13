@@ -7,7 +7,9 @@
 template <typename T>
 bool EIGEN3EXT::eigensym( const T *valA,int nnzA,  const int *irowA,  const int *pcolA,
 						 const T *valB,int nnzB,  const int *irowB,  const int *pcolB,
-						 int n,int n_eig,T *vals,T *vecs){
+						  int n,int n_eig,T *vals,T *vecs,
+						  const char mode,
+						  const std::string which){
   
   //check parameters
   const bool valid = (valA!=NULL&&irowA!=NULL&&pcolA!=NULL&&
@@ -20,26 +22,25 @@ bool EIGEN3EXT::eigensym( const T *valA,int nnzA,  const int *irowA,  const int 
   ARluSymMatrix<T> A(n, nnzA, const_cast<T*>(valA), const_cast<int*>(irowA), const_cast<int*>(pcolA));
   ARluSymMatrix<T> B(n, nnzB, const_cast<T*>(valB), const_cast<int*>(irowB), const_cast<int*>(pcolB));
 
-  /**
-   * \todo it is seems that the result is not the smallest ones when used to
-   * solve the eigen-problem of MA.What is the means of these parameters?
-   * 
-   * ARluSymGenEig<T> dprob(n_eig, A, B,(char*)"LM"); Defining what we need: the
-   * n_eig eigenvectors with smallest magnitude.
-   */
-  ARluSymGenEig<T> dprob('S',n_eig, A, B,0.0f,(char*)"LM");
-
-  // Finding eigenvalues and eigenvectors.
-  int coveraged = dprob.EigenValVectors(vecs,vals);
-  return (coveraged==n_eig);
-  return false;
-  
+  if ('R' == mode){
+	ARluSymGenEig<T> dprob(n_eig, A, B , const_cast<char*>(which.c_str()));
+	int coveraged = dprob.EigenValVectors(vecs,vals);
+	return (coveraged==n_eig);
+  }else{
+	ARluSymGenEig<T> dprob(mode,n_eig, A, B,0.0f,const_cast<char*>(which.c_str()));
+	int coveraged = dprob.EigenValVectors(vecs,vals);
+	return (coveraged==n_eig);
+  }
 }
 
 template bool EIGEN3EXT::eigensym( const double *valA,int nnzA,  const int *irowA,  const int *pcolA,
-								  const double *valB,int nnzB,  const int *irowB,  const int *pcolB,
-								  int n,int n_eig,double *vals,double *vecs);
+								   const double *valB,int nnzB,  const int *irowB,  const int *pcolB,
+								   int n,int n_eig,double *vals,double *vecs,
+								   const char mode,
+								   const std::string which);
 
 template bool EIGEN3EXT::eigensym( const float *valA,int nnzA,  const int *irowA,  const int *pcolA,
-								  const float *valB,int nnzB,  const int *irowB,  const int *pcolB,
-								  int n,int n_eig,float *vals,float *vecs);
+								   const float *valB,int nnzB,  const int *irowB,  const int *pcolB,
+								   int n,int n_eig,float *vals,float *vecs,
+								   const char mode,
+								   const std::string which);
