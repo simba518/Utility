@@ -88,34 +88,45 @@ namespace QGLVEXT{
   	LocalframeManipulatoionCtrl(pQGLViewerExt viewer,pLocalframeManipulatoion manipulate):
   	  viewer(viewer), manipulate(manipulate){
 
+	  enabled = true;
   	  mouse_button = Qt::LeftButton;
   	  modify_key = Qt::ControlModifier;
   	  viewer->addSelfRenderEle(manipulate);
   	  connect(viewer,SIGNAL(mousePressSignal(QMouseEvent*)),this,SLOT(press(QMouseEvent*)));
   	  connect(viewer,SIGNAL(selectedIds(const vector<int>)),this,SLOT(select(const vector<int>)));
   	}
-  
+	void setEnable(const bool enable){
+	  enabled = enable;
+	}
+
   public slots:
   	void press (QMouseEvent *e){
-	  
-  	  if ((e->button()==mouse_button)&&(e->modifiers() == modify_key)){
-  		manipulate->prepareSelection();
-  		viewer->setSelector(manipulate);
-  		viewer->select(QRect(e->pos().x(),e->pos().y(),10,10));
-  	  }
-  	}
-  	void select(const vector<int> ids){
-	  if (viewer->getSelector().get() == manipulate.get()){
-		manipulate->select(ids);
-		manipulate->setShow(ids.size() > 0);
+	  if (enabled){
+		if ((e->button()==mouse_button)&&(e->modifiers() == modify_key)){
+		  manipulate->prepareSelection();
+		  viewer->setSelector(manipulate);
+		  viewer->select(QRect(e->pos().x(),e->pos().y(),10,10));
+		}
 	  }
   	}
+  	void select(const vector<int> ids){
+	  if (enabled){
+		if (viewer->getSelector().get() == manipulate.get()){
+		  manipulate->select(ids);
+		  manipulate->setShow(ids.size() > 0);
+		}
+	  }
+  	}
+	void toggleEnable(){
+	  enabled = enabled ? false:true;
+	}
 
   private:
   	pQGLViewerExt viewer;
   	pLocalframeManipulatoion manipulate;
   	Qt::MouseButton mouse_button;
   	Qt::KeyboardModifiers modify_key;
+	bool enabled;
   };
   typedef boost::shared_ptr<LocalframeManipulatoionCtrl> pLocalframeManipulatoionCtrl;  
 

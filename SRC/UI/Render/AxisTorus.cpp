@@ -4,6 +4,7 @@
 #include "AxisTorus.h"
 #include <QGLViewer/config.h>
 #include <iostream>
+#include <Log.h>
 using namespace std;
 using namespace QGLVEXT;
 
