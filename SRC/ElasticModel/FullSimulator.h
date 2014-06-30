@@ -134,6 +134,12 @@ namespace SIMULATOR{
 	const VectorXd &getV()const{
 	  return v;
 	}
+	VectorXd &getU(){
+	  return u;
+	}
+	VectorXd &getV(){
+	  return v;
+	}
 	int getDim()const{
 	  if (def_model){
 		return def_model->dimension();

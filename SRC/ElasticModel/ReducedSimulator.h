@@ -68,6 +68,8 @@ namespace SIMULATOR{
 	// get
 	const VectorXd &getQ()const{return q;}
 	const VectorXd &getV()const{return v;}
+	VectorXd &getQ(){return q;}
+	VectorXd &getV(){return v;}
 	double getTimestep()const{
 	  return h;
 	}
