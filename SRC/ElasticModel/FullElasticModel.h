@@ -41,6 +41,7 @@ namespace SIMULATOR{
 
 	// dimension of the full space.
 	virtual int dimension()const = 0;
+	virtual const VectorXd &getRestShape()const = 0;
   };
   typedef boost::shared_ptr<BaseFullModel> pBaseFullModel;
 
@@ -100,6 +101,9 @@ namespace SIMULATOR{
 	}
 	int dimension()const{
 	  return rest_x.size();
+	}
+	const VectorXd &getRestShape()const{
+	  return rest_x;
 	}
 
 	void setTetMesh(pTetMesh_const tet){
