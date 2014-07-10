@@ -262,6 +262,27 @@ namespace UTILITY{
 
 	BBoxD getBBox()const;
 
+	template<class VECTOR3D, class VECTOR>
+	void computeGravity(const VECTOR3D &g, VECTOR &gravity)const{
+
+	  gravity.resize(nodes().size()*3);
+	  if (gravity.size() > 0){
+		memset(&gravity[0], 0, sizeof(gravity[0])*nodes().size()*3);
+	  }
+	  const double invNumEleVert = 1.0/4.0;
+	  for(int el=0; el < _tets.size(); el++){
+		const double volume = tetrahedron(nodes()[_tets[el][0]],nodes()[_tets[el][1]],
+										  nodes()[_tets[el][2]],nodes()[_tets[el][3]]).volume();
+		const double mass_x_invN = _mtl._rho[el]*volume*invNumEleVert;
+		for(int j=0; j<4; j++){
+		  const int vj = _tets[el][j];
+		  gravity[vj*3+0] += mass_x_invN*g[0];
+		  gravity[vj*3+1] += mass_x_invN*g[1];
+		  gravity[vj*3+2] += mass_x_invN*g[2];
+		}
+	  }
+	}
+
 	// io
 	bool load(const std::string& filename);
 	bool loadElasticMtl(const std::string& filename);
