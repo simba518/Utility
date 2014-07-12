@@ -1,5 +1,0 @@
-SET(LIBRARY_NAME utility_collision)
-INCLUDE_DIRECTORIES(./self-ccd)
-AUX_SOURCE_DIRECTORY(. collision_src)
-AUX_SOURCE_DIRECTORY(./self-ccd self_src)
-ADD_LIBRARY(${LIBRARY_NAME}  ${collision_src} ${self_src})
