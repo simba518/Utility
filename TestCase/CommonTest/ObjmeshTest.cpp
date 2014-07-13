@@ -184,4 +184,26 @@ BOOST_AUTO_TEST_CASE(testObjCombine){
 
 }
 
+BOOST_AUTO_TEST_CASE(testObjToPlanes){
+ 
+  Objmesh mesh_dino;
+  TEST_ASSERT( mesh_dino.load(string(TEST_DATA_DIR)+"dino.obj") );
+  VVec4d planes;
+  mesh_dino.toPlanes(planes);
+  ASSERT_EQ(planes.size(), mesh_dino.getFacesNum());
+
+  ASSERT_EQ_TOL(planes[0].head(3).norm(),1.0f,1e-8);
+  ASSERT_EQ_TOL(planes[planes.size()-1].head(3).norm(),1.0f,1e-8);
+
+  for (int f = 0; f < planes.size(); ++f){
+	const Vector3d v0 = mesh_dino.getVerts(mesh_dino.getFaces(f)[0]);
+	const Vector3d v1 = mesh_dino.getVerts(mesh_dino.getFaces(f)[1]);
+	const Vector3d v2 = mesh_dino.getVerts(mesh_dino.getFaces(f)[2]);
+
+	ASSERT_EQ_TOL(planes[f].head(3).dot(v0)+planes[f][3],0.0f,1e-8);
+	ASSERT_EQ_TOL(planes[f].head(3).dot(v1)+planes[f][3],0.0f,1e-8);
+	ASSERT_EQ_TOL(planes[f].head(3).dot(v2)+planes[f][3],0.0f,1e-8);
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

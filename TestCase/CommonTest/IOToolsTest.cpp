@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(vectorIO)
 
 BOOST_AUTO_TEST_CASE(matrixIO)
 {
-  MatrixXd m1(3,2);
+  MatrixXd m1 = MatrixXd::Random(3,2)*2;
   MatrixXd m2 = MatrixXd::Random(3,2);
   ASSERT_NE(m1,m2);
   const std::string fname = std::string(TEST_DATA_DIR)+"temptM.b";

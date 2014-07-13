@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(testInterpMatrix){
   ASSERT_EQ(A.rows(),uTarget_1.size());
   ASSERT_EQ(A.cols(),u.size());
   const VectorXd uTarget_2 = A*u;
-  ASSERT_EQ(uTarget_1,uTarget_2);
+  ASSERT_EQ_SMALL_VEC_TOL(uTarget_1,uTarget_2,uTarget_2.size(),1e-12);
 }
 
 BOOST_AUTO_TEST_CASE(testInterpIODino){

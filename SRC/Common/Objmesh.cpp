@@ -295,3 +295,30 @@ void Objmesh::combine(const Objmesh &other){
   _faces = t_faces;
   _normalIndex = t_normalIndex;
 }
+
+void Objmesh::toPlanes(const Eigen::VectorXd &verts, const Eigen::VectorXi &faces, VVec4d &planes){
+ 
+  assert_eq(verts.size()%3,0);
+  assert_eq(faces.size()%3,0);
+
+  planes.resize(faces.size()/3);
+
+  for (int f = 0; f < faces.size()/3; ++f){
+
+	const int i0 = faces[f*3+0];
+	const int i1 = faces[f*3+1];
+	const int i2 = faces[f*3+2];
+
+	assert_in(i0*3,0,verts.size()-3);
+	assert_in(i1*3,0,verts.size()-3);
+	assert_in(i2*3,0,verts.size()-3);
+
+	const Vector3d v0 = verts.segment<3>(i0*3);
+	const Vector3d v1 = verts.segment<3>(i1*3);
+	const Vector3d v2 = verts.segment<3>(i2*3);
+
+	planes[f].head(3) = (v0-v1).cross(v2-v1).normalized();
+	planes[f][3] = -v0.dot(planes[f].head(3));
+
+  }
+}

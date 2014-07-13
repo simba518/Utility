@@ -12,6 +12,8 @@ using namespace std;
 
 namespace UTILITY{
 
+  typedef std::vector<Eigen::Vector4d,Eigen::aligned_allocator<Eigen::Vector4d> > VVec4d;
+
   typedef struct _ObjMtl{
 
 	_ObjMtl(){
@@ -116,6 +118,11 @@ namespace UTILITY{
 	  return center;
 	}
 	void moveCenterTo(const Eigen::Vector3d &pos);
+	void toPlanes(VVec4d &planes)const{
+	  toPlanes(_verts,_faces,planes);
+	}
+	// convert to the planes: n[i]*x + p[i] = 0, where n[i]=planes[i][0,1,2], p[i] = planes[i][3], and n[i] is normalized.
+	static void toPlanes(const Eigen::VectorXd &verts, const Eigen::VectorXi &faces, VVec4d &planes);
 
 	// IO
 	// load triangle obj file

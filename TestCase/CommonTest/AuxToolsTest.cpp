@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(testMath){
   a.push_back(1);
   ASSERT_EQ(UTILITY::norm2<vector<double> >(a),1);
   a.push_back(-2);
-  ASSERT_EQ(UTILITY::norm2<vector<double> >(a),sqrt(1+2*2));
+  ASSERT_EQ_TOL(UTILITY::norm2<vector<double> >(a),sqrt(1+2*2),1e-12);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
