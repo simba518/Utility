@@ -317,7 +317,7 @@ void Objmesh::toPlanes(const Eigen::VectorXd &verts, const Eigen::VectorXi &face
 	const Vector3d v1 = verts.segment<3>(i1*3);
 	const Vector3d v2 = verts.segment<3>(i2*3);
 
-	planes[f].head(3) = (v0-v1).cross(v2-v1).normalized();
+	planes[f].head(3) = (v1-v0).cross(v2-v0).normalized();
 	planes[f][3] = -v0.dot(planes[f].head(3));
 
   }

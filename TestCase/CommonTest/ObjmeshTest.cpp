@@ -204,6 +204,19 @@ BOOST_AUTO_TEST_CASE(testObjToPlanes){
 	ASSERT_EQ_TOL(planes[f].head(3).dot(v1)+planes[f][3],0.0f,1e-8);
 	ASSERT_EQ_TOL(planes[f].head(3).dot(v2)+planes[f][3],0.0f,1e-8);
   }
+
+  VectorXd verts(3*3);
+  verts << 0,0,0,
+	1,0,0,
+	0,0,1;
+  VectorXi faces(3);
+  faces << 0,1,2;
+  Objmesh one_trangle(verts,faces);
+  one_trangle.toPlanes(planes);
+  ASSERT_EQ(planes.size(),1);
+  Vector4d p;
+  p << 0,-1,0,0;
+  ASSERT_EQ_SMALL_VEC_TOL(planes[0],p,4,1e-8);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
