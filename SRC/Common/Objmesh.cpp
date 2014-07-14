@@ -1,7 +1,7 @@
 #include <boost/filesystem.hpp>
 #include <Objmesh.h>
 #include <AuxTools.h>
-using namespace boost::filesystem;
+using boost::filesystem::path;
 using namespace UTILITY;
 using namespace Eigen;
 

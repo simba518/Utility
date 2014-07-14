@@ -24,7 +24,8 @@ bool PartialConstraints::write(ofstream &outf)const{
   int index = 0;
   BOOST_FOREACH(const set<int>& s, nodes){
 	BOOST_FOREACH(const int nodeId, s){
-	  sortedNodes.insert(make_pair<int,int>(nodeId,index));
+	  const pair<int,int> p = pair<int,int>(nodeId,index);
+	  sortedNodes.insert(p);
 	  index++;
 	}
   }
