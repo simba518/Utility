@@ -10,32 +10,36 @@
 #include <iostream>
 #include <assert.h>
 
+#if defined(WIN32) || defined(NDEBUG)/* Not NDEBUG.  */
+
+#define assert_ext(cond, info) ;
+#define assert_eq(value_a,value_b) ;
+#define assert_ne(value_a,value_b) ;
+#define assert_ge(value_a,value_b) ;
+#define assert_gt(value_a,value_b) ;
+#define assert_le(value_a,value_b) ;
+#define assert_lt(value_a,value_b) ;
+#define assert_in(value_a,min,max) ;
+
+#define assert_eq_ext(value_a,value_b,info) ;
+#define assert_ne_ext(value_a,value_b,info)	;
+#define assert_ge_ext(value_a,value_b,info)	;
+#define assert_gt_ext(value_a,value_b,info)	;
+#define assert_le_ext(value_a,value_b,info)	;
+#define assert_lt_ext(value_a,value_b,info)	;
+#define assert_in_ext(value_a,min,max,info) ;
+#define DEBUG_FUN(fun) ;
+
+#else
+
+#define DEBUG_FUN(fun) fun;
+
 #define assert_ext(cond, info)											\
   if (!cond)															\
 	{																	\
 	  std::cout << "additional info: "<< info << std::endl;				\
 	  assert(cond);														\
 	}																	\
-
-#if defined(WIN32) || defined(NDEBUG)/* Not NDEBUG.  */
-
-# define assert_eq(value_a,value_b)		
-# define assert_ne(value_a,value_b)		
-# define assert_ge(value_a,value_b)		
-# define assert_gt(value_a,value_b)		
-# define assert_le(value_a,value_b)		
-# define assert_lt(value_a,value_b)		
-# define assert_in(value_a,min,max)
-
-# define assert_eq_ext(value_a,value_b,info)
-# define assert_ne_ext(value_a,value_b,info)		
-# define assert_ge_ext(value_a,value_b,info)		
-# define assert_gt_ext(value_a,value_b,info)		
-# define assert_le_ext(value_a,value_b,info)		
-# define assert_lt_ext(value_a,value_b,info)		
-# define assert_in_ext(value_a,min,max,info)
-
-#else
 
 // define a new assert micro to throw expections instead of abort
 #define my_assert( e, file, line ) ( throw std::runtime_error(std::string("file:")+std::string(file)+"::"+boost::lexical_cast<std::string>(line)+" : failed assertion "+e))

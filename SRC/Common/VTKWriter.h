@@ -125,6 +125,35 @@ namespace UTILITY{
 	}
 
 	template<typename VECTOR>
+	void addLines(const VECTOR &lines){
+	  vector<VectorXdTmp<int,2> > vv;
+	  convetVec2VV2d(lines,vv);
+	  addLines(vv);
+	}
+
+	template<typename VECTOR_2I,typename ALLOCATOR>
+	void addLines(const vector<VECTOR_2I,ALLOCATOR> &lines){
+
+	  if (lines.size() > 0)
+		assert_eq(lines[0].size(),2);
+	  if (_binary){
+		for (int i = 0; i < lines.size(); ++i){
+		  vtkWriteBinary(_cells,2);
+		  vtkWriteBinary(_cells,lines[i][0]);
+		  vtkWriteBinary(_cells,lines[i][1]);
+		  vtkWriteBinary(_cellTypes,3);
+		}
+	  }else{
+		for (int i = 0; i < lines.size(); ++i){
+		  _cells<< 2 <<" "<< lines[i][0] << " " << lines[i][1]<< endl;
+		  _cellTypes << 3 << " ";
+		}
+	  }
+	  _nCells += lines.size();
+	  _nCellIndexes += lines.size()*(2+1);
+	}
+
+	template<typename VECTOR>
 	void addTriangles(const VECTOR &faces){
 	  vector<VectorXdTmp<int,3> > vv;
 	  convetVec2VV3d(faces,vv);
@@ -233,6 +262,17 @@ namespace UTILITY{
 		vvec[i][0] = vec[i*3+0];
 		vvec[i][1] = vec[i*3+1];
 		vvec[i][2] = vec[i*3+2];
+	  }
+	}
+
+	template<typename VECTOR,typename VECTOR2D>
+	void convetVec2VV2d(const VECTOR &vec,VECTOR2D &vvec)const{
+
+	  assert_eq(vec.size()%2,0);
+	  vvec.resize(vec.size()/2);
+	  for (size_t i = 0; i < vvec.size(); ++i){
+		vvec[i][0] = vec[i*2+0];
+		vvec[i][1] = vec[i*2+1];
 	  }
 	}
 
