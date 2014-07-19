@@ -188,7 +188,7 @@ namespace SIMULATOR{
   /**
    * @class LagImpFullSim simulator in full space using Lagrangian constraints
    * and implicit integration scheme.
-   * @see Doc/Latex/IntegrationMethods.pdf
+   * @see Doc/IntegrationMethods.pdf
    */
   class LagImpFullSim: public BaseFullSim{
 	
@@ -228,7 +228,7 @@ namespace SIMULATOR{
 	void resetA_triplet();
 	void copyTriplet(VecT &Full_triplet, const VecT &sub_triplet, const int start)const;
 	
-  private:
+  protected:
 	VectorXd f; // internal forces.
 	SparseMatrix<double> M; // mass matrix.
 	SparseMatrix<double> C; // constraint matrix.
@@ -261,7 +261,7 @@ namespace SIMULATOR{
   /**
    * @class PenStaticFullSim quasi-static simulator with penalty constraints, 
    * and we solve the nonlinear equation using newton method.
-   * @see Doc/Latex/StaticDeformation.pdf
+   * @see Doc/StaticDeformation.pdf
    */
   class PenStaticFullSim: public BaseFullSim{
 	
@@ -280,13 +280,13 @@ namespace SIMULATOR{
 	void setConM(const VecT &C_triplet,const int C_rows,const int C_cols);
 	void setUc(const VectorXd &uc);
 	void removeAllCon();
-	bool forward();
+	virtual bool forward();
 
   protected:
 	const VectorXd &grad(const VectorXd &u);
 	const SparseMatrix<double> &jac(const VectorXd &u);
 	
-  private:
+  protected:
 	double lambda; // penalty for con.
 	SparseMatrix<double> C; // constraint matrix.
 	SparseMatrix<double> lambda_CtC; // C^t*C
@@ -296,6 +296,24 @@ namespace SIMULATOR{
 	SparseMatrix<double> J;
 	int max_it;
 	double tolerance;
+  };
+
+
+  /**
+   * @class PenStaticFullSim semi-implicit simulator with penalty constraints.
+   * @see Doc/IntegrationMethods.pdf
+   * @note currently, we only use the mass-damping, and ignore the stiffness damping.
+   */
+  class PenSemiImpFullSim: public PenStaticFullSim{
+	
+  public:
+    PenSemiImpFullSim(): PenStaticFullSim(){}
+	PenSemiImpFullSim(pBaseFullModel def_model):PenStaticFullSim(def_model){}
+	bool prepare();
+	bool forward();
+
+  private:
+	DiagonalMatrix<double,-1> h_M_inv; // h*(M^{-1})
   };
   
 }//end of namespace

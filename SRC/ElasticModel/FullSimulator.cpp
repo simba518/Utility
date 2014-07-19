@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assertext.h>
 #include <Log.h>
+#include <Timer.h>
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 #include <Eigen/UmfPackSupport>
@@ -37,14 +38,17 @@ void LagImpFullSim::setConM(const VecT &C_triplet,const int C_rows,const int C_c
 bool LagImpFullSim::forward(){
 
   // assemble A and b
+  Timer timer;
+  timer.start();
   bool succ = assembleA();
   succ &= assembleB();
   assert_eq(A.rows(),A.cols());
   assert_eq(A.rows(),b.size());
+  timer.stop("K,f, A, b: ");
 
   // solve equation
+  timer.start();
   if (succ){
-
 	UmfPackLU<SparseMatrix<double> > solver;
 	solver.compute(A);
 	if(solver.info()!=Success) {
@@ -57,6 +61,8 @@ bool LagImpFullSim::forward(){
 	  return false;
 	}
   }
+  timer.stop("solve: ");
+
   if (succ){
 	u = u + h*v.head(getDim());
   }
@@ -252,4 +258,33 @@ const SparseMatrix<double> &PenStaticFullSim::jac(const VectorXd &u){
 	J += lambda_CtC;
   }
   return J;
+}
+
+bool PenSemiImpFullSim::prepare(){
+
+  bool succ = false;
+  if(PenStaticFullSim::prepare()){
+	assert_gt(h,0.0f);
+	succ = def_model->evaluateM(h_M_inv);
+	for (int i = 0; i < h_M_inv.diagonal().size(); ++i){
+	  assert_gt(h_M_inv.diagonal()[i],0.0f);
+	  h_M_inv.diagonal()[i] = h/h_M_inv.diagonal()[i];
+	}
+  }
+  return succ;
+}
+
+bool PenSemiImpFullSim::forward(){
+
+  bool succ = true;
+  def_model->evaluateF(u, g);
+
+  // @note here, only use mass damping.
+  if (lambda_CtC.size() > 0){
+	v += h_M_inv*(fext+lambda_CtUc-g-lambda_CtC*u)-(h*alpha_m)*v; 
+  }else{
+	v += h_M_inv*(fext-g)-(h*alpha_m)*v; 
+  }
+  u += h*v;
+  return succ;
 }

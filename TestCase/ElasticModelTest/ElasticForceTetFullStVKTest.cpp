@@ -56,6 +56,15 @@ BOOST_AUTO_TEST_CASE(testKTet2){
   stvk_fun.Kdx(dx, X, out);
   ASSERT_GT ( out.norm(), 1e-3);
 
+  const SparseMatrix<double> &K2 = stvk_fun.K(dx);
+  cout << out.transpose() << endl;
+  cout << (K2*X).transpose() << endl;
+
+  stvk_fun.force(X,out);
+  cout << out.transpose() << endl;
+
+  ASSERT_LE ((out-(K2*dx)).norm(), 1e-12*out.norm());
+
 }
 
 BOOST_AUTO_TEST_CASE(testK){

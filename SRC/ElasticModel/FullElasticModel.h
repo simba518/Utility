@@ -33,15 +33,45 @@ namespace SIMULATOR{
 
 	// compute the stiffness matrix or its triplet. both in full format.
 	virtual bool evaluateK(const Eigen::VectorXd &u, SparseMatrix<double> &K_full)=0;
-	virtual bool evaluateK_triplet(const Eigen::VectorXd &u, VecT &K_full_t)=0;
+	virtual bool evaluateK_triplet(const Eigen::VectorXd &u, VecT &K_full_t){
+	  static SparseMatrix<double> K;
+	  const bool succ = evaluateK(u,K);
+	  getTriplet(K,K_full_t);
+	  return succ;
+	}
 
 	// compute the mass matrix or its triplet. both in full format.
+	virtual bool evaluateM(DiagonalMatrix<double,-1> &M_lumped)=0;
 	virtual bool evaluateM(SparseMatrix<double> &M_full)=0;
-	virtual bool evaluateM_triplet(VecT &M_full_t)=0;
+	virtual bool evaluateM_triplet(VecT &M_triplet, const bool lumped=true){
+	  bool succ = false;
+	  if (lumped){
+		static SparseMatrix<double> M_full;
+		succ = evaluateM(M_full);
+		getTriplet(M_full,M_triplet);
+	  }else{
+		static DiagonalMatrix<double,-1> M_lumped;
+		succ = evaluateM(M_lumped);
+		M_triplet.clear();
+		M_triplet.reserve(M_lumped.diagonal().size());
+		for (int k=0; k <M_lumped.diagonal().size(); ++k)
+		  M_triplet.push_back(Triplet<double>(k,k,M_lumped.diagonal()[k]));
+	  }
+	  return succ;
+	}
 
 	// dimension of the full space.
 	virtual int dimension()const = 0;
 	virtual const VectorXd &getRestShape()const = 0;
+
+	static void getTriplet(const SparseMatrix<double> &mat, VecT&trip){
+	  trip.clear();
+	  trip.reserve(mat.nonZeros());
+	  for (int k=0; k <mat.outerSize(); ++k)
+		for (SparseMatrix<double>::InnerIterator it(mat,k); it; ++it)
+		  trip.push_back(Triplet<double>(it.row(),it.col(),it.value()));
+	}
+
   };
   typedef boost::shared_ptr<BaseFullModel> pBaseFullModel;
 
@@ -82,22 +112,15 @@ namespace SIMULATOR{
 	  K_full *= -1.0f;
 	  return true;
 	}
-	bool evaluateK_triplet(const Eigen::VectorXd &u, VecT &K_full_t){
-	  static SparseMatrix<double> K;
-	  const bool succ = evaluateK(u,K);
-	  getTriplet(K,K_full_t);
-	  return succ;
+	bool evaluateM(DiagonalMatrix<double,-1> &M_lumped){
+	  assert(tetMesh);
+	  mass.compute(M_lumped,*tetMesh);
+	  return true;
 	}
 	bool evaluateM(SparseMatrix<double> &M_full){
 	  assert(tetMesh);
 	  mass.compute(M_full,*tetMesh);
 	  return true;
-	}
-	bool evaluateM_triplet(VecT &M_full_t){
-	  static SparseMatrix<double> M;
-	  const bool succ = evaluateM(M);
-	  getTriplet(M,M_full_t);
-	  return succ;
 	}
 	int dimension()const{
 	  return rest_x.size();
@@ -115,13 +138,6 @@ namespace SIMULATOR{
 	}
 
   protected:
-	static void getTriplet(const SparseMatrix<double> &mat, VecT&trip){
-	  trip.clear();
-	  trip.reserve(mat.nonZeros());
-	  for (int k=0; k <mat.outerSize(); ++k)
-		for (SparseMatrix<double>::InnerIterator it(mat,k); it; ++it)
-		  trip.push_back(Triplet<double>(it.row(),it.col(),it.value()));
-	}
 	
   private:
 	pTetMesh_const tetMesh;
