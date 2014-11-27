@@ -4,8 +4,8 @@
 #include <CASADITools.h>
 using namespace Eigen;
 using namespace CASADI;
-using CasADi::SX;
-using CasADi::SXMatrix;
+using casadi::SXElement;
+using casadi::SX;
 
 BOOST_AUTO_TEST_SUITE(CASADITools)
 
@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(convert2VecTest){
 
   VectorXd v(3);
   v << 1,2,5;
-  const CasADi::SXMatrix SV = convert(v);
+  const casadi::SX SV = convert(v);
   ASSERT_EQ(SV.size1(),v.size());
   ASSERT_EQ(SV.size2(),1);
   const VectorXd a = convert2Vec<double>(SV);
@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(makeEyeMatrixTest){
   
   VectorXd a(3);
   a << 1,2,3;
-  const CasADi::SXMatrix A = makeEyeMatrix(a);
+  const casadi::SX A = makeEyeMatrix(a);
   const MatrixXd Ms = convert<double>(A);
   MatrixXd M(3,3);
   M.setZero();
@@ -41,20 +41,20 @@ BOOST_AUTO_TEST_CASE(convertTest){
     vec.push_back(v[i]);
   }
 
-  const SXMatrix M1 = convert(vec);
+  const SX M1 = convert(vec);
   ASSERT_EQ(M1.size1(),6);
   ASSERT_EQ(M1.size2(),1);
   const VectorXd m1 = convert2Vec<double>(M1);
   ASSERT_EQ(m1,v);
 
-  const SXMatrix M2 = convert(vec,2);
+  const SX M2 = convert(vec,2);
   ASSERT_EQ(M2.size1(),3);
   ASSERT_EQ(M2.size2(),2);
   const MatrixXd m2 = convert<double>(M2);
   const Matrix<double,3,2> &em2 = Map<Matrix<double,3,2> >(&(v[0]));
   ASSERT_EQ(m2,em2);
 
-  const SXMatrix M3 = convert(vec,2,false);
+  const SX M3 = convert(vec,2,false);
   ASSERT_EQ(M3.size1(),3);
   ASSERT_EQ(M3.size2(),2);
   const MatrixXd m3 = convert<double>(M3);

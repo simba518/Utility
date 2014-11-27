@@ -1,5 +1,5 @@
 FIND_PATH(CASADI_INCLUDE_DIR 
-  casadi/symbolic/sx/sx.hpp
+  casadi/casadi.hpp
 )
 
 IF (CASADI_INCLUDE_DIR)
@@ -11,18 +11,10 @@ ELSE (CASADI_INCLUDE_DIR)
 ENDIF (CASADI_INCLUDE_DIR)
 
 SET(CASADI_LIBS_LIST
-  casadi_cplex_interface
-  casadi_ipopt_interface
-  casadi_lapack_interface
-  casadi_sundials_interface
-  casadi_csparse_interface
-  casadi_knitro_interface
-  casadi_optimal_control
-  casadi_integration
-  casadi_nonlinear_programming
+  casadi_core
+  casadi_integrators
   casadi_csparse
   casadi_tinyxml
-  casadi
 )
 
 FOREACH(LIB in ${CASADI_LIBS_LIST})
