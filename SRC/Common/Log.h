@@ -19,19 +19,19 @@ inline void PRINT_MSG(const std::string &title,const T&event,bool cond=false,con
 }
 
 #define PRINT_MSG_MICRO(title,event,cond)				\
-  if(!cond){											\
+  if(!(cond)){											\
 	std::cout<<"*"<<title<<"\t: "<<event<<std::endl;	\
   }
 
 #define PRINT_MSG_MICRO_EXT(title,event,cond,file,line)	\
-  if(!cond){											\
+  if(!(cond)){											\
 	std::cout<<"*"<<title<<"\t: "<<event;				\
 	std::cout<<"\t at\t: file:"<<file<<"::"<<line<<std::endl;	\
   }
 
 /************************ERROR******************************/
 #ifdef LOG_ERROR
-#define ERROR_LOG_COND(event,cond) {PRINT_MSG_MICRO_EXT("ERROR",event,cond,__FILE__,__LINE__);}
+#define ERROR_LOG_COND(event,cond){PRINT_MSG_MICRO_EXT("ERROR",event,cond,__FILE__,__LINE__);}
 #define ERROR_LOG(event) {PRINT_MSG_MICRO_EXT("ERROR",event,false,__FILE__,__LINE__);}
 #else
 #define ERROR_LOG_COND(event,cond)
