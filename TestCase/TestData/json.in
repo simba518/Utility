@@ -6,6 +6,8 @@
 
 "filename" : "f.txt",
 
+"filenames": ["f0.txt", "f1.txt", "f2.txt"],
+
 "intnumber": 80,
 
 "floatnumber": 100.0,

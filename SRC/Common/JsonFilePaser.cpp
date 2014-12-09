@@ -52,8 +52,10 @@ bool JsonFilePaser::readFilePath(const std::string eleName, std::string &filePat
   return succ;
 }
 bool JsonFilePaser::readFilePath(const std::string eleName, std::vector<std::string> &filePathes,const bool checkFileExist){
+
   bool succ = false;
-  if(read(eleName,filePathes)){
+  if(read<std::vector<std::string> >(eleName,filePathes)){
+	succ = true;
 	for (size_t i = 0; i < filePathes.size(); ++i){
 	  filePathes[i] = getFileDir()+filePathes[i];
 	  succ &= fileIsExist(eleName,filePathes[i],checkFileExist);

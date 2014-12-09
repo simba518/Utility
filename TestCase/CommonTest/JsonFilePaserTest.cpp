@@ -21,6 +21,7 @@ BOOST_FIXTURE_TEST_CASE(readFloat, JsonFilePaserTestInit){
 }
 
 BOOST_FIXTURE_TEST_CASE(readVector, JsonFilePaserTestInit){
+
   std::vector<int> v, cv;
   cv.push_back(1);
   cv.push_back(2);
@@ -30,11 +31,29 @@ BOOST_FIXTURE_TEST_CASE(readVector, JsonFilePaserTestInit){
   ASSERT_EQ_SMALL_VEC(v,cv,v.size());
 }
 
+BOOST_FIXTURE_TEST_CASE(readStrVector, JsonFilePaserTestInit){
+
+  std::vector<std::string> v;
+  TEST_ASSERT(jsonFile.read("filenames",v));
+  ASSERT_EQ(v.size(),3);
+  ASSERT_EQ(v[0], "f0.txt");
+  ASSERT_EQ(v[1], "f1.txt");
+  ASSERT_EQ(v[2], "f2.txt");
+}
+
 BOOST_FIXTURE_TEST_CASE(readFilePath, JsonFilePaserTestInit){
+
   std::string filename;
   TEST_ASSERT(jsonFile.readFilePath("filename",filename,false));
   ASSERT_NE(filename,std::string("f.txt"));
   ASSERT_EQ(filename,jsonFile.getFileDir()+std::string("f.txt"));
+
+  std::vector<std::string> filenames;
+  TEST_ASSERT(jsonFile.readFilePath("filenames",filenames,false));
+  ASSERT_EQ(filenames.size(),3);
+  ASSERT_EQ(filenames[0],jsonFile.getFileDir()+std::string("f0.txt"));
+  ASSERT_EQ(filenames[1],jsonFile.getFileDir()+std::string("f1.txt"));
+  ASSERT_EQ(filenames[2],jsonFile.getFileDir()+std::string("f2.txt"));
 }
 
 BOOST_FIXTURE_TEST_CASE(readArrayArray, JsonFilePaserTestInit){
