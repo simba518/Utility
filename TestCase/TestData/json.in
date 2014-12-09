@@ -12,6 +12,8 @@
 
 "intArray" : [1,2,3],
 
-"strArray": ["a","bc"]
+"strArray": ["a","bc"],
+
+"array_array": [ [1], [2,3], [4,5,6] ]
 
 }

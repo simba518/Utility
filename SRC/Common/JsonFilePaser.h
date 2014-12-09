@@ -120,6 +120,16 @@ namespace UTILITY{
 	}
 
 	template<class T>
+	void actualRead(const std::string eleName, std::vector<std::vector<T> > &value){
+	  BOOST_FOREACH(const boost::property_tree::ptree::value_type& child,_jsonData.get_child(eleName)){
+		value.push_back( std::vector<T>() );
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type& child_child, child.second){
+		  value[value.size()-1].push_back(child_child.second.get<T>(""));
+		}
+	  }
+	}
+
+	template<class T>
 	void actualRead(const std::string eleName, std::set<T> &value){
 	  BOOST_FOREACH(const boost::property_tree::ptree::value_type& child,_jsonData.get_child(eleName)){
 		value.insert(child.second.get<T>(""));

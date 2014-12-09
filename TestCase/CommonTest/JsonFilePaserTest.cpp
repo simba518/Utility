@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <UnitTestAssert.h>
 #include <JsonFilePaser.h>
+#include <iostream>
 
 struct JsonFilePaserTestInit{
   JsonFilePaserTestInit(){
@@ -34,6 +35,24 @@ BOOST_FIXTURE_TEST_CASE(readFilePath, JsonFilePaserTestInit){
   TEST_ASSERT(jsonFile.readFilePath("filename",filename,false));
   ASSERT_NE(filename,std::string("f.txt"));
   ASSERT_EQ(filename,jsonFile.getFileDir()+std::string("f.txt"));
+}
+
+BOOST_FIXTURE_TEST_CASE(readArrayArray, JsonFilePaserTestInit){
+  std::vector<std::vector<int> > array_array;
+  TEST_ASSERT(jsonFile.read("array_array",array_array));
+  ASSERT_EQ(array_array.size(), 3);
+
+  ASSERT_EQ(array_array[0].size(), 1);
+  ASSERT_EQ(array_array[0][0], 1);
+
+  ASSERT_EQ(array_array[1].size(), 2);
+  ASSERT_EQ(array_array[1][0], 2);
+  ASSERT_EQ(array_array[1][1], 3);
+
+  ASSERT_EQ(array_array[2].size(), 3);
+  ASSERT_EQ(array_array[2][0], 4);
+  ASSERT_EQ(array_array[2][1], 5);
+  ASSERT_EQ(array_array[2][2], 6);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
