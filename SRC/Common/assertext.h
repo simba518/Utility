@@ -10,6 +10,12 @@
 #include <iostream>
 #include <assert.h>
 
+#if defined(DEBUG_FUN)
+#define debug_fun(fun) fun;
+#else
+#define debug_fun(fun) ;
+#endif /* DEBUG_FUN */
+
 #if defined(WIN32) || defined(NDEBUG)/* Not NDEBUG.  */
 
 #define assert_ext(cond, info) ;
@@ -28,11 +34,8 @@
 #define assert_le_ext(value_a,value_b,info)	;
 #define assert_lt_ext(value_a,value_b,info)	;
 #define assert_in_ext(value_a,min,max,info) ;
-#define DEBUG_FUN(fun) ;
 
 #else
-
-#define DEBUG_FUN(fun) fun;
 
 #define assert_ext(cond, info)											\
   if (!cond)															\
