@@ -11,11 +11,11 @@ TetMeshEmbeding::TetMeshEmbeding(pTetMesh tetMesh,pObjmesh objMesh){
   setObjmesh(objMesh);
 }
 void TetMeshEmbeding::setTetMesh(pTetMesh tetMesh){
-  assert(_tetMesh);
+  assert(tetMesh);
   _tetMesh = tetMesh;
 }
 void TetMeshEmbeding::setObjmesh(pObjmesh objMesh){
-  assert(_objMesh);
+  assert(objMesh);
   _objMesh = objMesh;
   _objRestVerts = _objMesh->getVerts();
 }
